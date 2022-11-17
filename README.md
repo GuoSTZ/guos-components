@@ -1,1 +1,3 @@
-# base-umi
+# 基础配置项目
+
+React + antd
