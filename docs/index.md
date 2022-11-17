@@ -2,8 +2,9 @@
 
 ```tsx
 import React from 'react';
+import Base from 'base';
 
 export default () => {
-  return <div>base</div>;
+  return <Base />;
 };
 ```
