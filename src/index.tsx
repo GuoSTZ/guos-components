@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { Tabs, TabsProps } from 'antd';
+import LoadingView from './views/Loading';
 import './index.less';
 
 export default () => {
-  const [count, setCount] = useState(0);
+  const items: TabsProps['items'] = [
+    {
+      key: '1',
+      label: '加载中',
+      children: <LoadingView />,
+    },
+  ];
 
-  useEffect(() => {
-    const id = setInterval(() => {
-      setCount((count) => count + 1);
-    }, 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  return <h1>{count}</h1>;
+  return <Tabs items={items} />;
 };
