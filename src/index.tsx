@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs, TabsProps } from 'antd';
-import LoadingView from './views/Loading';
+import LoadingView from './views/LoadingView';
 import './index.less';
 
 export default () => {

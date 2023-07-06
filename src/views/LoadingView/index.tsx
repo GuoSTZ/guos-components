@@ -3,7 +3,7 @@ import Loading from '../../components/Loading';
 
 export default () => {
   return (
-    <div style={{ background: '#000' }}>
+    <div style={{ background: '#000', width: 'fit-content' }}>
       <Loading />
     </div>
   );
