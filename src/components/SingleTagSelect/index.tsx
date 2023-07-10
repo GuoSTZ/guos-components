@@ -35,7 +35,7 @@ export default () => {
     if (!value || optionsSet.has(value.toLowerCase())) {
       return options;
     } else {
-      return [{ label: value, value }, ...options];
+      return ([] as SelectProps['options'])!.concat({ label: value, value }, options);
     }
   };
 
