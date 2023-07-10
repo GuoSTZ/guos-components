@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Select, SelectProps } from 'antd';
 
+const { Option } = Select;
+
 export default () => {
   const [selectedValue, setSelectedValue] = useState([] as string[]);
   const [searchValue, setSearchValue] = useState('' as string);
@@ -11,12 +13,14 @@ export default () => {
     { value: 'Yiminghe', label: 'yiminghe' },
   ];
 
-  const optionsSet = React.useMemo(() => {
+  const [optionsSet, optionsChildren] = React.useMemo(() => {
     const optionsSet = new Set();
+    const optionsChildren: React.ReactNode[] = [];
     options.forEach((item) => {
       optionsSet.add((item.label as string).toLowerCase());
+      optionsChildren.push(<Option key={item.value}>{item.label}</Option>);
     });
-    return optionsSet;
+    return [optionsSet, optionsChildren];
   }, [options]);
 
   const handleChange = (value: string[]) => {
@@ -45,6 +49,14 @@ export default () => {
     }
   };
 
+  const handleOptionsChildren = (options: React.ReactNode[], value: string) => {
+    if (!value || optionsSet.has(value.toLowerCase())) {
+      return options;
+    } else {
+      return ([] as React.ReactNode[])!.concat(<Option key={value}>{value}</Option>, options);
+    }
+  };
+
   return (
     <>
       <Select
@@ -67,6 +79,19 @@ export default () => {
         style={{ width: 600, marginTop: 20 }}
         placeholder="这是一个单选下拉框"
       />
+      {console.log(handleOptionsChildren(optionsChildren, searchValue))}
+      <Select
+        showSearch
+        filterOption={(input, option) =>
+          ((option?.children ?? '') as string).toLowerCase().includes(input.toLowerCase())
+        }
+        onChange={handleChange2}
+        onSearch={handleSearch}
+        style={{ width: 600, marginTop: 20 }}
+        placeholder="这是一个使用Select.Option的单选下拉框"
+      >
+        {handleOptionsChildren(optionsChildren, searchValue)}
+      </Select>
     </>
   );
 };
