@@ -22,7 +22,7 @@ export default () => {
     },
     {
       key: '3',
-      label: '单选的tags Select',
+      label: '多类型单选下拉框',
       children: <SingleTagSelect />,
     },
   ];

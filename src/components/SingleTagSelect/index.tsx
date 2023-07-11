@@ -79,7 +79,7 @@ export default () => {
         style={{ width: 600, marginTop: 20 }}
         placeholder="这是一个单选下拉框"
       />
-      {console.log(handleOptionsChildren(optionsChildren, searchValue))}
+
       <Select
         showSearch
         filterOption={(input, option) =>
