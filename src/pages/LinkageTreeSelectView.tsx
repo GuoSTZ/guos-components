@@ -15,7 +15,7 @@ interface FormViewProps {}
 let dbAccountKey = 0;
 const createDbAccountData = (level = 1, path = 0) => {
   const list = [];
-  for (let i = 0; i < 10; i += 1) {
+  for (let i = 0; i < 2; i += 1) {
     const key = level === 1 ? `数据源名称${i}` : `账号${i}-${level}`;
     const treeNode: Exclude<TreeSelectProps['treeData'], undefined> extends (infer T)[]
       ? T
@@ -23,6 +23,7 @@ const createDbAccountData = (level = 1, path = 0) => {
       title: key,
       key: `${dbAccountKey}`,
       value: `${dbAccountKey}`,
+      disabled: key === '账号1-0',
     };
     dbAccountKey++;
 
@@ -61,7 +62,7 @@ const createUserData = (level = 2, path = 0) => {
 };
 
 const dbAccountData = createDbAccountData();
-const userData = createUserData();
+const userData = [] || createUserData();
 console.log(`当前账号以及数据源的节点数量： ${dbAccountKey}`, '====');
 console.log(`当前用户以及部门的节点数量： ${userKey}`, '====');
 
@@ -146,6 +147,7 @@ export default () => {
           label="数据源账号"
           name="dbAccount"
           rules={[{ required: true, message: '请选择数据源账号' }]}
+          initialValue={[{ label: '全部', value: 'all' }]}
         >
           <LinkageTreeSelect
             multiple
@@ -159,6 +161,25 @@ export default () => {
         </Form.Item>
 
         <Form.Item
+          label="数据源账号"
+          name="dbAccount"
+          rules={[{ required: true, message: '请选择数据源账号' }]}
+          initialValue={[{ label: '全部', value: 'all' }]}
+        >
+          <LinkageTreeSelect
+            multiple
+            treeCheckable
+            treeDefaultExpandAll
+            // treeData={dbAccountData}
+            treeCheckStrictly
+            maxTagCount={10}
+            placeholder="数据源账号"
+          >
+            <LinkageTreeSelect.TreeNode key={'1'} value={'1'} title="Node1" />
+          </LinkageTreeSelect>
+        </Form.Item>
+
+        {/* <Form.Item
           label="用户"
           name="username"
           rules={[{ required: true, message: ' 请选择用户' }]}
@@ -172,7 +193,7 @@ export default () => {
             maxTagCount={10}
             placeholder="用户"
           />
-        </Form.Item>
+        </Form.Item> */}
 
         {/* <Form.Item
           label="用户2"

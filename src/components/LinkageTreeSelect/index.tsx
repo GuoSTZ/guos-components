@@ -1,12 +1,51 @@
-import React, { useEffect, useState } from 'react';
-import { TreeSelect, TreeSelectProps } from 'antd';
+import React, { useEffect, useState, ReactNode } from 'react';
+import { TreeSelect, TreeSelectProps, Checkbox } from 'antd';
+import { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { ChangeEventExtra } from 'rc-tree-select/es/TreeSelect';
 
-export interface LinkageTreeSelectProps extends TreeSelectProps {}
+export interface LinkageTreeSelectProps extends TreeSelectProps {
+  selectAll?: boolean;
+  selectAllText?: string;
+  selectAllValue?: any;
+  children?: React.ReactNode;
+}
 
-export default (props: LinkageTreeSelectProps) => {
-  const { treeData, onChange, onDeselect, onSelect, ...restProps } = props;
+const TreeNode = TreeSelect.TreeNode;
+
+type CompoundedComponent = ((props: LinkageTreeSelectProps) => React.ReactElement) & {
+  defaultProps?: LinkageTreeSelectProps;
+  TreeNode: typeof TreeNode;
+};
+
+/**
+ * 存有特殊交互方式的树下拉框，目前仅treeData传入方式支持特殊交互，treeNode传入方式暂未支持
+ * @param props LinkageTreeSelectProps
+ * @returns
+ */
+const LinkageTreeSelect: CompoundedComponent = (props) => {
+  const {
+    dropdownRender,
+    multiple,
+    onChange,
+    onDeselect,
+    onSelect,
+    selectAll,
+    selectAllText,
+    selectAllValue,
+    treeCheckable,
+    treeData,
+    value,
+    ...restProps
+  } = props;
+  const { listItemHeight } = props;
   const [treeDataMap, setTreeDataMap] = useState(new Map());
+  const [checkedValue, setCheckedValue] = useState([] as any[]);
+  const [checkedAll, setCheckedAll] = useState(false);
+  const [treeValue, setTreeValue] = useState([] as any[]);
+
+  const ITEM_HEIGHT = listItemHeight ?? 24;
+  const isMultiple = !!(treeCheckable || multiple);
+  const SELECT_ALL_DATA = [{ label: selectAllText, value: selectAllValue }];
 
   // 遍历treeData，并映射到treeDataMap中
   useEffect(() => {
@@ -14,6 +53,8 @@ export default (props: LinkageTreeSelectProps) => {
     const traverseTree = (data: typeof treeData = [], parentTitle?: React.ReactNode) => {
       data.forEach((item, index) => {
         item.parentTitle = parentTitle;
+        // 组件本身涉及到disabled状态的修改，故将初始的disabled值转移到自定义的available属性中
+        item.available = typeof item.disabled === 'boolean' ? !item.disabled : true;
         dataMap.set(item['value'], item);
         if (Array.isArray(item.children) && item.children.length > 0) {
           traverseTree(item.children, item.title);
@@ -27,17 +68,25 @@ export default (props: LinkageTreeSelectProps) => {
     }
   }, [treeData]);
 
+  useEffect(() => {
+    setCheckedAll(selectAllValue === value?.[0]?.value);
+    if (selectAllValue === value?.[0]?.value) {
+      handleTree(true);
+    } else {
+      setTreeValue(value);
+    }
+  }, [selectAllValue, value, treeDataMap.size]);
+
   /**
    * 处理子节点的置灰状态，以及子节点的value值存储
    * @param data 待处理的数据
-   * @param status 是否置灰，改变disabled和disableCheckbox
+   * @param status 是否置灰，改变disabled
    * @param tempSet Set数据，存储全部子节点的value值
    * @returns \{ childrenData, set }
    */
   const handleChildren = (data: typeof treeData, status: boolean, tempSet?: Set<any>) => {
     const childrenData = data?.map((item) => {
-      item.disableCheckbox = status;
-      item.disabled = status;
+      item.disabled = status || !item.available;
       if (item.children) {
         item.children = handleChildren(item.children, status, tempSet).childrenData;
       }
@@ -47,7 +96,7 @@ export default (props: LinkageTreeSelectProps) => {
     return { childrenData, set: tempSet };
   };
 
-  const handleOnChange = (value: any, labelList: React.ReactNode[], extra: ChangeEventExtra) => {
+  const handleOnChange = (value: any, labelList: ReactNode[], extra: ChangeEventExtra) => {
     value.forEach((item: any) => {
       if (treeDataMap.has(item?.value)) {
         const data = treeDataMap.get(item.value);
@@ -57,6 +106,7 @@ export default (props: LinkageTreeSelectProps) => {
         item.parentTitle = data?.parentTitle;
       }
     });
+    setCheckedValue(value);
     onChange?.(value, labelList, extra);
   };
 
@@ -84,13 +134,78 @@ export default (props: LinkageTreeSelectProps) => {
     onSelect?.(value, node);
   };
 
+  // const handleTreeNode = (data: any = {}, checked: boolean): any => {
+  //   const newData = Array.isArray(data) ? data : [data];
+  //   return newData?.map((child: any) =>
+  //     React.cloneElement(child, {
+  //       disabled: checked || !child.available,
+  //       children: child.props.children ? handleTreeNode(child.props.children, checked) : undefined,
+  //     }),
+  //   );
+  // };
+
+  const handleTree = (checked: boolean) => {
+    if (treeData) {
+      treeDataMap.forEach((value) => {
+        value.disabled = checked || !value.available;
+      });
+    }
+  };
+
+  const selectAllOnChange = (e: CheckboxChangeEvent) => {
+    const checked = e?.target?.checked;
+    const temp = {
+      label: selectAllText,
+      value: selectAllValue,
+    };
+    handleTree(checked);
+    if (checked) {
+      onChange?.([temp], [], {} as ChangeEventExtra);
+    } else {
+      onChange?.(checkedValue, [], {} as ChangeEventExtra);
+    }
+  };
+
+  const renderDropdown = (originNode: ReactNode) => {
+    const menu = (
+      <React.Fragment>
+        {isMultiple && selectAll && (
+          <div className={'linkage-tree-select-all'} style={{ height: ITEM_HEIGHT }}>
+            <Checkbox
+              onChange={selectAllOnChange}
+              checked={checkedAll}
+              style={{ lineHeight: `${ITEM_HEIGHT}px` }}
+            >
+              {selectAllText}
+            </Checkbox>
+          </div>
+        )}
+        {originNode}
+      </React.Fragment>
+    );
+    return dropdownRender ? dropdownRender(menu) : menu;
+  };
+
   return (
     <TreeSelect
+      multiple
+      treeCheckable
       {...restProps}
+      dropdownRender={renderDropdown}
       onChange={handleOnChange}
       onDeselect={handleOnDeselect}
       onSelect={handleOnSelect}
       treeData={treeData}
+      value={checkedAll ? SELECT_ALL_DATA : treeValue}
     />
   );
 };
+
+LinkageTreeSelect.TreeNode = TreeNode;
+LinkageTreeSelect.defaultProps = {
+  selectAll: true,
+  selectAllText: '全部',
+  selectAllValue: 'all',
+};
+
+export default LinkageTreeSelect;
