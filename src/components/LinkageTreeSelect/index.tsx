@@ -191,6 +191,7 @@ const LinkageTreeSelect: CompoundedComponent = (props) => {
       onChange={handleOnChange}
       onDeselect={handleOnDeselect}
       onSelect={handleOnSelect}
+      treeCheckStrictly
       treeData={treeData}
       value={checkedAll ? SELECT_ALL_DATA : treeValue}
     />

@@ -150,11 +150,8 @@ export default () => {
           initialValue={[{ label: '全部', value: 'all' }]}
         >
           <LinkageTreeSelect
-            multiple
-            treeCheckable
             treeDefaultExpandAll
             treeData={dbAccountData}
-            treeCheckStrictly
             maxTagCount={10}
             placeholder="数据源账号"
           />
@@ -162,16 +159,12 @@ export default () => {
 
         <Form.Item
           label="数据源账号"
-          name="dbAccount"
+          name="dbAccount2"
           rules={[{ required: true, message: '请选择数据源账号' }]}
-          initialValue={[{ label: '全部', value: 'all' }]}
         >
           <LinkageTreeSelect
-            multiple
-            treeCheckable
             treeDefaultExpandAll
             // treeData={dbAccountData}
-            treeCheckStrictly
             maxTagCount={10}
             placeholder="数据源账号"
           >
@@ -185,11 +178,8 @@ export default () => {
           rules={[{ required: true, message: ' 请选择用户' }]}
         >
           <LinkageTreeSelect
-            multiple
-            treeCheckable
             treeDefaultExpandAll
             treeData={userData}
-            treeCheckStrictly
             maxTagCount={10}
             placeholder="用户"
           />
