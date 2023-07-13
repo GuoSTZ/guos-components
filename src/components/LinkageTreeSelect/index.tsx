@@ -2,6 +2,7 @@ import React, { useEffect, useState, ReactNode } from 'react';
 import { TreeSelect, TreeSelectProps, Checkbox } from 'antd';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { ChangeEventExtra } from 'rc-tree-select/es/TreeSelect';
+import './index.less';
 
 export interface LinkageTreeSelectProps extends TreeSelectProps {
   selectAll?: boolean;
@@ -45,6 +46,7 @@ const LinkageTreeSelect: CompoundedComponent = (props) => {
 
   const ITEM_HEIGHT = listItemHeight ?? 24;
   const isMultiple = !!(treeCheckable || multiple);
+  const showSelectAll = isMultiple && selectAll && treeData && treeData.length > 0;
   const SELECT_ALL_DATA = [{ label: selectAllText, value: selectAllValue }];
 
   // 遍历treeData，并映射到treeDataMap中
@@ -69,6 +71,7 @@ const LinkageTreeSelect: CompoundedComponent = (props) => {
   }, [treeData]);
 
   useEffect(() => {
+    console.log(selectAllValue, value, treeDataMap.size, '======');
     setCheckedAll(selectAllValue === value?.[0]?.value);
     if (selectAllValue === value?.[0]?.value) {
       handleTree(true);
@@ -165,7 +168,7 @@ const LinkageTreeSelect: CompoundedComponent = (props) => {
   const renderDropdown = (originNode: ReactNode) => {
     const menu = (
       <React.Fragment>
-        {isMultiple && selectAll && (
+        {showSelectAll && (
           <div className={'linkage-tree-select-all'} style={{ height: ITEM_HEIGHT }}>
             <Checkbox
               onChange={selectAllOnChange}

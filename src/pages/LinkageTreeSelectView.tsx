@@ -15,7 +15,7 @@ interface FormViewProps {}
 let dbAccountKey = 0;
 const createDbAccountData = (level = 1, path = 0) => {
   const list = [];
-  for (let i = 0; i < 2; i += 1) {
+  for (let i = 0; i < 10; i += 1) {
     const key = level === 1 ? `数据源名称${i}` : `账号${i}-${level}`;
     const treeNode: Exclude<TreeSelectProps['treeData'], undefined> extends (infer T)[]
       ? T
@@ -154,6 +154,7 @@ export default () => {
             treeData={dbAccountData}
             maxTagCount={10}
             placeholder="数据源账号"
+            open
           />
         </Form.Item>
 
@@ -172,7 +173,7 @@ export default () => {
           </LinkageTreeSelect>
         </Form.Item>
 
-        {/* <Form.Item
+        <Form.Item
           label="用户"
           name="username"
           rules={[{ required: true, message: ' 请选择用户' }]}
@@ -183,7 +184,7 @@ export default () => {
             maxTagCount={10}
             placeholder="用户"
           />
-        </Form.Item> */}
+        </Form.Item>
 
         {/* <Form.Item
           label="用户2"
