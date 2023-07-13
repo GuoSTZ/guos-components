@@ -73,29 +73,9 @@ export default () => {
   useEffect(() => {
     const { dbAccount = [], username = [] } = formData;
     let res: any[] = [];
-    const dbData: any[] = [];
-    const uData: any[] = [];
+    const dbData: any[] = loop(dbAccount);
+    const uData: any[] = loop(username);
 
-    dbAccount.forEach((item: any) => {
-      if (item.children) {
-        item.children.forEach((it: any) => {
-          it.parentTitle = item.title;
-          dbData.push(it);
-        });
-      } else {
-        dbData.push(item);
-      }
-    });
-    username.forEach((item: any) => {
-      if (item.children) {
-        item.children.forEach((it: any) => {
-          it.parentTitle = item.title;
-          uData.push(it);
-        });
-      } else {
-        uData.push(item);
-      }
-    });
     const dataMap = new Map();
     uData.forEach((item: any, index: number) => {
       const temp: any[] = [];
@@ -113,6 +93,24 @@ export default () => {
     setFilterData(dataMap);
     setTableData(res);
   }, [formData]);
+
+  const loop = (data: any[]) => {
+    let res: any[] = [];
+    data.forEach((item: any) => {
+      if (item.children) {
+        item.children.forEach((it: any) => {
+          if (it.children) {
+            res = ([] as any[]).concat(res, loop(it.children));
+          } else {
+            res.push(it);
+          }
+        });
+      } else {
+        res.push(item);
+      }
+    });
+    return res;
+  };
 
   const tableConfig: TableProps<TableRecord> = {
     columns: [
@@ -198,7 +196,7 @@ export default () => {
           </Button>
         </Form.Item>
       </Form>
-      <Tree treeData={formData.username} style={{ minHeight: 300 }} />
+      <Tree treeData={formData.username} height={400} style={{ minHeight: 300 }} />
       <Table {...tableConfig} />
     </Space>
   );
