@@ -154,7 +154,6 @@ export default () => {
             treeData={dbAccountData}
             maxTagCount={10}
             placeholder="数据源账号"
-            open
           />
         </Form.Item>
 
