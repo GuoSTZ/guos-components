@@ -71,12 +71,12 @@ const LinkageTreeSelect: CompoundedComponent = (props) => {
   }, [treeData]);
 
   useEffect(() => {
-    console.log(selectAllValue, value, treeDataMap.size, '======');
     setCheckedAll(selectAllValue === value?.[0]?.value);
     if (selectAllValue === value?.[0]?.value) {
       handleTree(true);
     } else {
       setTreeValue(value);
+      setCheckedValue(value);
     }
   }, [selectAllValue, value, treeDataMap.size]);
 
@@ -100,17 +100,23 @@ const LinkageTreeSelect: CompoundedComponent = (props) => {
   };
 
   const handleOnChange = (value: any, labelList: ReactNode[], extra: ChangeEventExtra) => {
-    value.forEach((item: any) => {
-      if (treeDataMap.has(item?.value)) {
-        const data = treeDataMap.get(item.value);
-        item.children = data?.children;
-        item.title = item.label;
-        item.key = item.value;
-        item.parentTitle = data?.parentTitle;
-      }
-    });
-    setCheckedValue(value);
-    onChange?.(value, labelList, extra);
+    // 通过标签点击删除或者键盘回退键进行删除「全部」时
+    if (checkedAll && value.length === 0) {
+      handleTree(false);
+      onChange?.(checkedValue, [], {} as ChangeEventExtra);
+    } else {
+      value.forEach((item: any) => {
+        if (treeDataMap.has(item?.value)) {
+          const data = treeDataMap.get(item.value);
+          item.children = data?.children;
+          item.title = item.label;
+          item.key = item.value;
+          item.parentTitle = data?.parentTitle;
+        }
+      });
+      setCheckedValue(value);
+      onChange?.(value, labelList, extra);
+    }
   };
 
   const handleOnDeselect = (value: string, node: any) => {
@@ -136,16 +142,6 @@ const LinkageTreeSelect: CompoundedComponent = (props) => {
     }
     onSelect?.(value, node);
   };
-
-  // const handleTreeNode = (data: any = {}, checked: boolean): any => {
-  //   const newData = Array.isArray(data) ? data : [data];
-  //   return newData?.map((child: any) =>
-  //     React.cloneElement(child, {
-  //       disabled: checked || !child.available,
-  //       children: child.props.children ? handleTreeNode(child.props.children, checked) : undefined,
-  //     }),
-  //   );
-  // };
 
   const handleTree = (checked: boolean) => {
     if (treeData) {

@@ -62,7 +62,7 @@ const createUserData = (level = 2, path = 0) => {
 };
 
 const dbAccountData = createDbAccountData();
-const userData = [] || createUserData();
+const userData = createUserData();
 console.log(`当前账号以及数据源的节点数量： ${dbAccountKey}`, '====');
 console.log(`当前用户以及部门的节点数量： ${userKey}`, '====');
 
