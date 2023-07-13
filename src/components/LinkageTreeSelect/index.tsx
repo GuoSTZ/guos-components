@@ -154,13 +154,9 @@ const LinkageTreeSelect: CompoundedComponent = (props) => {
 
   const selectAllOnChange = (e: CheckboxChangeEvent) => {
     const checked = e?.target?.checked;
-    const temp = {
-      label: selectAllText,
-      value: selectAllValue,
-    };
     handleTree(checked);
     if (checked) {
-      onChange?.([temp], [], {} as ChangeEventExtra);
+      onChange?.(SELECT_ALL_DATA, [], {} as ChangeEventExtra);
     } else {
       onChange?.(checkedValue, [], {} as ChangeEventExtra);
     }
