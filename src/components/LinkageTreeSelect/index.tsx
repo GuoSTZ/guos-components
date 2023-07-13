@@ -25,14 +25,14 @@ type CompoundedComponent = ((props: LinkageTreeSelectProps) => React.ReactElemen
 const LinkageTreeSelect: CompoundedComponent = (props) => {
   const {
     dropdownRender,
-    multiple,
+    multiple = true,
     onChange,
     onDeselect,
     onSelect,
     selectAll,
     selectAllText,
     selectAllValue,
-    treeCheckable,
+    treeCheckable = true,
     treeData,
     value,
     ...restProps
