@@ -48,4 +48,17 @@ export default defineConfig({
   lessLoader: {
     modifyVars: {},
   },
+  chainWebpack(config) {
+    // 在这里可以对 webpack 配置进行修改和定制
+    config.module
+      .rule('svg')
+      .test(/\.svg$/)
+      .use('@svgr/webpack')
+      .loader('svg-url-loader')
+      .options({
+        // 可选配置，根据需要自行调整
+        encoding: 'base64',
+      })
+      .end();
+  },
 });
