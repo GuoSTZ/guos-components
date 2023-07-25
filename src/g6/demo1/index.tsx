@@ -4,6 +4,7 @@ import { appSvgBase64, apiSvgBase64 } from './images';
 import { fittingString } from '../utils';
 import './index.less';
 
+// 连接点的位置
 const anchorPoints = [
   [0.5, 0], // 0
   [1, 0.5], // 1
@@ -182,14 +183,9 @@ const data = {
 data.nodes.forEach(function (node: any) {
   node.label = fittingString(node.label, 100, 14);
 });
-data.edges.forEach(function (edge: any) {
-  // edge.label = fittingString(edge.label, 120, globalFontSize);
-  // edge.curveOffset = 10
-});
 
 G6.registerEdge('rect-img-edge', {
   draw(cfg, group) {
-    console.log(cfg, group, '======');
     const startPoint = cfg.startPoint!;
     const endPoint = cfg.endPoint!;
     const x1 = startPoint.x,
@@ -254,7 +250,6 @@ G6.registerEdge('rect-img-edge', {
       name: 'edge-rect',
     });
 
-    // Draw the icon on the edge
     const icon = group.addShape('image', {
       attrs: {
         x: midPoint.x - 24,
@@ -349,15 +344,10 @@ export default () => {
         },
         defaultEdge: {
           type: 'rect-img-edge',
-          // type: 'polyline',
         },
         // 节点不同状态下的样式集合
         nodeStateStyles: {
           // 鼠标 hover 上节点，即 hover 状态为 true 时的样式
-          // hover: {
-          //   fill: 'lightsteelblue',
-          // },
-          // 鼠标点击节点，即 click 状态为 true 时的样式
           hover: {
             stroke: '#3385FF',
             lineWidth: 1,
@@ -377,14 +367,6 @@ export default () => {
                 return text;
               },
             },
-            // {
-            //   type: 'edge-tooltip', // 边提示框
-            //   formatText(model) {
-            //     // 边提示框文本内容
-            //     const text = `源应用: ${model.source} <br /> 目标应用: ${model.target}`
-            //     return text;
-            //   },
-            // }
           ],
         },
         plugins: [grid], // 将 minimap 实例配置到图上
@@ -392,50 +374,27 @@ export default () => {
       graph.data(data);
       graph.render(); // 渲染图
 
-      // 节点上的点击事件
-      graph.on('node:hover', function (e) {
-        console.log(e, 'e');
-        // 先将所有当前是 click 状态的节点置为非 click 状态
-        const clickNodes = graph.findAllByState('node', 'hover');
-        clickNodes.forEach((cn) => {
-          graph.setItemState(cn, 'hover', false);
-        });
-        const nodeItem = e.item; // 获取被点击的节点元素对象
-        graph.setItemState(nodeItem!, 'hover', true); // 设置当前节点的 click 状态为 true
+      // 鼠标进入节点
+      graph.on('node:mouseenter', (e) => {
+        const nodeItem = e.item; // 获取鼠标进入的节点元素对象
+        graph.setItemState(nodeItem!, 'hover', true); // 设置当前节点的 hover 状态为 true
+      });
+      // 鼠标离开节点
+      graph.on('node:mouseleave', (e) => {
+        const nodeItem = e.item; // 获取鼠标离开的节点元素对象
+        graph.setItemState(nodeItem!, 'hover', false); // 设置当前节点的 hover 状态为 false
       });
       graph.on('edge-rect:click', function (event) {
-        console.log(event, 'edge-rect:click');
         graph.changeData({ nodes: [] });
       });
 
       graph.on('edge-image:click', (event) => {
-        console.log(event, 'edge-image:click');
         graph.changeData({ nodes: [] });
       });
 
       graph.on('edge-text:click', (event) => {
-        console.log(event, 'edge-text:click');
         graph.changeData({ nodes: [] });
       });
-
-      // 监听边事件
-      // graph.on('edge:mouseenter', (evt) => {
-      //   const { item } = evt;
-      //   graph!.setItemState(item!, 'active', true);
-      // });
-      // graph.on('edge:mouseleave', (evt) => {
-      //   const { item } = evt;
-      //   graph!.setItemState(item!, 'active', false);
-      // });
-      // graph.on('edge:click', (evt) => {
-      //   const { item } = evt;
-      //   graph!.setItemState(item!, 'selected', true);
-      // });
-      // graph.on('canvas:click', (evt) => {
-      //   graph!.getEdges().forEach((edge) => {
-      //     graph!.clearItemStates(edge);
-      //   });
-      // });
     }
 
     if (typeof window !== 'undefined')
