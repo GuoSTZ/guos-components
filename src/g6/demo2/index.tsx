@@ -162,7 +162,7 @@ const data = {
 
 data.nodes.forEach(function (node: any) {
   node.label = fittingString(node.label, 100, 14);
-  node.anchorPoints = anchorPoints;
+  // node.anchorPoints = anchorPoints;
 });
 // data.edges.forEach(function (edge: any) {
 
@@ -246,7 +246,7 @@ export default () => {
           type: 'dagre',
           rankdir: 'LR',
           // align: 'UL',
-          // controlPoints: true,1
+          controlPoints: true,
           nodesepFunc: () => 50,
           ranksepFunc: () => 50,
         },
@@ -299,6 +299,18 @@ export default () => {
             lineWidth: 1,
           },
         },
+        // 节点不同状态下的样式集合
+        edgeStateStyles: {
+          // 鼠标 hover 上节点，即 hover 状态为 true 时的样式
+          hover: {
+            stroke: '#3385FF',
+            endArrow: {
+              path: 'M 0,0 L 8,4 L 8,0 L 8,-4 Z',
+              fill: '#3385FF',
+            },
+            lineWidth: 1,
+          },
+        },
         modes: {
           // 允许拖拽画布、放缩画布、拖拽节点
           default: [
@@ -330,14 +342,24 @@ export default () => {
         const nodeItem = e.item; // 获取鼠标离开的节点元素对象
         graph.setItemState(nodeItem!, 'hover', false); // 设置当前节点的 hover 状态为 false
       });
+      // 鼠标进入边
+      graph.on('edge:mouseenter', (e) => {
+        const edgeItem = e.item; // 获取鼠标进入的节点元素对象
+        graph.setItemState(edgeItem!, 'hover', true); // 设置当前边的 hover 状态为 true
+      });
+      // 鼠标离开边
+      graph.on('edge:mouseleave', (e) => {
+        const edgeItem = e.item; // 获取鼠标离开的节点元素对象
+        graph.setItemState(edgeItem!, 'hover', false); // 设置当前边的 hover 状态为 false
+      });
+
+      // 边上自定义节点的多个元素点击事件
       graph.on('edge-rect:click', function (event) {
         graph.changeData({ nodes: [] });
       });
-
       graph.on('edge-image:click', (event) => {
         graph.changeData({ nodes: [] });
       });
-
       graph.on('edge-text:click', (event) => {
         graph.changeData({ nodes: [] });
       });
