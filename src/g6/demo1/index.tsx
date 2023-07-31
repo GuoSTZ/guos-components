@@ -126,9 +126,10 @@ const data = {
       id: 'edge7',
       source: 'node4', // String，必须，起始点 id
       target: 'node7', // String，必须，目标点 id
-      sourceAnchor: 7,
-      targetAnchor: 4,
+      // sourceAnchor: 7,
+      // targetAnchor: 4,
       count: 123,
+      lineType: 'polyline',
     },
     {
       id: 'edge8',
@@ -159,8 +160,9 @@ const data = {
       source: 'node7', // String，必须，起始点 id
       target: 'node4', // String，必须，目标点 id
       count: 123,
-      sourceAnchor: 5,
-      targetAnchor: 6,
+      // sourceAnchor: 5,
+      // targetAnchor: 6,
+      lineType: 'polyline',
     },
     {
       id: 'edge13',
@@ -194,47 +196,43 @@ G6.registerEdge('rect-img-edge', {
       y2 = endPoint.y;
     const width = 52,
       height = 20;
-    const midPoint = {
-      x: (x1 + x2) / 2,
-      y: (y1 + y2) / 2,
-    };
-    const defaultSpace = 40; // 设定默认折线的延伸长度
+
+    let offsetX = 0,
+      offsetY = 0;
     let shape: any;
     if (cfg.lineType === 'polyline') {
-      // 注意：此处只是个demo的特殊化处理，完全不具备通用性
-      const _y1 = y1 + defaultSpace;
-      const _y2 = y2 + defaultSpace;
-      midPoint.y = midPoint.y + defaultSpace;
-      shape = group.addShape('path', {
-        attrs: {
-          path: [
-            ['M', x1, y1],
-            ['L', x1, _y1],
-            ['L', x2, _y2],
-            ['L', x2, y2],
-          ],
-          endArrow: {
-            path: 'M 0,0 L 8,4 L 8,0 L 8,-4 Z',
-            fill: '#B1BFD4',
-          },
-          stroke: '#B1BFD4',
-        },
-      });
-    } else {
-      shape = group.addShape('line', {
-        attrs: {
-          x1,
-          y1,
-          x2,
-          y2,
-          endArrow: {
-            path: 'M 0,0 L 8,4 L 8,0 L 8,-4 Z',
-            fill: '#B1BFD4',
-          },
-          stroke: '#B1BFD4',
-        },
-      });
+      let offSet = 30;
+      // 这里需要仔细考虑下
+      if (y1 < y2) {
+        offsetX = -offSet;
+      } else {
+        offsetX = offSet;
+      }
+      if (x1 < x2) {
+        offsetY = -offSet;
+      } else {
+        offsetY = offSet;
+      }
     }
+
+    shape = group.addShape('line', {
+      attrs: {
+        x1: x1 + offsetX,
+        y1: y1 + offsetY,
+        x2: x2 + offsetX,
+        y2: y2 + offsetY,
+        endArrow: {
+          path: 'M 0,0 L 8,4 L 8,0 L 8,-4 Z',
+          fill: '#B1BFD4',
+        },
+        stroke: '#B1BFD4',
+      },
+    });
+
+    const midPoint = {
+      x: (x1 + x2) / 2 + offsetX,
+      y: (y1 + y2) / 2 + offsetY,
+    };
 
     group?.addShape('rect', {
       attrs: {
