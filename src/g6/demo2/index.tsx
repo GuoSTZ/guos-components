@@ -162,7 +162,7 @@ const data = {
 
 data.nodes.forEach(function (node: any) {
   node.label = fittingString(node.label, 100, 14);
-  // node.anchorPoints = anchorPoints;
+  node.anchorPoints = anchorPoints;
 });
 // data.edges.forEach(function (edge: any) {
 
@@ -308,7 +308,7 @@ export default () => {
               path: 'M 0,0 L 8,4 L 8,0 L 8,-4 Z',
               fill: '#3385FF',
             },
-            lineWidth: 1,
+            lineWidth: 2,
           },
         },
         modes: {
