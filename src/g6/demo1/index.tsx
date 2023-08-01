@@ -186,95 +186,82 @@ data.nodes.forEach(function (node: any) {
   node.label = fittingString(node.label, 100, 14);
 });
 
-G6.registerEdge('rect-img-edge', {
-  draw(cfg, group) {
-    const startPoint = cfg.startPoint!;
-    const endPoint = cfg.endPoint!;
-    const x1 = startPoint.x,
-      y1 = startPoint.y,
-      x2 = endPoint.x,
-      y2 = endPoint.y;
-    const width = 52,
-      height = 20;
+G6.registerEdge(
+  'rect-img-edge',
+  {
+    afterDraw(cfg, group) {
+      // 双向线条的处理仍然存在问题
+      // const startPoint = cfg?.startPoint!;
+      // const endPoint = cfg?.endPoint!;
+      // const x1 = startPoint.x,
+      //   y1 = startPoint.y,
+      //   x2 = endPoint.x,
+      //   y2 = endPoint.y;
 
-    let offsetX = 0,
-      offsetY = 0;
-    let shape: any;
-    if (cfg.lineType === 'polyline') {
-      let offSet = 30;
-      // 这里需要仔细考虑下
-      if (y1 < y2) {
-        offsetX = -offSet;
-      } else {
-        offsetX = offSet;
-      }
-      if (x1 < x2) {
-        offsetY = -offSet;
-      } else {
-        offsetY = offSet;
-      }
-    }
+      // let offsetX = 0,
+      //   offsetY = 0;
+      // if (cfg?.lineType === 'polyline') {
+      //   let offSet = 30;
+      //   // 在网格布局中，实际上每个节点是对齐的
+      //   if (y1 < y2 && x1 === x2) {
+      //     offsetX = -offSet;
+      //   } else {
+      //     offsetX = offSet;
+      //   }
+      //   if (x1 < x2 && y1 === y2) {
+      //     offsetY = -offSet;
+      //   } else {
+      //     offsetY = offSet;
+      //   }
+      // }
 
-    shape = group.addShape('line', {
-      attrs: {
-        x1: x1 + offsetX,
-        y1: y1 + offsetY,
-        x2: x2 + offsetX,
-        y2: y2 + offsetY,
-        endArrow: {
-          path: 'M 0,0 L 8,4 L 8,0 L 8,-4 Z',
-          fill: '#B1BFD4',
+      const width = 52,
+        height = 20;
+      const shape = group?.get('children')[0];
+      const midPoint = shape.getPoint(0.5);
+
+      group?.addShape('rect', {
+        attrs: {
+          width,
+          height,
+          fill: '#fff',
+          radius: 10,
+          stroke: '#E6E9F0',
+          x: midPoint.x - width / 2,
+          y: midPoint.y - height / 2,
+          cursor: 'pointer',
         },
-        stroke: '#B1BFD4',
-      },
-    });
+        name: 'edge-rect',
+      });
 
-    const midPoint = {
-      x: (x1 + x2) / 2 + offsetX,
-      y: (y1 + y2) / 2 + offsetY,
-    };
+      const icon = group?.addShape('image', {
+        attrs: {
+          x: midPoint.x - 24,
+          y: midPoint.y - 8,
+          width: 16,
+          height: 16,
+          img: apiSvgBase64,
+          cursor: 'pointer',
+        },
+        name: 'edge-image',
+      });
 
-    group?.addShape('rect', {
-      attrs: {
-        width,
-        height,
-        fill: '#fff',
-        radius: 10,
-        stroke: '#E6E9F0',
-        x: midPoint.x - width / 2,
-        y: midPoint.y - height / 2,
-        cursor: 'pointer',
-      },
-      name: 'edge-rect',
-    });
-
-    const icon = group.addShape('image', {
-      attrs: {
-        x: midPoint.x - 24,
-        y: midPoint.y - 8,
-        width: 16,
-        height: 16,
-        img: apiSvgBase64,
-        cursor: 'pointer',
-      },
-      name: 'edge-image',
-    });
-
-    const text = group.addShape('text', {
-      attrs: {
-        x: midPoint.x - 4,
-        y: midPoint.y + 6,
-        text: cfg.count,
-        fontSize: 12,
-        fill: '#38415C',
-        cursor: 'pointer',
-      },
-      name: 'edge-text',
-    });
-
-    return shape;
+      const text = group?.addShape('text', {
+        attrs: {
+          x: midPoint.x - 4,
+          y: midPoint.y + 6,
+          text: cfg?.count,
+          fontSize: 12,
+          fill: '#38415C',
+          cursor: 'pointer',
+        },
+        name: 'edge-text',
+      });
+    },
+    update: undefined,
   },
-});
+  'line',
+);
 
 export default () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -342,6 +329,14 @@ export default () => {
         },
         defaultEdge: {
           type: 'rect-img-edge',
+          style: {
+            endArrow: {
+              path: 'M 0,0 L 8,4 L 8,0 L 8,-4 Z',
+              fill: '#B1BFD4',
+            },
+            stroke: '#B1BFD4',
+            radius: 20,
+          },
         },
         // 节点不同状态下的样式集合
         nodeStateStyles: {
