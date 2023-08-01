@@ -8,7 +8,7 @@ export default () => {
   const items: TabsProps['items'] = [
     {
       key: '1',
-      label: 'Demo',
+      label: '官方网格布局Demo',
       children: <Demo />,
     },
     {
