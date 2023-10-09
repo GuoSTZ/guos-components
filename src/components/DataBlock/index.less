@@ -1,0 +1,50 @@
+@prefix: ~'data-block';
+
+.@{prefix} {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding-left: 11px;
+
+  &-small {
+    width: 180px;
+    max-width: 180px;
+    background: url(./assets/small.png) no-repeat;
+    background-size: 100% 100%;
+  }
+
+  &-large {
+    width: 363px;
+    min-width: 363px;
+    background: url(./assets/large.png) no-repeat;
+    background-size: 100% 100%;
+  }
+}
+
+.label-text {
+  display: flex;
+  align-items: center;
+  color: #c0cfdc;
+  font-weight: 400;
+  font-size: 14px;
+
+  &-label {
+    white-space: nowrap;
+    &::after {
+      content: '\FF1A';
+    }
+  }
+
+  &-value {
+    display: flex;
+    align-items: center;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 22px;
+    text-shadow: 0px 0px 8px #2fa9ff;
+  }
+
+  &-unit {
+    margin-left: 4px;
+  }
+}

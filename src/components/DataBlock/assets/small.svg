@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="178px" height="40px" viewBox="0 0 178 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>矩形</title>
+    <defs>
+        <linearGradient x1="100%" y1="50%" x2="0%" y2="50%" id="linearGradient-1">
+            <stop stop-color="#036FA1" stop-opacity="0" offset="0%"></stop>
+            <stop stop-color="#52A8FF" stop-opacity="0.167416446" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="3.77839804%" y1="48.438544%" x2="56.2694709%" y2="52.5066316%" id="linearGradient-2">
+            <stop stop-color="#93E6FE" stop-opacity="0.399309919" offset="0%"></stop>
+            <stop stop-color="#1C2E7F" stop-opacity="0" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="大屏-3" transform="translate(-1512.000000, -471.000000)" fill="url(#linearGradient-1)" stroke="url(#linearGradient-2)">
+            <g id="编组-24备份" transform="translate(1512.000000, 421.000000)">
+                <path d="M178.148649,50.5 L178.148649,89.5 L20,89.5 C14.6152237,89.5 9.74022369,87.3173882 6.21141777,83.7885822 C2.68261184,80.2597763 0.5,75.3847763 0.5,70 C0.5,64.6152237 2.68261184,59.7402237 6.21141777,56.2114178 C9.74022369,52.6826118 14.6152237,50.5 20,50.5 L20,50.5 L178.148649,50.5 Z" id="矩形"></path>
+            </g>
+        </g>
+    </g>
+</svg>

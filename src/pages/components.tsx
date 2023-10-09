@@ -4,6 +4,7 @@ import Loading from '../components/Loading';
 import SwitchButton from '../components/SwitchButton';
 import SingleTagSelect from '../components/SingleTagSelect';
 import LinkageTreeSelectView from './LinkageTreeSelectView';
+import InfoCard from '../components/InFlow';
 
 export default () => {
   const items: TabsProps['items'] = [
@@ -31,7 +32,16 @@ export default () => {
       label: '联动树下拉框',
       children: <LinkageTreeSelectView />,
     },
+    {
+      key: '5',
+      label: '大屏组件1',
+      children: (
+        <div style={{ width: 400 }}>
+          <InfoCard />
+        </div>
+      ),
+    },
   ];
 
-  return <Tabs items={items} defaultActiveKey="4" />;
+  return <Tabs items={items} defaultActiveKey="5" />;
 };
