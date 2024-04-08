@@ -2,7 +2,7 @@ import React, { memo, useRef } from 'react';
 import { Typography } from 'antd';
 import TreeToTable, { TreeToTableRef } from '../../../components/TreeToTable/index';
 
-import { treeData_2_level, treeData_3_level } from '../../../data/treeData';
+import { treeData_2_level, treeData_3_level, treeData_4_level } from '../../../data/treeData';
 
 const Tree_To_Table = () => {
   const treeToTableRef = useRef<TreeToTableRef>(null);
@@ -16,7 +16,7 @@ const Tree_To_Table = () => {
           title: 'name',
         },
         // @ts-ignore
-        treeData: treeData_3_level,
+        treeData: treeData_4_level,
         showSearch: true,
         placeholder: '请输入',
       }}
