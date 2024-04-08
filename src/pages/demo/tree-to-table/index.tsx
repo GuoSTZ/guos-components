@@ -1,13 +1,11 @@
 import React, { memo, useRef } from 'react';
 import { Typography } from 'antd';
-import TreeToTable from '../../../components/TreeToTable/index';
+import TreeToTable, { TreeToTableRef } from '../../../components/TreeToTable/index';
 
 import { treeData_2_level, treeData_3_level } from '../../../data/treeData';
 
 const Tree_To_Table = () => {
-  const treeToTableRef = useRef<{
-    tableDelete: (key: string) => void;
-  }>(null);
+  const treeToTableRef = useRef<TreeToTableRef>(null);
 
   return (
     <TreeToTable
