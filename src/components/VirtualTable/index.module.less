@@ -1,0 +1,38 @@
+.virtual-table {
+  :global {
+    .@{ant-prefix} {
+      &-table-container {
+        &::before,
+        &::after {
+          display: none;
+        }
+      }
+
+      &-table-thead {
+        > tr {
+          > th.@{ant-prefix}-table-cell {
+            padding-left: 12px;
+          }
+        }
+      }
+    }
+  }
+
+  &-cell {
+    box-sizing: border-box;
+    padding: 9px 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: #fff;
+    border-bottom: 1px solid #e8e8e8;
+  }
+
+  [data-theme='dark'] &-cell {
+    box-sizing: border-box;
+    padding: 9px 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: #141414;
+    border-bottom: 1px solid #303030;
+  }
+}

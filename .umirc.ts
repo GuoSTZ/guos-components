@@ -46,7 +46,9 @@ export default defineConfig({
     '@table-expanded-row-bg': '#f7f8fa', // 表格展开背景色
   },
   lessLoader: {
-    modifyVars: {},
+    modifyVars: {
+      '@ant-prefix': 'ant',
+    },
   },
   chainWebpack(config) {
     // 在这里可以对 webpack 配置进行修改和定制
@@ -60,5 +62,8 @@ export default defineConfig({
         encoding: 'base64',
       })
       .end();
+
+    // 别名配置
+    config.resolve.alias.set('@', require.resolve('./src'));
   },
 });
