@@ -155,7 +155,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>((props, re
     setCheckedKeys(Array.from(checkedKeySet));
     const data = [];
     for (const key of tableKeySet) {
-      data.push(treeDataMap.get(key));
+      treeDataMap.has(key) && data.push(treeDataMap.get(key));
     }
     needReverse && data.reverse();
     setTableData(data);
