@@ -98,7 +98,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>((props, re
   const [tableSearchValue, setTableSearchValue] = useState('');
   const [isCheckAll, setIsCheckAll] = useState(false);
 
-  const allKeys = useRef(new Array()).current;
+  const allKeys = useRef(new Set<Key>()).current;
   const parentNodeMap = useRef(new Map()).current;
   const treeDataMap = useRef(new Map()).current;
   const tableKeySet = useRef(new Set<Key>()).current;
@@ -114,7 +114,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>((props, re
       const key = item[rowKey];
       const name = item[rowName];
       treeDataMap.set(key, { ...item, children: null, [CHILDREN_BACKUP]: item.children });
-      allKeys.push(key);
+      allKeys.add(key);
       childKeySet.add(key);
       if (item.children) {
         loop(item.children, key, name);
@@ -260,9 +260,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>((props, re
       if (treeSearchValue) {
         setTreeSearchValue('');
       }
-      const len = allKeys.length;
-      for (let i = 0; i < len; i++) {
-        const key = allKeys[i];
+      for (const key of allKeys) {
         checkedKeySet.add(key);
         treeCheckedKeys.push(key);
         const node = treeDataMap.get(key);
