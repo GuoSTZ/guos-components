@@ -33,7 +33,7 @@ export interface TreeToTableProps<T> {
     /** 树源数据 */
     treeData: NewDataNode[];
     /** 树头部自定义 */
-    header?: ReactNode[] | ((info: { checkedKeySet: Set<Key> }) => ReactNode[]);
+    header?: string | ReactNode[] | ((info: { checkedKeySet: Set<Key> }) => ReactNode[]);
     /** 树是否可搜索 */
     showSearch?: boolean;
     /** 树自定义搜索回调 */
@@ -44,7 +44,7 @@ export interface TreeToTableProps<T> {
   /** 表格数据 */
   tableProps: TableProps<T> & {
     /** 表格头部自定义 */
-    header?: ReactNode[] | ((info: { tableKeySet: Set<Key> }) => ReactNode[]);
+    header?: string | ReactNode[] | ((info: { tableKeySet: Set<Key> }) => ReactNode[]);
     /** 表格是否可搜索 */
     showSearch?: boolean;
     /** 表格自定义搜索回调 */
@@ -61,7 +61,6 @@ export type TreeToTableRef = {
   tableDelete: (id: Key) => void;
   tableDeleteAll: () => void;
   tableData: NewDataNode[];
-  treeDataMap: Map<Key, NewDataNode>;
 };
 
 /** 树默认搜索回调函数 */
@@ -91,6 +90,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>((props, re
 
   const rowKey = restTreeProps?.fieldNames?.key || 'key';
   const rowName = restTreeProps?.fieldNames?.title || 'title';
+  const rowChildren = restTreeProps?.fieldNames?.children || 'children';
 
   const [tableData, setTableData] = useState<NewDataNode[]>([]);
   const [checkedKeys, setCheckedKeys] = useState<Key[]>([]);
@@ -113,11 +113,12 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>((props, re
       pName && (item.pName = pName);
       const key = item[rowKey];
       const name = item[rowName];
-      treeDataMap.set(key, { ...item, children: null, [CHILDREN_BACKUP]: item.children });
-      allKeys.add(key);
-      childKeySet.add(key);
-      if (item.children) {
-        loop(item.children, key, name);
+      treeDataMap.set(key, { ...item, children: null, [CHILDREN_BACKUP]: item[rowChildren] });
+      // 过滤掉「禁用」和「不可勾选」的数据
+      item.disabled !== true && item.checkable !== false && allKeys.add(key);
+      item.disabled !== true && item.checkable !== false && childKeySet.add(key);
+      if (item[rowChildren]) {
+        loop(item[rowChildren], key, name);
       }
     }
     pKey && parentNodeMap.set(pKey, childKeySet);
@@ -264,9 +265,12 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>((props, re
         checkedKeySet.add(key);
         treeCheckedKeys.push(key);
         const node = treeDataMap.get(key);
+        const pNode = treeDataMap.get(node.pKey);
+
         if (
-          (parentNodeMap.has(key) && node.pKey === undefined) || // 节点为父节点，且没有更上一级的父节点
-          (node[CHILDREN_BACKUP] === undefined && node.pKey === undefined) // 节点没有父节点也没有子节点的独立节点
+          (node.pKey === undefined && node[CHILDREN_BACKUP] === undefined) || // 这个是独立节点，既没有父节点，也没有子节点
+          (node.pKey === undefined && parentNodeMap.has(key)) || // 这个是根节点
+          pNode?.checkable === false // 这个是父节点不可选的节点
         ) {
           tableKeySet.add(key);
           tableData.push(node);
@@ -314,18 +318,18 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>((props, re
     if (leftMergedFilterValue(searchValue, treeNode)) {
       return { ...treeNode };
     }
-    if (!treeNode.children) {
+    if (!treeNode[rowChildren]) {
       return null;
     }
     const result = [];
-    for (const child of treeNode.children) {
+    for (const child of treeNode[rowChildren]) {
       const data = searchTree(child, searchValue);
       data && result.push(data);
     }
     if (result.length === 0) {
       return null;
     }
-    return { ...treeNode, children: result };
+    return { ...treeNode, [rowChildren]: result };
   };
   const getFilterTree = (tree: NewDataNode[], searchValue: string) => {
     const result = [];
@@ -368,6 +372,16 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>((props, re
     }
   }, [tableData, tableSearchValue]);
 
+  const renderHeader = (header: string | ReactNode[] | Function) => {
+    if (typeof header === 'string') {
+      return header;
+    } else if (typeof header === 'function') {
+      return header({ checkedKeySet }).map((item: React.ReactNode) => <div>{item}</div>);
+    } else if (Array.isArray(header)) {
+      return header.map((item) => <div>{item}</div>);
+    }
+  };
+
   useImperativeHandle(
     ref,
     () => ({
@@ -375,7 +389,6 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>((props, re
       tableDelete,
       tableDeleteAll,
       tableData,
-      treeDataMap,
     }),
     [treeCheckAll, tableDelete, tableDeleteAll, tableData, treeDataMap],
   );
@@ -384,11 +397,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>((props, re
     <div className={styles['tree-to-table']}>
       <div className={styles['tree-to-table-left']}>
         {leftHeader ? (
-          <div className={styles['tree-to-table-header']}>
-            {typeof leftHeader !== 'function'
-              ? leftHeader.map((item) => <div>{item}</div>)
-              : leftHeader({ checkedKeySet }).map((item) => <div>{item}</div>)}
-          </div>
+          <div className={styles['tree-to-table-header']}>{renderHeader(leftHeader)}</div>
         ) : null}
         {leftShowSearch ? (
           <div className={styles['tree-to-table-search']}>
@@ -419,11 +428,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>((props, re
 
       <div className={styles['tree-to-table-right']}>
         {rightHeader ? (
-          <div className={styles['tree-to-table-header']}>
-            {typeof rightHeader !== 'function'
-              ? rightHeader.map((item) => <div>{item}</div>)
-              : rightHeader({ tableKeySet }).map((item) => <div>{item}</div>)}
-          </div>
+          <div className={styles['tree-to-table-header']}>{renderHeader(rightHeader)}</div>
         ) : null}
         {rightShowSearch ? (
           <div className={styles['tree-to-table-search']}>

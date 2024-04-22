@@ -2,7 +2,12 @@ import React, { memo, useRef } from 'react';
 import { Typography } from 'antd';
 import TreeToTable, { TreeToTableRef } from '../../../components/TreeToTable/index';
 
-import { treeData_2_level, treeData_3_level, treeData_4_level } from '../../../data/treeData';
+import {
+  treeData_2_level,
+  treeData_3_level,
+  treeData_4_level,
+  treeData_4_level_child,
+} from '../../../data/treeData';
 
 const Tree_To_Table = () => {
   const treeToTableRef = useRef<TreeToTableRef>(null);
@@ -14,9 +19,11 @@ const Tree_To_Table = () => {
         fieldNames: {
           key: 'id',
           title: 'name',
+          children: 'child',
         },
         // @ts-ignore
-        treeData: treeData_4_level,
+        treeData: treeData_4_level_child,
+        header: '待选项',
         showSearch: true,
         placeholder: '请输入',
       }}
@@ -37,6 +44,7 @@ const Tree_To_Table = () => {
             ),
           },
         ],
+        header: ['已选项', <a onClick={() => treeToTableRef.current?.tableDeleteAll()}>清空</a>],
         showSearch: true,
         placeholder: '请输入',
       }}
