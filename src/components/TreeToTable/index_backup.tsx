@@ -82,7 +82,11 @@ const TreeToTable = forwardRef<any, TreeToTableProps<any>>((props, ref) => {
     treeData.forEach((item) => {
       const pKey = item[rowKey];
       const pName = item[rowName];
-      treeDataMap.set(pKey, { ...item, children: null, childrenStored: item.children });
+      treeDataMap.set(pKey, {
+        ...item,
+        children: null,
+        childrenStored: item.children,
+      });
       allKeys.push(pKey);
       const childKeySet = new Set();
       item.children?.forEach((it) => {
@@ -91,12 +95,27 @@ const TreeToTable = forwardRef<any, TreeToTableProps<any>>((props, ref) => {
         it.pKey = pKey;
         it.pName = pName;
         childKeySet.add(cKey);
-        treeDataMap.set(cKey, { ...it, children: null, childrenStored: it.children });
+        treeDataMap.set(cKey, {
+          ...it,
+          children: null,
+          childrenStored: it.children,
+        });
         allKeys.push(cKey);
       });
       parentNodeMap.set(pKey, childKeySet);
     });
   }, [treeData]);
+
+  // 将Set转换为Array
+  const transferData = ({ needReverse } = { needReverse: true }) => {
+    setCheckedKeys(Array.from(checkedKeySet));
+    const data = [];
+    for (const key of tableKeySet) {
+      data.push(treeDataMap.get(key));
+    }
+    needReverse && data.reverse();
+    setTableData(data);
+  };
 
   // 处理回填
   useEffect(() => {
@@ -120,17 +139,6 @@ const TreeToTable = forwardRef<any, TreeToTableProps<any>>((props, ref) => {
       transferData();
     }
   }, [value, treeData]);
-
-  // 将Set转换为Array
-  const transferData = ({ needReverse } = { needReverse: true }) => {
-    setCheckedKeys(Array.from(checkedKeySet));
-    const data = [];
-    for (const key of tableKeySet) {
-      data.push(treeDataMap.get(key));
-    }
-    needReverse && data.reverse();
-    setTableData(data);
-  };
 
   // 勾选节点回调
   const onCheck = (_: any, e: any) => {
@@ -239,10 +247,10 @@ const TreeToTable = forwardRef<any, TreeToTableProps<any>>((props, ref) => {
     const value = e.target.value;
     setTreeSearchValue(value);
   };
-  const searchTree: (treeNode: NewDataNode, searchValue: string) => NewDataNode | null = (
+  const searchTree: (
     treeNode: NewDataNode,
     searchValue: string,
-  ) => {
+  ) => NewDataNode | null = (treeNode: NewDataNode, searchValue: string) => {
     if (leftMergedFilterValue(searchValue, treeNode)) {
       return { ...treeNode };
     }
@@ -324,7 +332,11 @@ const TreeToTable = forwardRef<any, TreeToTableProps<any>>((props, ref) => {
         ) : null}
         {leftShowSearch ? (
           <div className={styles['tree-to-table-search']}>
-            <Input placeholder={leftPlaceholder} onChange={treeSearch} value={treeSearchValue} />
+            <Input
+              placeholder={leftPlaceholder}
+              onChange={treeSearch}
+              value={treeSearchValue}
+            />
           </div>
         ) : null}
         <div className={styles['tree-to-table-checkAll']}>

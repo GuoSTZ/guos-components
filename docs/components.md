@@ -2,7 +2,7 @@
 
 ```tsx
 import React from 'react';
-import Components from 'base/pages/components';
+import Components from 'guos-components/pages/components';
 
 export default () => {
   return <Components />;

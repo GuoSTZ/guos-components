@@ -31,16 +31,20 @@ const ChildComponent3 = () => {
 export default () => {
   const [count1, setCount1] = useState(0);
   const [count2, setCount2] = useState(0);
-  const value = count1 % 2;
+  // const value = count1 % 2;
   const value1 = useMemo(() => count2 % 2, [count2]);
   return (
     <div>
       父组件
       <br />
-      <button onClick={() => setCount1((origin) => origin + 1)}>修改count1</button>
+      <button type="button" onClick={() => setCount1((origin) => origin + 1)}>
+        修改count1
+      </button>
       {`count1的值为 ${count1}`}
       <br />
-      <button onClick={() => setCount2((origin) => origin + 1)}>修改count2</button>
+      <button type="button" onClick={() => setCount2((origin) => origin + 1)}>
+        修改count2
+      </button>
       {`count2的值为 ${count2}`}
       <ChildComponent1 value={value1} />
       <ChildComponent2 value={value1} />

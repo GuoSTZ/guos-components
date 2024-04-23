@@ -1,4 +1,4 @@
-import G6, { IAbstractGraph, ModelConfig } from '@antv/g6';
+import G6, { IAbstractGraph } from '@antv/g6';
 import React, { useEffect, useRef } from 'react';
 import { appSvgBase64, apiSvgBase64 } from './images';
 import { fittingString } from '../utils';
@@ -234,7 +234,8 @@ G6.registerEdge(
         name: 'edge-rect',
       });
 
-      const icon = group?.addShape('image', {
+      // const icon =
+      group?.addShape('image', {
         attrs: {
           x: midPoint.x - 24,
           y: midPoint.y - 8,
@@ -246,7 +247,8 @@ G6.registerEdge(
         name: 'edge-image',
       });
 
-      const text = group?.addShape('text', {
+      // const text =
+      group?.addShape('text', {
         attrs: {
           x: midPoint.x - 4,
           y: midPoint.y + 6,
@@ -268,10 +270,11 @@ export default () => {
   let graph: IAbstractGraph;
   useEffect(() => {
     if (!graph) {
-      const width = ref.current?.scrollWidth!; // 暂时直接定义宽度
+      const width = ref.current?.scrollWidth || 1200; // 暂时直接定义宽度
       const height = ref.current?.scrollHeight || 600; // 暂时直接定义高度
       // 实例化 minimap 插件
-      const minimap = new G6.Minimap({
+      // const minimap =
+      new G6.Minimap({
         size: [100, 100],
         className: 'minimap',
         type: 'delegate',
@@ -377,15 +380,15 @@ export default () => {
         const nodeItem = e.item; // 获取鼠标离开的节点元素对象
         graph.setItemState(nodeItem!, 'hover', false); // 设置当前节点的 hover 状态为 false
       });
-      graph.on('edge-rect:click', function (event) {
+      graph.on('edge-rect:click', function () {
         graph.changeData({ nodes: [] });
       });
 
-      graph.on('edge-image:click', (event) => {
+      graph.on('edge-image:click', () => {
         graph.changeData({ nodes: [] });
       });
 
-      graph.on('edge-text:click', (event) => {
+      graph.on('edge-text:click', () => {
         graph.changeData({ nodes: [] });
       });
     }
@@ -393,7 +396,12 @@ export default () => {
     if (typeof window !== 'undefined')
       window.onresize = () => {
         if (!graph || graph.get('destroyed')) return;
-        if (!ref.current || !ref.current.scrollWidth || !ref.current.scrollHeight) return;
+        if (
+          !ref.current ||
+          !ref.current.scrollWidth ||
+          !ref.current.scrollHeight
+        )
+          return;
         graph.changeSize(ref.current.scrollWidth, ref.current.scrollHeight);
       };
   }, []);

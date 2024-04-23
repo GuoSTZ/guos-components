@@ -7,7 +7,7 @@ export default () => {
   };
 
   return (
-    <button className="switch-button" onClick={buttonOnClick}>
+    <button type="button" className="switch-button" onClick={buttonOnClick}>
       <div className="switch-button-handle"></div>
     </button>
   );

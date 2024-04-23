@@ -7,8 +7,6 @@ import LinkageTreeSelectView from './LinkageTreeSelectView';
 import InfoCard from '../components/InFlow';
 import Tree_To_Table from './demo/tree-to-table';
 
-import { treeData_2_level, treeData_3_level } from '../data/treeData';
-
 export default () => {
   const items: TabsProps['items'] = [
     {

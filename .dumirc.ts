@@ -1,11 +1,10 @@
 import { defineConfig } from 'dumi';
 
 export default defineConfig({
-  title: 'base',
-  // favicon: '',
-  // logo: '',
   outputPath: 'docs-dist',
-  // more config: https://d.umijs.org/config
+  themeConfig: {
+    name: 'guos-components',
+  },
   headScripts: [],
   extraBabelPlugins: [
     [
@@ -49,21 +48,22 @@ export default defineConfig({
     modifyVars: {
       '@ant-prefix': 'ant',
     },
+    javascriptEnabled: true,
   },
-  chainWebpack(config) {
-    // 在这里可以对 webpack 配置进行修改和定制
-    config.module
-      .rule('svg')
-      .test(/\.svg$/)
-      .use('@svgr/webpack')
-      .loader('svg-url-loader')
-      .options({
-        // 可选配置，根据需要自行调整
-        encoding: 'base64',
-      })
-      .end();
+  // chainWebpack(config) {
+  //   // 在这里可以对 webpack 配置进行修改和定制
+  //   config.module
+  //     .rule('svg')
+  //     .test(/\.svg$/)
+  //     .use('@svgr/webpack')
+  //     .loader('svg-url-loader')
+  //     .options({
+  //       // 可选配置，根据需要自行调整
+  //       encoding: 'base64',
+  //     })
+  //     .end();
 
-    // 别名配置
-    config.resolve.alias.set('@', require.resolve('./src'));
-  },
+  //   // 别名配置
+  //   config.resolve.alias.set('@', require.resolve('./src'));
+  // },
 });

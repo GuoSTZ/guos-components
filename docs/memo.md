@@ -2,7 +2,7 @@
 
 ```tsx
 import React from 'react';
-import Memo from 'base/pages/memo';
+import Memo from 'guos-components/pages/memo';
 
 export default () => {
   return <Memo />;

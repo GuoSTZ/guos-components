@@ -1,7 +1,5 @@
 import React, { ReactNode } from 'react';
-import SmallSvg from './assets/small.svg';
-import LargeSvg from './assets/large.svg';
-import styles from './index.less';
+import styles from './index.module.less';
 
 export interface DataBlockProps {
   size: 'small' | 'large';
@@ -31,8 +29,12 @@ const LabelText = ({ label, value, unit }: LabelTextProps) => {
 export default (props: DataBlockProps) => {
   const { className, icon, label, size = 'small', unit, value } = props;
 
-  const defaultClassName = `${styles['data-block']} ${styles[`data-block-${size}`]}`;
-  const mergedClassName = className ? `${defaultClassName} ${className}` : defaultClassName;
+  const defaultClassName = `${styles['data-block']} ${
+    styles[`data-block-${size}`]
+  }`;
+  const mergedClassName = className
+    ? `${defaultClassName} ${className}`
+    : defaultClassName;
 
   return (
     <div

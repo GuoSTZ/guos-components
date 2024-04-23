@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, TableProps, Space, Form, Button, Tree, TreeSelect } from 'antd';
+import { Table, TableProps, Space, Form, Button, Tree } from 'antd';
 import { TreeSelectProps } from 'antd';
 import LinkageTreeSelect from '../components/LinkageTreeSelect';
 
@@ -10,14 +10,15 @@ interface TableRecord {
   dbName: string;
 }
 
-interface FormViewProps {}
-
 let dbAccountKey = 0;
 const createDbAccountData = (level = 1, path = 0) => {
   const list = [];
   for (let i = 0; i < 10; i += 1) {
     const key = level === 1 ? `数据源名称${i}` : `账号${i}-${level}`;
-    const treeNode: Exclude<TreeSelectProps['treeData'], undefined> extends (infer T)[]
+    const treeNode: Exclude<
+      TreeSelectProps['treeData'],
+      undefined
+    > extends (infer T)[]
       ? T
       : never = {
       title: key,
@@ -28,7 +29,7 @@ const createDbAccountData = (level = 1, path = 0) => {
     dbAccountKey++;
 
     if (level > 0) {
-      treeNode.children = createDbAccountData(level - 1, path++);
+      treeNode.children = createDbAccountData(level - 1, path + 1);
     }
 
     list.push(treeNode);
@@ -44,7 +45,10 @@ const createUserData = (level = 2, path = 0) => {
     if (level === 2) key = `一级部门${i}`;
     if (level === 1) key = `二级部门${i}`;
     if (level === 0) key = `用户${i}-${level}`;
-    const treeNode: Exclude<TreeSelectProps['treeData'], undefined> extends (infer T)[]
+    const treeNode: Exclude<
+      TreeSelectProps['treeData'],
+      undefined
+    > extends (infer T)[]
       ? T
       : never = {
       title: key,
@@ -54,7 +58,7 @@ const createUserData = (level = 2, path = 0) => {
     userKey++;
 
     if (level > 0) {
-      treeNode.children = createUserData(level - 1, path++);
+      treeNode.children = createUserData(level - 1, path + 1);
     }
     list.push(treeNode);
   }
@@ -64,10 +68,28 @@ const createUserData = (level = 2, path = 0) => {
 const dbAccountData = createDbAccountData();
 const userData = createUserData();
 
+const loop = (data: any[]) => {
+  let res: any[] = [];
+  data.forEach((item: any) => {
+    if (item.children) {
+      item.children.forEach((it: any) => {
+        if (it.children) {
+          res = ([] as any[]).concat(res, loop(it.children));
+        } else {
+          res.push(it);
+        }
+      });
+    } else {
+      res.push(item);
+    }
+  });
+  return res;
+};
+
 export default () => {
   const [formData, setFormData] = useState({ dbAccount: [], username: [] });
   const [tableData, setTableData] = useState([] as any[]);
-  const [filterData, setFilterData] = useState(new Map());
+  // const [filterData, setFilterData] = useState(new Map());
 
   useEffect(() => {
     const { dbAccount = [], username = [] } = formData;
@@ -89,27 +111,9 @@ export default () => {
       dataMap.set(item.value, temp);
       res = res.concat(temp);
     });
-    setFilterData(dataMap);
+    // setFilterData(dataMap);
     setTableData(res);
   }, [formData]);
-
-  const loop = (data: any[]) => {
-    let res: any[] = [];
-    data.forEach((item: any) => {
-      if (item.children) {
-        item.children.forEach((it: any) => {
-          if (it.children) {
-            res = ([] as any[]).concat(res, loop(it.children));
-          } else {
-            res.push(it);
-          }
-        });
-      } else {
-        res.push(item);
-      }
-    });
-    return res;
-  };
 
   const tableConfig: TableProps<TableRecord> = {
     columns: [
@@ -205,7 +209,11 @@ export default () => {
           </Button>
         </Form.Item>
       </Form>
-      <Tree treeData={formData.username} height={400} style={{ minHeight: 300 }} />
+      <Tree
+        treeData={formData.username}
+        height={400}
+        style={{ minHeight: 300 }}
+      />
       <Table {...tableConfig} />
     </Space>
   );

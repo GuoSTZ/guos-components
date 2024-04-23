@@ -1,9 +1,8 @@
 import React from 'react';
-import SmallRed from './assets/smallRed.svg';
 import smallRedPng from './assets/smallRed.png';
 import largeRedPng from './assets/largeRed.png';
 import smallYellowPng from './assets/smallYellow.png';
-import styles from './index.less';
+import styles from './index.module.less';
 
 export interface LabelTagProps {
   size?: 'small' | 'large';
@@ -27,8 +26,12 @@ const pngs = {
 
 export default (props: React.PropsWithChildren<LabelTagProps>) => {
   const { children, className, color = 'red', size = 'small', tip } = props;
-  const defaultClassName = `${styles[`label-tag`]} ${styles[`label-tag-${size}`]}`;
-  const mergedClassName = className ? `${defaultClassName} ${className}` : defaultClassName;
+  const defaultClassName = `${styles[`label-tag`]} ${
+    styles[`label-tag-${size}`]
+  }`;
+  const mergedClassName = className
+    ? `${defaultClassName} ${className}`
+    : defaultClassName;
 
   return (
     <label

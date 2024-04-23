@@ -2,7 +2,7 @@
 
 ```tsx
 import React from 'react';
-import Interaction from 'base/pages/interaction';
+import Interaction from 'guos-components/pages/interaction';
 
 export default () => {
   return <Interaction />;

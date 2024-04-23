@@ -11,9 +11,11 @@ export interface LinkageTreeSelectProps extends TreeSelectProps {
   children?: React.ReactNode;
 }
 
-const TreeNode = TreeSelect.TreeNode;
+const TreeNode: typeof TreeSelect.TreeNode = TreeSelect.TreeNode;
 
-type CompoundedComponent = ((props: LinkageTreeSelectProps) => React.ReactElement) & {
+type CompoundedComponent = ((
+  props: LinkageTreeSelectProps,
+) => React.ReactElement) & {
   defaultProps?: LinkageTreeSelectProps;
   TreeNode: typeof TreeNode;
 };
@@ -46,17 +48,22 @@ const LinkageTreeSelect: CompoundedComponent = (props) => {
 
   const ITEM_HEIGHT = listItemHeight ?? 24;
   const isMultiple = !!(treeCheckable || multiple);
-  const showSelectAll = isMultiple && selectAll && treeData && treeData.length > 0;
+  const showSelectAll =
+    isMultiple && selectAll && treeData && treeData.length > 0;
   const SELECT_ALL_DATA = [{ label: selectAllText, value: selectAllValue }];
 
   // 遍历treeData，并映射到treeDataMap中
   useEffect(() => {
     const dataMap = new Map();
-    const traverseTree = (data: typeof treeData = [], parentTitle?: React.ReactNode) => {
-      data.forEach((item, index) => {
+    const traverseTree = (
+      data: typeof treeData = [],
+      parentTitle?: React.ReactNode,
+    ) => {
+      data.forEach((item) => {
         item.parentTitle = parentTitle;
         // 组件本身涉及到disabled状态的修改，故将初始的disabled值转移到自定义的available属性中
-        item.available = typeof item.disabled === 'boolean' ? !item.disabled : true;
+        item.available =
+          typeof item.disabled === 'boolean' ? !item.disabled : true;
         dataMap.set(item['value'], item);
         if (Array.isArray(item.children) && item.children.length > 0) {
           traverseTree(item.children, item.title);
@@ -69,6 +76,14 @@ const LinkageTreeSelect: CompoundedComponent = (props) => {
       setTreeDataMap(dataMap); // 更新 Map 对象以触发重新渲染
     }
   }, [treeData]);
+
+  const handleTree = (checked: boolean) => {
+    if (treeData) {
+      treeDataMap.forEach((value) => {
+        value.disabled = checked || !value.available;
+      });
+    }
+  };
 
   useEffect(() => {
     setCheckedAll(selectAllValue === value?.[0]?.value);
@@ -87,11 +102,19 @@ const LinkageTreeSelect: CompoundedComponent = (props) => {
    * @param tempSet Set数据，存储全部子节点的value值
    * @returns \{ childrenData, set }
    */
-  const handleChildren = (data: typeof treeData, status: boolean, tempSet?: Set<any>) => {
+  const handleChildren = (
+    data: typeof treeData,
+    status: boolean,
+    tempSet?: Set<any>,
+  ) => {
     const childrenData = data?.map((item) => {
       item.disabled = status || !item.available;
       if (item.children) {
-        item.children = handleChildren(item.children, status, tempSet).childrenData;
+        item.children = handleChildren(
+          item.children,
+          status,
+          tempSet,
+        ).childrenData;
       }
       tempSet?.add(item.value);
       return item;
@@ -99,7 +122,11 @@ const LinkageTreeSelect: CompoundedComponent = (props) => {
     return { childrenData, set: tempSet };
   };
 
-  const handleOnChange = (value: any, labelList: ReactNode[], extra: ChangeEventExtra) => {
+  const handleOnChange = (
+    value: any,
+    labelList: ReactNode[],
+    extra: ChangeEventExtra,
+  ) => {
     // 通过标签点击删除或者键盘回退键进行删除「全部」时
     if (checkedAll && value.length === 0) {
       handleTree(false);
@@ -133,22 +160,19 @@ const LinkageTreeSelect: CompoundedComponent = (props) => {
    */
   const handleOnSelect = (value: string, node: any) => {
     if (Array.isArray(node?.children) && node.children.length > 0) {
-      const { childrenData, set: dataSet } = handleChildren(node.children, true, new Set());
+      const { childrenData, set: dataSet } = handleChildren(
+        node.children,
+        true,
+        new Set(),
+      );
       node.children = childrenData;
 
-      const newValue = props.value?.filter((item: any) => !dataSet!.has(item.value)) || [];
+      const newValue =
+        props.value?.filter((item: any) => !dataSet!.has(item.value)) || [];
       newValue.push(node);
       onChange?.(newValue, [], {} as ChangeEventExtra);
     }
     onSelect?.(value, node);
-  };
-
-  const handleTree = (checked: boolean) => {
-    if (treeData) {
-      treeDataMap.forEach((value) => {
-        value.disabled = checked || !value.available;
-      });
-    }
   };
 
   const selectAllOnChange = (e: CheckboxChangeEvent) => {
@@ -165,7 +189,10 @@ const LinkageTreeSelect: CompoundedComponent = (props) => {
     const menu = (
       <React.Fragment>
         {showSelectAll && (
-          <div className={'linkage-tree-select-all'} style={{ height: ITEM_HEIGHT }}>
+          <div
+            className={'linkage-tree-select-all'}
+            style={{ height: ITEM_HEIGHT }}
+          >
             <Checkbox
               onChange={selectAllOnChange}
               checked={checkedAll}

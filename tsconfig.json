@@ -5,13 +5,16 @@
     "moduleResolution": "node",
     "jsx": "react",
     "esModuleInterop": true,
-    "types": ["jest"],
     "baseUrl": "./",
     "strict": true,
     "skipLibCheck": true,
     "declaration": true,
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@@/*": [".dumi/tmp/*"],
+      "guos-components": ["src"],
+      "guos-components/*": ["src/*", "*"]
     }
-  }
+  },
+  "include": [".dumirc.ts", "src/**/*"]
 }

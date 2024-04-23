@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
 
-export default function App() {
-  return (
-    <div>
-      <Form />
-      <ExpensiveTree />
-    </div>
-  );
-}
-
 function Form() {
   let [color, setColor] = useState('red');
   return (
@@ -25,4 +16,13 @@ function ExpensiveTree() {
     // Artificial delay -- do nothing for 100ms
   }
   return <p>I am a very slow component tree.</p>;
+}
+
+export default function App() {
+  return (
+    <div>
+      <Form />
+      <ExpensiveTree />
+    </div>
+  );
 }
