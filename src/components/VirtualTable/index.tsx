@@ -5,7 +5,9 @@ import React, { memo, useEffect, useRef, useState } from 'react';
 import { VariableSizeGrid as Grid } from 'react-window';
 import styles from './index.module.less';
 
-const VirtualTable = <RecordType extends object>(props: TableProps<RecordType>) => {
+const VirtualTable = <RecordType extends object>(
+  props: TableProps<RecordType>,
+) => {
   const { columns = [], scroll } = props;
   const [tableWidth, setTableWidth] = useState(0);
 
@@ -50,7 +52,10 @@ const VirtualTable = <RecordType extends object>(props: TableProps<RecordType>) 
 
   useEffect(() => resetVirtualGrid, [tableWidth]);
 
-  const renderVirtualList = (rawData: object[], { scrollbarSize, ref, onScroll }: any) => {
+  const renderVirtualList = (
+    rawData: object[],
+    { scrollbarSize, ref, onScroll }: any,
+  ) => {
     ref.current = connectObject;
     const totalHeight = rawData.length * 40;
 
@@ -61,7 +66,8 @@ const VirtualTable = <RecordType extends object>(props: TableProps<RecordType>) 
         columnCount={mergedColumns.length}
         columnWidth={(index: number) => {
           const { width } = mergedColumns[index];
-          return totalHeight > Number(scroll!.y!) && index === mergedColumns.length - 1
+          return totalHeight > Number(scroll!.y!) &&
+            index === mergedColumns.length - 1
             ? (width as number) - scrollbarSize - 1
             : (width as number);
         }}
@@ -97,6 +103,7 @@ const VirtualTable = <RecordType extends object>(props: TableProps<RecordType>) 
                   : styles['virtual-table-cell']
               }
               style={style}
+              title={content}
             >
               {content}
             </div>

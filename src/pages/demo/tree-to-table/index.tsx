@@ -8,7 +8,8 @@ import {
   // treeData_2_level,
   // treeData_3_level,
   // treeData_4_level,
-  treeData_4_level_child,
+  // treeData_4_level_child,
+  asset_data,
 } from '../../../data/treeData';
 
 const Tree_To_Table = () => {
@@ -21,10 +22,10 @@ const Tree_To_Table = () => {
         fieldNames: {
           key: 'id',
           title: 'name',
-          children: 'child',
+          // children: 'child',
         },
         // @ts-ignore
-        treeData: treeData_4_level_child,
+        treeData: asset_data,
         header: '待选项',
         showSearch: true,
         placeholder: '请输入',
@@ -32,10 +33,32 @@ const Tree_To_Table = () => {
       tableProps={{
         dataSource: [],
         columns: [
+          // {
+          //   title: '名称',
+          //   dataIndex: 'name',
+          //   key: 'name',
+          // },
           {
-            title: '名称',
-            dataIndex: 'name',
-            key: 'name',
+            title: '资产集合',
+            dataIndex: 'assetName',
+            key: 'assetName',
+            render: (text, row) => {
+              // console.log(text, row, '==')
+              // return '123'
+              const name = row?.assetName || row?.assetGroupName || row?.dbName;
+              if (text) {
+                return text;
+              } else {
+                return `当前${name}下所有资产集合`;
+              }
+            },
+            ellipsis: true,
+          },
+          {
+            title: '数据库名称',
+            dataIndex: 'dbName',
+            key: 'dbName',
+            ellipsis: true,
           },
           {
             title: '操作',

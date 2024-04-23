@@ -409,3 +409,123 @@ export const identit_data = [
     ],
   },
 ];
+
+/** 资产相关数据 */
+export const asset_data = [
+  {
+    id: '1',
+    name: '数据库名称1',
+    dbName: '数据库名称1',
+    children: [
+      {
+        id: '1-1',
+        name: '默认资产集合组ORCLE',
+        dbName: '数据库名称1',
+        assetGroupName: '默认资产集合组ORCLE',
+        children: [],
+      },
+      {
+        id: '1-2',
+        name: '资产集合组21',
+        dbName: '数据库名称1',
+        assetGroupName: '资产集合组21',
+        children: [
+          {
+            id: '1-2-1',
+            name: '资产集合2',
+            dbName: '数据库名称1',
+            assetGroupName: '资产集合组21',
+            assetName: '资产集合2',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: '2',
+    name: '数据库名称3',
+    dbName: '数据库名称3',
+    children: [
+      {
+        id: '2-1',
+        name: '默认资产集合组MySQL',
+        dbName: '数据库名称3',
+        assetGroupName: '默认资产集合组MySQL',
+        children: [],
+      },
+      {
+        id: '2-2',
+        name: '资产集合组222',
+        dbName: '数据库名称3',
+        assetGroupName: '资产集合组222',
+        children: [
+          {
+            id: '2-2-1',
+            name: '资产集合2221',
+            dbName: '数据库名称3',
+            assetGroupName: '资产集合组222',
+            assetName: '资产集合2221',
+          },
+          {
+            id: '2-2-2',
+            name: '资产集合2222',
+            dbName: '数据库名称3',
+            assetGroupName: '资产集合组222',
+            assetName: '资产集合2222',
+          },
+          {
+            id: '2-2-3',
+            name: '资产集合2223',
+            dbName: '数据库名称3',
+            assetGroupName: '资产集合组222',
+            assetName: '资产集合2223',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: '3',
+    name: '数据库名称2',
+    dbName: '数据库名称2',
+    children: [
+      {
+        id: '3-1',
+        name: '默认资产集合组MySQL2',
+        dbName: '数据库名称2',
+        assetGroupName: '默认资产集合组MySQL2',
+        children: [
+          {
+            id: '3-1-1',
+            name: '资产集合mysql201',
+            dbName: '数据库名称2',
+            assetGroupName: '默认资产集合组MySQL2',
+            assetName: '资产集合mysql201',
+          },
+        ],
+      },
+      {
+        id: '3-2',
+        name: '资产集合组666',
+        dbName: '数据库名称2',
+        assetGroupName: '资产集合组666',
+        children: [
+          {
+            id: '3-2-1',
+            name: '资产集合6661',
+            dbName: '数据库名称2',
+            assetGroupName: '资产集合组666',
+            assetName: '资产集合6661',
+          },
+          {
+            id: '3-2-2',
+            name: '资产集合6662',
+            dbName: '数据库名称2',
+            assetGroupName: '资产集合组224',
+            assetName: '资产集合6662',
+          },
+        ],
+      },
+    ],
+  },
+];

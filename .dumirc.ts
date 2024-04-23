@@ -3,7 +3,7 @@ import { defineConfig } from 'dumi';
 export default defineConfig({
   outputPath: 'docs-dist',
   themeConfig: {
-    name: 'guos-components',
+    name: 'g-components',
   },
   headScripts: [],
   extraBabelPlugins: [
