@@ -118,11 +118,11 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
     const [tableSearchValue, setTableSearchValue] = useState('');
     const [isCheckAll, setIsCheckAll] = useState(false);
 
-    const allKeys = useRef(new Set<Key>()).current;
-    const parentNodeMap = useRef(new Map()).current;
-    const treeDataMap = useRef(new Map()).current;
-    const tableKeySet = useRef(new Set<Key>()).current;
-    const checkedKeySet = useRef(new Set<Key>()).current;
+    const allKeys = useRef(new Set<Key>());
+    const parentNodeMap = useRef(new Map());
+    const treeDataMap = useRef(new Map());
+    const tableKeySet = useRef(new Set<Key>());
+    const checkedKeySet = useRef(new Set<Key>());
 
     const loop = useCallback(
       (data: TreeToTableDataNode[], pKey?: Key, pName?: React.ReactNode) => {
@@ -134,7 +134,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
           pName && (item.pName = pName);
           const key = item[rowKey];
           const name = item[rowName];
-          treeDataMap.set(key, {
+          treeDataMap.current?.set(key, {
             ...item,
             children: null,
             [CHILDREN_BACKUP]: item[rowChildren],
@@ -142,7 +142,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
           // 过滤掉「禁用」和「不可勾选」的数据
           item.disabled !== true &&
             item.checkable !== false &&
-            allKeys.add(key);
+            allKeys.current?.add(key);
           item.disabled !== true &&
             item.checkable !== false &&
             childKeySet.add(key);
@@ -150,7 +150,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
             loop(item[rowChildren], key, name);
           }
         }
-        pKey && parentNodeMap.set(pKey, childKeySet);
+        pKey && parentNodeMap.current?.set(pKey, childKeySet);
       },
       [],
     );
@@ -166,10 +166,11 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       needOnChange?: boolean;
     }) => {
       const { needReverse = true, needOnChange = true } = params || {};
-      setCheckedKeys(Array.from(checkedKeySet));
+      setCheckedKeys(Array.from(checkedKeySet.current));
       const data = [];
-      for (const key of tableKeySet) {
-        treeDataMap.has(key) && data.push(treeDataMap.get(key));
+      for (const key of tableKeySet.current) {
+        treeDataMap.current?.has(key) &&
+          data.push(treeDataMap.current?.get(key));
       }
       needReverse && data.reverse();
       setTableData(data);
@@ -179,10 +180,13 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
     /** 循环该节点的子节点，并勾选 */
     const loopCNodeForCheck = useCallback(
       (key: Key, callback: (key: Key) => void) => {
-        const childKeySet = parentNodeMap.get(key);
+        const childKeySet = parentNodeMap.current?.get(key);
         for (const childKey of childKeySet) {
           // 剪枝
-          if (parentNodeMap.has(childKey) && !checkedKeySet.has(childKey)) {
+          if (
+            parentNodeMap.current?.has(childKey) &&
+            !checkedKeySet.current?.has(childKey)
+          ) {
             loopCNodeForCheck(childKey, callback);
           }
           callback(childKey);
@@ -194,10 +198,13 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
     /** 循环该节点的子节点，并取消勾选 */
     const loopCNodeForCancelCheck = useCallback(
       (key: Key, callback: (key: Key) => void) => {
-        const childKeySet = parentNodeMap.get(key);
+        const childKeySet = parentNodeMap.current?.get(key);
         for (const childKey of childKeySet) {
           // 剪枝
-          if (parentNodeMap.has(childKey) && checkedKeySet.has(childKey)) {
+          if (
+            parentNodeMap.current?.has(childKey) &&
+            checkedKeySet.current?.has(childKey)
+          ) {
             loopCNodeForCancelCheck(childKey, callback);
           }
           callback(childKey);
@@ -208,20 +215,20 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
 
     /** 找到该节点的父节点，并处理 */
     const loopPNode = useCallback((key: Key) => {
-      const pKey = treeDataMap.get(key)?.pKey;
-      if (checkedKeySet.has(pKey)) {
-        tableKeySet.delete(key);
-        checkedKeySet.delete(key);
-        tableKeySet.delete(pKey);
-        checkedKeySet.delete(pKey);
+      const pKey = treeDataMap.current?.get(key)?.pKey;
+      if (checkedKeySet.current?.has(pKey)) {
+        tableKeySet.current?.delete(key);
+        checkedKeySet.current?.delete(key);
+        tableKeySet.current?.delete(pKey);
+        checkedKeySet.current?.delete(pKey);
 
         // 将该节点的兄弟节点添加到表格数据中
-        const childKeySet = parentNodeMap.get(pKey);
+        const childKeySet = parentNodeMap.current?.get(pKey);
         for (const childKey of childKeySet) {
-          childKey !== key && tableKeySet.add(childKey);
+          childKey !== key && tableKeySet.current?.add(childKey);
         }
 
-        if (checkedKeySet.has(treeDataMap.get(pKey)?.pKey)) {
+        if (checkedKeySet.current?.has(treeDataMap.current?.get(pKey)?.pKey)) {
           loopPNode(pKey);
         }
       }
@@ -230,18 +237,18 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
     // 处理回填
     useEffect(() => {
       if (treeData?.length > 0) {
-        tableKeySet.clear();
-        checkedKeySet.clear();
+        tableKeySet.current?.clear();
+        checkedKeySet.current?.clear();
         value?.forEach((item) => {
           if (!item[rowKey]) {
             return;
           }
           const key = item[rowKey];
-          checkedKeySet.add(key);
-          tableKeySet.add(key);
-          if (parentNodeMap.has(key)) {
+          checkedKeySet.current?.add(key);
+          tableKeySet.current?.add(key);
+          if (parentNodeMap.current?.has(key)) {
             loopCNodeForCheck(key, (childKey) => {
-              checkedKeySet.add(childKey);
+              checkedKeySet.current?.add(childKey);
             });
           }
         });
@@ -253,13 +260,13 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
     const onCheck = (_: any, e: any) => {
       const key = e.node[rowKey];
       if (e.checked || e.selected) {
-        tableKeySet.add(key);
-        checkedKeySet.add(key);
+        tableKeySet.current?.add(key);
+        checkedKeySet.current?.add(key);
         // 如果勾选了父节点
-        if (parentNodeMap.has(key)) {
+        if (parentNodeMap.current?.has(key)) {
           loopCNodeForCheck(key, (childKey) => {
-            tableKeySet.delete(childKey);
-            checkedKeySet.add(childKey);
+            tableKeySet.current?.delete(childKey);
+            checkedKeySet.current?.add(childKey);
           });
         }
       } else {
@@ -268,21 +275,21 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
           setIsCheckAll(false);
           onCheckAll?.();
         }
-        tableKeySet.delete(key);
-        checkedKeySet.delete(key);
-        const node = treeDataMap.get(key);
+        tableKeySet.current?.delete(key);
+        checkedKeySet.current?.delete(key);
+        const node = treeDataMap.current?.get(key);
         // 如果取消勾选父节点，且该节点没有父节点
-        if (parentNodeMap.has(key) && node.pKey === undefined) {
+        if (parentNodeMap.current?.has(key) && node.pKey === undefined) {
           loopCNodeForCancelCheck(key, (childKey) => {
-            tableKeySet.delete(childKey);
-            checkedKeySet.delete(childKey);
+            tableKeySet.current?.delete(childKey);
+            checkedKeySet.current?.delete(childKey);
           });
-        } else if (parentNodeMap.has(key) && node.pKey !== undefined) {
+        } else if (parentNodeMap.current?.has(key) && node.pKey !== undefined) {
           // 如果取消勾选父节点，且该节点有父节点
           loopPNode(key);
           loopCNodeForCancelCheck(key, (childKey) => {
-            tableKeySet.delete(childKey);
-            checkedKeySet.delete(childKey);
+            tableKeySet.current?.delete(childKey);
+            checkedKeySet.current?.delete(childKey);
           });
         } else {
           loopPNode(key);
@@ -294,8 +301,8 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
     /** 树全选 */
     const treeCheckAll = (e: CheckboxChangeEvent) => {
       onCheckAll?.(e.target.checked);
-      tableKeySet.clear();
-      checkedKeySet.clear();
+      tableKeySet.current?.clear();
+      checkedKeySet.current?.clear();
       const treeCheckedKeys = [];
       const tableData = [];
       setIsCheckAll(e.target.checked);
@@ -305,18 +312,18 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
         if (treeSearchValue) {
           setTreeSearchValue('');
         }
-        for (const key of allKeys) {
-          checkedKeySet.add(key);
+        for (const key of allKeys.current) {
+          checkedKeySet.current?.add(key);
           treeCheckedKeys.push(key);
-          const node = treeDataMap.get(key);
-          const pNode = treeDataMap.get(node.pKey);
+          const node = treeDataMap.current?.get(key);
+          const pNode = treeDataMap.current?.get(node.pKey);
 
           if (
             (node.pKey === undefined && node[CHILDREN_BACKUP] === undefined) || // 这个是独立节点，既没有父节点，也没有子节点
-            (node.pKey === undefined && parentNodeMap.has(key)) || // 这个是根节点
+            (node.pKey === undefined && parentNodeMap.current?.has(key)) || // 这个是根节点
             pNode?.checkable === false // 这个是父节点不可选的节点
           ) {
-            tableKeySet.add(key);
+            tableKeySet.current?.add(key);
             tableData.push(node);
           }
         }
@@ -328,15 +335,15 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
 
     /** 表格单个删除 */
     const tableDelete = (key: Key) => {
-      tableKeySet.delete(key);
-      checkedKeySet.delete(key);
+      tableKeySet.current?.delete(key);
+      checkedKeySet.current?.delete(key);
       setIsCheckAll(false);
       onCheckAll?.();
       // 如果删除的是父节点
-      if (parentNodeMap.has(key)) {
+      if (parentNodeMap.current?.has(key)) {
         loopCNodeForCancelCheck(key, (childKey) => {
-          tableKeySet.delete(childKey);
-          checkedKeySet.delete(childKey);
+          tableKeySet.current?.delete(childKey);
+          checkedKeySet.current?.delete(childKey);
         });
       }
       transferData();
@@ -344,8 +351,8 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
 
     /** 表格全部删除 */
     const tableDeleteAll = () => {
-      tableKeySet.clear();
-      checkedKeySet.clear();
+      tableKeySet.current?.clear();
+      checkedKeySet.current?.clear();
       setIsCheckAll(false);
       onCheckAll?.();
       setCheckedKeys([]);
@@ -434,9 +441,9 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       if (typeof header === 'string') {
         return header;
       } else if (typeof header === 'function') {
-        return header({ checkedKeySet }).map((item: React.ReactNode) => (
-          <div>{item}</div>
-        ));
+        return header({ checkedKeySet: Array.from(checkedKeySet.current) }).map(
+          (item: React.ReactNode) => <div>{item}</div>,
+        );
       } else if (Array.isArray(header)) {
         return header.map((item) => <div>{item}</div>);
       }
