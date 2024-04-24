@@ -1,13 +1,17 @@
 import { Form, Radio, RadioChangeEvent } from 'antd';
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useRef, useState } from 'react';
 
 import BaseTreeToTable from './BaseTreeToTable';
 import { asset_data, db_group_data, db_type } from '@/data/asset';
 
 const AssetScope = () => {
   const form = Form.useFormInstance();
+  const ref = useRef<any>(null);
   const [assetType, setAssetType] = useState<0 | 1 | 2 | 3>(1);
-  const [storedData, setStoredData] = useState<Record<number, any[]>>({});
+  const [storedData, setStoredData] = useState<
+    Record<number, { checkAll?: boolean; data: any[] }>
+  >({});
+  const [checkAll, setCheckAll] = useState<boolean | undefined>(false);
 
   const i18nText = {
     header: ['待选项', '已选项'],
@@ -127,21 +131,36 @@ const AssetScope = () => {
   const handleOnChange = (e: RadioChangeEvent) => {
     /** 切换资产选择方式的时候，存储当前组件的值，回填上一个组件的值 */
     const data = form.getFieldValue('assetScope');
-    setStoredData((origin) => ({ ...origin, [assetType]: data }));
+    setStoredData((origin) => ({ ...origin, [assetType]: { checkAll, data } }));
 
     form.setFieldValue('assetType', e.target.value);
-    form.setFieldValue('assetScope', storedData[e.target.value]);
+    form.setFieldValue('assetScope', storedData[e.target.value]?.data);
+    setCheckAll(storedData[e.target.value]?.checkAll);
 
     setAssetType(e.target.value);
+  };
+
+  const handleOnCheckAll = (value?: boolean) => {
+    setCheckAll(value);
   };
 
   const renderComp = (configId: 0 | 1 | 2 | 3) => {
     if (configId === 0) {
       return null;
     }
+    const { treeProps, ...restConfig } = config[configId];
     return (
       <Form.Item label="资产授权方式" name={'assetScope'}>
-        <BaseTreeToTable key={configId} {...config[configId]} />
+        <BaseTreeToTable
+          key={configId}
+          ref={ref}
+          treeProps={{
+            ...treeProps,
+            checkAll,
+            onCheckAll: handleOnCheckAll,
+          }}
+          {...restConfig}
+        />
       </Form.Item>
     );
   };

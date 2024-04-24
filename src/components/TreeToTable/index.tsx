@@ -43,6 +43,12 @@ export interface TreeToTableProps<T> {
     filterSearch?: (filterValue: string, data: any) => boolean;
     /** 树搜索框底部文字 */
     placeholder?: string;
+    /** 树组件是否显示全选组件 */
+    showCheckAll?: boolean;
+    /** 树组件全选组件受控值 */
+    checkAll?: boolean;
+    /** 树组件全选组件勾选回调 */
+    onCheckAll?: (value?: boolean) => void;
   };
   /** 表格数据 */
   tableProps: TableProps<T> & {
@@ -86,6 +92,9 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       showSearch: leftShowSearch,
       filterSearch: leftFilterSearch,
       placeholder: leftPlaceholder,
+      showCheckAll = true,
+      onCheckAll,
+      checkAll,
       ...restTreeProps
     } = treeProps;
     const {
@@ -143,6 +152,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       [],
     );
 
+    // 树数据全量处理
     useEffect(() => {
       loop(treeData);
     }, [treeData, loop]);
@@ -236,7 +246,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       }
     }, [value, treeData, loopCNodeForCheck]);
 
-    // 勾选节点回调
+    /** 勾选节点回调 */
     const onCheck = (_: any, e: any) => {
       const key = e.node[rowKey];
       if (e.checked || e.selected) {
@@ -253,6 +263,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
         // 如果取消勾选节点
         if (isCheckAll) {
           setIsCheckAll(false);
+          onCheckAll?.();
         }
         tableKeySet.delete(key);
         checkedKeySet.delete(key);
@@ -277,8 +288,9 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       transferData();
     };
 
-    // 树全选
+    /** 树全选 */
     const treeCheckAll = (e: CheckboxChangeEvent) => {
+      onCheckAll?.(e.target.checked);
       tableKeySet.clear();
       checkedKeySet.clear();
       const treeCheckedKeys = [];
@@ -311,11 +323,12 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       onChange?.(tableData);
     };
 
-    // 表格单个删除
+    /** 表格单个删除 */
     const tableDelete = (key: Key) => {
       tableKeySet.delete(key);
       checkedKeySet.delete(key);
       setIsCheckAll(false);
+      onCheckAll?.();
       // 如果删除的是父节点
       if (parentNodeMap.has(key)) {
         loopCNodeForCancelCheck(key, (childKey) => {
@@ -326,17 +339,18 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       transferData();
     };
 
-    // 表格全部删除
+    /** 表格全部删除 */
     const tableDeleteAll = () => {
       tableKeySet.clear();
       checkedKeySet.clear();
       setIsCheckAll(false);
+      onCheckAll?.();
       setCheckedKeys([]);
       setTableData([]);
       onChange?.([]);
     };
 
-    // 树搜索
+    /** 树搜索 */
     const leftMergedFilterValue = leftFilterSearch || defaultTreeFilterSearch;
     const treeSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
@@ -387,7 +401,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       }
     }, [treeData, treeSearchValue]);
 
-    // 表格搜索
+    /** 表格搜索 */
     const rightMergedFilterValue =
       rightFilterSearch || defaultTableFilterSearch;
     const tableSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -410,6 +424,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       }
     }, [tableData, tableSearchValue]);
 
+    /** 自定义渲染组件头部 */
     const renderHeader = (
       header: string | ReactNode[] | ((info: any) => ReactNode[]),
     ) => {
@@ -432,8 +447,17 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
         tableDeleteAll,
         tableData,
       }),
-      [treeCheckAll, tableDelete, tableDeleteAll, tableData, treeDataMap],
+      [treeCheckAll, tableDelete, tableDeleteAll, tableData],
     );
+
+    // 树组件全选组件，受控处理
+    useEffect(() => {
+      if (checkAll === true) {
+        treeCheckAll({ target: { checked: true } } as CheckboxChangeEvent);
+      } else if (checkAll === false) {
+        treeCheckAll({ target: { checked: false } } as CheckboxChangeEvent);
+      }
+    }, [checkAll, treeData]);
 
     return (
       <div className={styles['tree-to-table']}>
@@ -452,11 +476,16 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
               />
             </div>
           ) : null}
-          <div className={styles['tree-to-table-checkAll']}>
-            <Checkbox checked={isCheckAll} onChange={treeCheckAll}>
-              全选
-            </Checkbox>
-          </div>
+          {showCheckAll ? (
+            <div className={styles['tree-to-table-checkAll']}>
+              <Checkbox
+                checked={checkAll ?? isCheckAll}
+                onChange={treeCheckAll}
+              >
+                全选
+              </Checkbox>
+            </div>
+          ) : null}
           {treeData?.length ? (
             <Tree
               height={356}
