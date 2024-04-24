@@ -9,11 +9,12 @@ import React, {
   useImperativeHandle,
 } from 'react';
 
-import TreeToTable, {
+import {
+  TreeToTable,
   TreeToTableRef,
   TreeToTableProps,
   TreeToTableDataNode,
-} from '@/components/TreeToTable';
+} from 'guos-components';
 
 interface ITreeProps
   extends Omit<TreeToTableProps<any>['treeProps'], 'treeData'> {

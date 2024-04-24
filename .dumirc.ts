@@ -4,6 +4,11 @@ export default defineConfig({
   outputPath: 'docs-dist',
   themeConfig: {
     name: 'g-components',
+    nav: [
+      { title: '开始', link: '/guide' },
+      { title: '组件', link: '/components' },
+    ],
+    footer: 'Copyright © 2023 | Powered by MC-FED',
   },
   headScripts: [],
   extraBabelPlugins: [

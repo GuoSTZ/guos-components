@@ -2,7 +2,7 @@ import { Form, Radio, RadioChangeEvent } from 'antd';
 import React, { memo, useCallback, useRef, useState } from 'react';
 
 import BaseTreeToTable from './BaseTreeToTable';
-import { asset_data, db_group_data, db_type } from '@/data/asset';
+import { asset_data, db_group_data, db_type } from '../data/asset';
 
 const AssetScope = () => {
   const form = Form.useFormInstance();
@@ -89,7 +89,7 @@ const AssetScope = () => {
             dataIndex: 'dbGroupName',
             key: 'dbGroupName',
             ellipsis: true,
-            width: 300,
+            width: 200,
           },
         ],
         placeholder: '请输入数据库分组',
@@ -119,7 +119,7 @@ const AssetScope = () => {
             dataIndex: 'label',
             key: 'label',
             ellipsis: true,
-            width: 300,
+            width: 200,
           },
         ],
         placeholder: '请输入数据库类型',
@@ -158,6 +158,7 @@ const AssetScope = () => {
             ...treeProps,
             checkAll,
             onCheckAll: handleOnCheckAll,
+            checkAllText: '全选',
           }}
           {...restConfig}
         />

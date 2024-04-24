@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Form, Button, Input } from 'antd';
+import { Form, Button } from 'antd';
 
 import AssetScope from './assetScope';
 
@@ -10,15 +10,7 @@ const formLayout = {
 const BaseForm = () => {
   const [form] = Form.useForm();
   return (
-    <Form
-      form={form}
-      {...formLayout}
-      onFinish={(values) => console.log(values, '=====form-submit-values')}
-    >
-      <Form.Item label={'测试项'}>
-        <Input />
-      </Form.Item>
-
+    <Form form={form} {...formLayout} onFinish={console.log}>
       <AssetScope />
 
       <Form.Item wrapperCol={{ offset: formLayout.labelCol.span }}>
