@@ -1,10 +1,9 @@
-# 组件示例
+# 默认页
 
 ```tsx
 import React from 'react';
-import Components from 'guos-components/pages/components';
 
 export default () => {
-  return <Components />;
+  return <div>这是组件默认页，可替换</div>;
 };
 ```

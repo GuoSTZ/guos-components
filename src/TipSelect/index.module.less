@@ -1,0 +1,93 @@
+.tip-select {
+  :global {
+    .@{ant-prefix}-select-selection-item {
+      > span {
+        display: inline-block;
+        width: 100%;
+      }
+    }
+  }
+
+  &-tips {
+    // max-width: 400px;
+
+    :global {
+      .@{ant-prefix}-tooltip-inner {
+        padding: 16px;
+        background: #fff;
+      }
+
+      .@{ant-prefix}-tooltip-arrow-content {
+        &::before {
+          background: #fff;
+        }
+      }
+    }
+  }
+}
+
+.tip-select-desc {
+  :global {
+    .@{ant-prefix}-descriptions-header {
+      margin: 0;
+
+      .@{ant-prefix}-descriptions-title {
+        position: relative;
+        padding-left: 8px;
+        font-size: 14px;
+        font-weight: 500;
+
+        &::before {
+          position: absolute;
+          left: 0;
+          top: 4px;
+          content: '';
+          width: 4px;
+          height: 14px;
+          background: #3385ff;
+          border-radius: 2px;
+        }
+      }
+    }
+
+    .@{ant-prefix}-descriptions-row {
+      .@{ant-prefix}-descriptions-item {
+        padding-left: 8px;
+        padding-bottom: 0;
+      }
+    }
+  }
+}
+
+.tip-select-dropdown {
+  :global {
+    .@{ant-prefix}-select-item-option {
+      padding: unset;
+
+      &-content {
+        > span {
+          display: block;
+          padding: 5px 12px;
+        }
+      }
+    }
+  }
+}
+
+.tip-select-modal {
+  &-templates {
+    display: flex;
+    align-items: center;
+
+    &-separate {
+      width: 100px;
+      text-align: center;
+    }
+  }
+
+  &-template {
+    width: 50%;
+    padding: 8px;
+    border: 1px solid #ced2de;
+  }
+}
