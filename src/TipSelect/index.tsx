@@ -1,15 +1,22 @@
 import { Alert, Tooltip, Select, SelectProps, Descriptions, Modal } from 'antd';
 import { DefaultOptionType } from 'antd/lib/select';
-import React, { Key, memo, ReactElement, ReactNode, useState } from 'react';
+import React, {
+  Key,
+  memo,
+  ReactElement,
+  ReactNode,
+  useEffect,
+  useState,
+} from 'react';
 
 import styles from './index.module.less';
 
 type IOption = {
-  label?: string | ReactNode;
-  value?: Key;
+  label: string | ReactNode;
+  value: string | number;
   descriptions: Array<{
     label: string;
-    value: Key;
+    value: string | number;
     changed?: boolean;
   }>;
 };
@@ -38,7 +45,17 @@ const TipSelect = (props: TipSelectProps) => {
   const [selectOption, setSelectOption] = useState<IOption>();
   const [nextSelectOption, setNextSelectOption] = useState<IOption>();
 
-  const renderTip = (descriptions: Array<{ label: string; value: Key }>) => {
+  useEffect(() => {
+    const mergedValue = props.value || props.defaultValue;
+    if (mergedValue) {
+      const option = options?.find((option) => option.value === mergedValue);
+      setSelectOption(option);
+    }
+  }, [props.value, props.defaultValue]);
+
+  const renderTip = (
+    descriptions: Array<{ label: string; value: string | number }>,
+  ) => {
     return (
       <Descriptions
         className={styles['tip-select-desc']}
@@ -94,6 +111,7 @@ const TipSelect = (props: TipSelectProps) => {
   const handleModalOnOk = () => {
     setSelectOption(nextSelectOption);
     setModalOpen(false);
+    props?.onChange?.(nextSelectOption?.value, nextSelectOption!);
   };
 
   const renderTemplate = (type: 'curr' | 'next') => {
