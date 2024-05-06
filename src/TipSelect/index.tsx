@@ -146,8 +146,10 @@ const TipSelect = (props: TipSelectProps) => {
 
     return (
       <div className={styles['tip-select-modal-template']}>
-        <div>{config[type].title}</div>
-        <div>
+        <div className={styles['tip-select-modal-template-title']}>
+          {config[type].title}
+        </div>
+        <div className={styles['tip-select-modal-template-text']}>
           {(config[type].option?.label as ReactElement)?.props?.children}
         </div>
         <div>
@@ -194,6 +196,7 @@ const TipSelect = (props: TipSelectProps) => {
         onCancel={() => setModalOpen(false)}
       >
         <Alert
+          className={styles['tip-select-modal-alert']}
           type="warning"
           showIcon
           message="确定更改当前“身份组或身份的名称”的授权模板？"
