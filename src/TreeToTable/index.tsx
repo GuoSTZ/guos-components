@@ -13,17 +13,13 @@ import React, {
 import { Tree, TreeProps, Checkbox, TableProps, Input } from 'antd';
 import { DataNode } from 'antd/lib/tree';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
-import VirtualTable from '../VirtualTable';
+import VirtualTable from './VirtualTable';
 import styles from './index.module.less';
-
-/** 避免children字段的存在，移动数据时，右侧表格出现children数据展开 */
-const CHILDREN_BACKUP = 'childrenStored';
 
 export type TreeToTableDataNode = Omit<DataNode, 'children'> & {
   pKey?: Key;
   pName?: React.ReactNode;
   children?: TreeToTableDataNode[];
-  [CHILDREN_BACKUP]?: TreeToTableDataNode[];
   [key: string]: any;
 };
 
@@ -51,6 +47,8 @@ export interface TreeToTableProps<T> {
     onCheckAll?: (value?: boolean) => void;
     /** 树组件全选组件文案 */
     checkAllText?: string;
+    /** 避免children字段的存在，移动数据时，右侧表格出现children数据展开 */
+    aliasChildren?: string;
   };
   /** 表格数据 */
   tableProps: TableProps<T> & {
@@ -98,6 +96,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       onCheckAll,
       checkAll,
       checkAllText = 'Check All',
+      aliasChildren = 'childrenStored',
       ...restTreeProps
     } = treeProps;
     const {
@@ -109,7 +108,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
     } = tableProps;
 
     const rowKey = restTreeProps?.fieldNames?.key || 'key';
-    const rowName = restTreeProps?.fieldNames?.title || 'title';
+    const rowTitle = restTreeProps?.fieldNames?.title || 'title';
     const rowChildren = restTreeProps?.fieldNames?.children || 'children';
 
     const [tableData, setTableData] = useState<TreeToTableDataNode[]>([]);
@@ -133,11 +132,12 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
           pKey && (item.pKey = pKey);
           pName && (item.pName = pName);
           const key = item[rowKey];
-          const name = item[rowName];
+          const name = item[rowTitle];
+          item[aliasChildren] = item[rowChildren];
           treeDataMap.current?.set(key, {
             ...item,
             children: null,
-            [CHILDREN_BACKUP]: item[rowChildren],
+            [aliasChildren]: item[rowChildren],
           });
           // 过滤掉「禁用」和「不可勾选」的数据
           item.disabled !== true &&
@@ -146,8 +146,8 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
           item.disabled !== true &&
             item.checkable !== false &&
             childKeySet.add(key);
-          if (item[rowChildren]) {
-            loop(item[rowChildren], key, name);
+          if (item[aliasChildren]) {
+            loop(item[aliasChildren], key, name);
           }
         }
         pKey && parentNodeMap.current?.set(pKey, childKeySet);
@@ -252,7 +252,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
             });
           }
         });
-        transferData({ needOnChange: false });
+        transferData({ needReverse: false, needOnChange: false });
       }
     }, [value, treeData, loopCNodeForCheck]);
 
@@ -319,7 +319,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
           const pNode = treeDataMap.current?.get(node.pKey);
 
           if (
-            (node.pKey === undefined && node[CHILDREN_BACKUP] === undefined) || // 这个是独立节点，既没有父节点，也没有子节点
+            (node.pKey === undefined && node[aliasChildren] === undefined) || // 这个是独立节点，既没有父节点，也没有子节点
             (node.pKey === undefined && parentNodeMap.current?.has(key)) || // 这个是根节点
             pNode?.checkable === false // 这个是父节点不可选的节点
           ) {
