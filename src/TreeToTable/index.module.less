@@ -23,6 +23,12 @@
 
   &-search {
     padding: 12px;
+
+    :global {
+      input.@{ant-prefix}-input.@{ant-prefix}-input-status-error:not(.@{ant-prefix}-input-disabled):not(.@{ant-prefix}-input-borderless) {
+        border-color: #ced2de;
+      }
+    }
   }
 
   &-checkAll {
