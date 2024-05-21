@@ -1,4 +1,5 @@
 export { default as DataBlock } from './DataBlock';
+export { default as EditTable } from './EditTable';
 export { default as InFlow } from './InFlow';
 export { default as LabelTag } from './LabelTag';
 export { default as LinkageTreeSelect } from './LinkageTreeSelect';
@@ -12,4 +13,4 @@ export {
   type TreeToTableDataNode,
   type TreeToTableRef,
 } from './TreeToTable';
-export { default as VirtualTable } from './VirtualTable';
+export { default as VirtualTable } from './TreeToTable/VirtualTable';

@@ -446,6 +446,8 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
         );
       } else if (Array.isArray(header)) {
         return header.map((item) => <div>{item}</div>);
+      } else {
+        return null;
       }
     };
 
