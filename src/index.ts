@@ -5,6 +5,7 @@ export { default as LabelTag } from './LabelTag';
 export { default as LinkageTreeSelect } from './LinkageTreeSelect';
 export { default as Loading } from './Loading';
 export { default as OutFlow } from './OutFlow';
+export { default as SvgLine } from './SvgLine';
 export { default as SwitchButton } from './SwitchButton';
 export { default as TipSelect } from './TipSelect';
 export {
