@@ -4,7 +4,7 @@ toc: content
 
 # 测试 Hooks
 
-## 加载会比较慢
+## 只是测试内容
 
 <!-- <code src="./memo/demos/demo1.tsx" title="memo钩子函数测试-父组件重渲"></code>
 <code src="./memo/demos/demo2.tsx" title="memo钩子函数测试"></code>
