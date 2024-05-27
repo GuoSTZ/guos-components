@@ -8,6 +8,7 @@ import React, {
   useEffect,
   useState,
 } from 'react';
+import { SvgLine } from 'guos-components';
 
 import styles from './index.module.less';
 
@@ -222,7 +223,7 @@ const TipSelect = (props: TipSelectProps) => {
         <div className={styles['tip-select-modal-templates']}>
           {renderTemplate('curr')}
           <div className={styles['tip-select-modal-templates-separate']}>
-            更改
+            <SvgLine width={'100%'} text="变更明细" />
           </div>
           {renderTemplate('next')}
         </div>
