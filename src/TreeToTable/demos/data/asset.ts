@@ -1,5 +1,60 @@
+/** 转换 数据库/资产集合组/资产集合 数据 */
+export const transferAssetData = (data: any[], pInfo = {}) => {
+  return data.map((item) => {
+    const newItem = {
+      ...item,
+      ...pInfo,
+      key: `${item.id}-${item.type}`,
+      title: item.name,
+    };
+    if (item.children) {
+      newItem.children = transferAssetData(item.children, {
+        dbName: newItem.dbName,
+        assetGroupName: newItem.assetGroupName,
+      });
+    }
+    return newItem;
+  });
+};
+
+/** 转换 数据库分组/数据库 数据 */
+export const transferGroupData = (data: any[], pInfo = {}) => {
+  return data.map((item) => {
+    const newItem = {
+      ...item,
+      ...pInfo,
+      key: `${item.id}-${item.type}`,
+      title: item.name,
+    };
+    if (item.children) {
+      newItem.children = transferAssetData(item.children, {
+        dbGroupName: newItem.dbGroupName,
+      });
+    }
+    return newItem;
+  });
+};
+
+/** 转换 数据库类型/数据库 数据 */
+export const transferTypeData = (data: any[], pInfo = {}) => {
+  return data.map((item) => {
+    const newItem = {
+      ...item,
+      ...pInfo,
+      key: `${item.id}-${item.type}`,
+      title: item.name,
+    };
+    if (item.children) {
+      newItem.children = transferAssetData(item.children, {
+        label: newItem.label,
+      });
+    }
+    return newItem;
+  });
+};
+
 /** 资产相关数据 */
-export const asset_data = [
+export const asset_data = transferAssetData([
   {
     id: 1,
     type: 'db',
@@ -31,6 +86,7 @@ export const asset_data = [
             assetGroupId: 2,
             assetId: 1,
             assetName: '资产集合2',
+            sensitiveTag: 1,
           },
         ],
       },
@@ -66,6 +122,7 @@ export const asset_data = [
             assetGroupId: 2,
             assetId: 2,
             assetName: '资产集合2221',
+            sensitiveTag: 2,
           },
           {
             id: 3,
@@ -75,6 +132,7 @@ export const asset_data = [
             assetGroupId: 2,
             assetId: 3,
             assetName: '资产集合2222',
+            sensitiveTag: 3,
           },
           {
             id: 4,
@@ -84,6 +142,7 @@ export const asset_data = [
             assetGroupId: 2,
             assetId: 4,
             assetName: '资产集合2223',
+            sensitiveTag: 4,
           },
         ],
       },
@@ -111,6 +170,7 @@ export const asset_data = [
             assetGroupId: 5,
             assetId: 5,
             assetName: '资产集合mysql201',
+            sensitiveTag: 5,
           },
         ],
       },
@@ -128,6 +188,7 @@ export const asset_data = [
             assetGroupId: 6,
             assetId: 6,
             assetName: '资产集合6661',
+            sensitiveTag: 1,
           },
           {
             id: 7,
@@ -137,383 +198,193 @@ export const asset_data = [
             assetGroupId: 6,
             assetId: 7,
             assetName: '资产集合6662',
+            sensitiveTag: 2,
           },
         ],
       },
     ],
   },
-];
+]);
 
 /** 分组相关数据 */
-export const db_group_data = [
-  { id: 1, dbGroupName: '分组1' },
-  { id: 2, dbGroupName: '分组2' },
-  { id: 3, dbGroupName: '分组3' },
-  { id: 4, dbGroupName: '分组4' },
-  { id: 5, dbGroupName: '分组5' },
-  { id: 6, dbGroupName: '分组6' },
-  { id: 7, dbGroupName: '分组7' },
-  { id: 8, dbGroupName: '分组8' },
-  { id: 9, dbGroupName: '分组9' },
-  { id: 10, dbGroupName: '分组10' },
-  { id: 11, dbGroupName: '分组11' },
-  { id: 12, dbGroupName: '分组12' },
-  { id: 13, dbGroupName: '分组13' },
-  { id: 14, dbGroupName: '分组14' },
-  { id: 15, dbGroupName: '分组15' },
-  { id: 16, dbGroupName: '分组16' },
-  { id: 17, dbGroupName: '分组17' },
-  { id: 18, dbGroupName: '分组18' },
-  { id: 19, dbGroupName: '分组19' },
-  { id: 20, dbGroupName: '分组20' },
-  { id: 21, dbGroupName: '分组21' },
-  { id: 22, dbGroupName: '分组22' },
-  { id: 23, dbGroupName: '分组23' },
-  { id: 24, dbGroupName: '分组24' },
-];
+export const db_group_data = transferGroupData([
+  {
+    id: 1,
+    type: 'dbGroup',
+    name: '分组1',
+    dbGroupName: '分组1',
+    dbGroupId: 1,
+    children: [
+      {
+        id: 1,
+        type: 'db',
+        name: '数据库名称1',
+        dbId: 1,
+        dbName: '数据库名称1',
+      },
+      {
+        id: 2,
+        type: 'db',
+        name: '数据库名称2',
+        dbId: 2,
+        dbName: '数据库名称2',
+      },
+    ],
+  },
+  {
+    id: 2,
+    type: 'dbGroup',
+    name: '分组2',
+    dbGroupName: '分组2',
+    children: [
+      {
+        id: 3,
+        type: 'db',
+        name: '数据库名称3',
+        dbId: 3,
+        dbName: '数据库名称3',
+      },
+      {
+        id: 4,
+        type: 'db',
+        name: '数据库名称4',
+        dbId: 4,
+        dbName: '数据库名称4',
+      },
+      {
+        id: 5,
+        type: 'db',
+        name: '数据库名称5',
+        dbId: 5,
+        dbName: '数据库名称5',
+      },
+    ],
+  },
+  {
+    id: 3,
+    type: 'dbGroup',
+    name: '分组3',
+    dbGroupName: '分组3',
+    children: [
+      {
+        id: 6,
+        type: 'db',
+        name: '数据库名称6',
+        dbId: 6,
+        dbName: '数据库名称6',
+      },
+    ],
+  },
+]);
 
 /** 数据库类型相关数据 */
-export const db_type = [
+export const db_type = transferTypeData([
   {
-    dataType: 'STRING',
-    name: 'soc_DBType',
     id: 3507,
+    type: 'type',
+    name: 'MySql',
     label: 'MySql',
     value: 'Mysql',
-    parentId: 945,
-    productType: '2',
+    children: [
+      {
+        id: 1,
+        type: 'db',
+        name: 'mysql_test_1',
+        dbId: 1,
+        dbName: 'mysql_test_1',
+      },
+      {
+        id: 2,
+        type: 'db',
+        name: 'mysql_test_2',
+        dbId: 2,
+        dbName: 'mysql_test_2',
+      },
+    ],
   },
   {
-    dataType: 'STRING',
-    name: 'soc_DBType',
     id: 3510,
+    type: 'type',
+    name: 'Oracle',
     label: 'Oracle',
     value: 'Oracle',
-    parentId: 945,
-    productType: '2',
+    children: [
+      {
+        id: 3,
+        type: 'db',
+        name: 'oracle_test_3',
+        dbId: 3,
+        dbName: 'oracle_test_3',
+      },
+      {
+        id: 4,
+        type: 'db',
+        name: 'oracle_test_4',
+        dbId: 4,
+        dbName: 'oracle_test_4',
+      },
+    ],
   },
   {
-    dataType: 'STRING',
-    name: 'soc_DBType',
     id: 3514,
+    type: 'type',
+    name: 'Sqlserver',
     label: 'Sqlserver',
     value: 'Mssql',
-    parentId: 945,
-    productType: '2',
+    children: [
+      {
+        id: 5,
+        type: 'db',
+        name: 'Sqlserver_test_5',
+        dbId: 5,
+        dbName: 'Sqlserver_test_5',
+      },
+      {
+        id: 6,
+        type: 'db',
+        name: 'Sqlserver_test_6',
+        dbId: 6,
+        dbName: 'Sqlserver_test_6',
+      },
+      {
+        id: 7,
+        type: 'db',
+        name: 'Sqlserver_test_7',
+        dbId: 7,
+        dbName: 'Sqlserver_test_7',
+      },
+    ],
   },
   {
-    dataType: 'STRING',
-    name: 'soc_DBType',
     id: 3517,
+    type: 'type',
+    name: 'Db2',
     label: 'Db2',
     value: 'Db2',
-    parentId: 945,
-    productType: '2',
+    children: [
+      {
+        id: 8,
+        type: 'db',
+        name: 'DB2_test_8',
+        dbId: 8,
+        dbName: 'DB2_test_8',
+      },
+    ],
   },
   {
-    dataType: 'STRING',
-    name: 'soc_DBType',
     id: 3521,
+    type: 'type',
+    name: 'PostgreSQL',
     label: 'PostgreSQL',
     value: 'Pgsql',
-    parentId: 945,
-    productType: '2',
+    children: [
+      {
+        id: 9,
+        type: 'db',
+        name: 'PostgreSQL_test_9',
+        dbId: 9,
+        dbName: 'PostgreSQL_test_9',
+      },
+    ],
   },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 3524,
-    label: 'Oceanbase(Mysql)',
-    value: 'Oceanbase',
-    parentId: 945,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 3525,
-    label: '达梦',
-    value: 'Dm',
-    parentId: 945,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 3529,
-    label: 'Informix',
-    value: 'Informix',
-    parentId: 945,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 3532,
-    label: 'Greenplum',
-    value: 'Greenplum',
-    parentId: 945,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 3534,
-    label: 'Qianbase',
-    value: 'Qianbase',
-    parentId: 945,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 3536,
-    label: 'Tidb',
-    value: 'Tidb',
-    parentId: 945,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 3538,
-    label: 'Mongodb',
-    value: 'Mongodb',
-    parentId: 946,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 3542,
-    label: 'Odps',
-    value: 'Odps',
-    parentId: 946,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 3543,
-    label: 'Impala',
-    value: 'Impala',
-    parentId: 946,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 3545,
-    label: 'Hive',
-    value: 'Hive',
-    parentId: 946,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 3547,
-    label: 'RDS MySQL',
-    value: 'RdsMysql',
-    parentId: 947,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 3549,
-    label: 'RDS PostgreSQL',
-    value: 'RdsPgsql',
-    parentId: 947,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 3734,
-    label: 'Kingbase',
-    value: 'Kingbase',
-    parentId: 945,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 3745,
-    label: 'TDSQL',
-    value: 'Mysql_TD',
-    parentId: 947,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 4916,
-    label: '神通',
-    value: 'Oscar',
-    parentId: 945,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 4927,
-    label: 'Oceanbase(Oracle)',
-    value: 'OceanbaseOracle',
-    parentId: 945,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 4964,
-    label: 'Gbase8a',
-    value: 'Gbase',
-    parentId: 945,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 4978,
-    label: 'Redis',
-    value: 'Redis',
-    parentId: 946,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 5000,
-    label: 'RDS Sqlserver',
-    value: 'RdsMssql',
-    parentId: 947,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 5143,
-    label: 'Gauss200',
-    value: 'Gauss200',
-    parentId: 945,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 5156,
-    label: 'Hana',
-    value: 'Hana',
-    parentId: 945,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 5523,
-    label: 'Zookeeper',
-    value: 'Zookeeper',
-    parentId: 946,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 5542,
-    label: 'Vertica',
-    value: 'Vertica',
-    parentId: 945,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 5868,
-    label: 'Sybase',
-    value: 'Sybase',
-    parentId: 945,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 5975,
-    label: 'Gbase8s',
-    value: 'Gbase8s87',
-    parentId: 945,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 5981,
-    label: 'RDS MariaDB',
-    value: 'RdsMariadb',
-    parentId: 947,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 6195,
-    label: 'Elasticsearch',
-    value: 'Elasticsearch',
-    parentId: 946,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 6201,
-    label: 'Highgo',
-    value: 'Highgo',
-    parentId: 945,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 6236,
-    label: 'PolarDB for mysql',
-    value: 'PolarMysql',
-    parentId: 947,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 6237,
-    label: 'PolarDB for pgsql',
-    value: 'Polar_pgsql',
-    parentId: 947,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 6238,
-    label: 'TeleDB',
-    value: 'Teledb',
-    parentId: 945,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 6239,
-    label: 'TelePG',
-    value: 'Telepg',
-    parentId: 945,
-    productType: '2',
-  },
-  {
-    dataType: 'STRING',
-    name: 'soc_DBType',
-    id: 6240,
-    label: 'UDAL',
-    value: 'UdalMysql',
-    parentId: 945,
-    productType: '2',
-  },
-];
+]);
