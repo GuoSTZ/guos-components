@@ -42,9 +42,10 @@ const AssetScope = () => {
   const config = useMemo(
     () => ({
       1: {
-        fetchData: new Promise((reslove) => {
-          reslove(asset_data);
-        }),
+        fetchData: () =>
+          new Promise((reslove) => {
+            reslove(asset_data);
+          }),
         treeProps: {
           placeholder: '请输入数据库/资产集合组/资产集合',
         },
@@ -77,9 +78,10 @@ const AssetScope = () => {
         text: i18nText,
       },
       2: {
-        fetchData: new Promise((reslove) => {
-          reslove(db_group_data);
-        }),
+        fetchData: () =>
+          new Promise((reslove) => {
+            reslove(db_group_data);
+          }),
         treeProps: {
           placeholder: '请输入数据库分组',
         },
@@ -98,9 +100,10 @@ const AssetScope = () => {
         text: i18nText,
       },
       3: {
-        fetchData: new Promise((reslove) => {
-          reslove(db_type);
-        }),
+        fetchData: () =>
+          new Promise((reslove) => {
+            reslove(db_type);
+          }),
         treeProps: {
           placeholder: '请输入数据库类型',
         },
