@@ -2,7 +2,7 @@ import { Form, Radio, RadioChangeEvent } from 'antd';
 import React, { memo, useCallback, useRef, useState } from 'react';
 
 import BaseTreeToTable from './BaseTreeToTable';
-import { identity_data, identity_group_data } from '../data/identity';
+import { identity_data_key, identity_group_data } from '../data/identity';
 
 const AssetScope = () => {
   const form = Form.useFormInstance();
@@ -28,13 +28,13 @@ const AssetScope = () => {
         console.log(params);
         return new Promise((reslove) => {
           setTimeout(() => {
-            const len = identity_data.length;
+            const len = identity_data_key.length;
             const data = [];
             // 实际上只处理了第一层数据，但也只需要处理第一层数据
             for (let i = 0; i < len; i++) {
               data.push({
-                ...identity_data[i],
-                checkable: identity_data[i].type !== 'parentGroup',
+                ...identity_data_key[i],
+                checkable: identity_data_key[i].type !== 'parentGroup',
               });
             }
             reslove(data);

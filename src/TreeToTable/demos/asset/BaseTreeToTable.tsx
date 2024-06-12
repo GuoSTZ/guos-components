@@ -87,7 +87,7 @@ const BaseTreeToTable = React.forwardRef<any, BaseTreeToTableProps<any>>(
       }),
       [treeToTableRef.current, ref],
     );
-    console.log(treeToTableRef, '====tree');
+
     return (
       <TreeToTable
         ref={treeToTableRef}

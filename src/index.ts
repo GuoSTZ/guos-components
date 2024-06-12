@@ -1,4 +1,5 @@
 export { default as DataBlock } from './DataBlock';
+export { default as DirectoryInput } from './DirectoryInput';
 export { default as EditTable } from './EditTable';
 export { default as InFlow } from './InFlow';
 export { default as LabelTag } from './LabelTag';

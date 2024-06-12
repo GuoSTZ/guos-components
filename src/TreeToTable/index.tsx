@@ -237,7 +237,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
     // 处理回填
     useEffect(() => {
       if (treeData?.length > 0) {
-        tableKeySet.current?.clear();
+        // tableKeySet.current?.clear();
         checkedKeySet.current?.clear();
         value?.forEach((item) => {
           if (!item[rowKey]) {
@@ -252,7 +252,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
             });
           }
         });
-        transferData({ needReverse: false, needOnChange: false });
+        transferData({ needReverse: true, needOnChange: false });
       }
     }, [value, treeData, loopCNodeForCheck]);
 
