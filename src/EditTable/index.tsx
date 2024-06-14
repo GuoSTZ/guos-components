@@ -9,12 +9,8 @@ import {
   Typography,
   message,
 } from 'antd';
-import { TableProps, ColumnType, TablePaginationConfig } from 'antd/es/table';
-import {
-  FilterValue,
-  SorterResult,
-  TableCurrentDataSource,
-} from 'antd/es/table/interface';
+import { FormInstance } from 'antd/es/form/Form';
+import { TableProps, ColumnType } from 'antd/es/table';
 import React, {
   memo,
   useState,
@@ -24,13 +20,13 @@ import React, {
 } from 'react';
 import styles from './index.module.less';
 
-export interface Item {
+interface Item {
   key: string;
   disabledEdit: boolean;
   [key: string]: any;
 }
 
-export interface ColumnText {
+interface ColumnText {
   add?: string;
   edit?: string;
   save?: string;
@@ -42,29 +38,32 @@ export interface ColumnText {
   [key: string]: string | undefined;
 }
 
-export interface EditTableProps<T>
-  extends Omit<TableProps<T>, 'columns' | 'onChange'> {
+interface EditTableProps<T> extends Omit<TableProps<T>, 'columns'> {
   columns: EditTableColumnType<T>[];
   text?: ColumnText;
-  onChange?: (
-    value: any[],
-    pagination: TablePaginationConfig,
-    filters: Record<string, FilterValue | null>,
-    sorter: SorterResult<T> | SorterResult<T>[],
-    extra: TableCurrentDataSource<T>,
-  ) => void;
-  value?: any[];
+  onAdd?: (values: Partial<Item> & { key: React.Key }) => void;
+  onEdit?: (values: Partial<Item> & { key: React.Key }) => void;
+  onCancel?: (values: Partial<Item> & { key: React.Key }) => void;
+  onDelete?: (id: React.Key) => void;
+  onSave?: (values: Partial<Item> & { key: React.Key }) => void;
 }
 
-export interface EditTableColumnType<T> extends ColumnType<T> {
+interface EditTableColumnType<T> extends ColumnType<T> {
   editable?: boolean;
   dataIndex: string;
-  /** 目前实际仅对Input有完整的支持，其他组件不做保证 */
+  /** 显示状态下的组件 */
   component?: any;
   componentProps?: any;
+  /** 编辑状态下的组件 */
+  editComponent?: any;
+  editComponentProps?: any;
+  editConfig?:
+    | Record<string, unknown>
+    | ((form: FormInstance) => Record<string, unknown>);
 }
 
-export interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
+interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
+  form?: FormInstance;
   editing: boolean;
   dataIndex: string;
   title: any;
@@ -73,48 +72,110 @@ export interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   children: React.ReactNode;
   component?: any;
   componentProps?: any;
+  editComponent?: any;
+  editComponentProps?: any;
+  editConfig?:
+    | Record<string, unknown>
+    | ((form: FormInstance) => Record<string, unknown>);
   text: ColumnText;
 }
 
-function getRandomKey(i?: number) {
-  if (typeof i === 'number') {
-    return new Date().valueOf() + '' + i;
+const renderEditItem = (info: any) => {
+  const {
+    CustomEditNode,
+    editComponentProps,
+    editConfig,
+    values,
+    dataIndex,
+    form,
+  } = info;
+  const handleEditConfig =
+    typeof editConfig === 'function' ? editConfig(form) : editConfig;
+
+  if (handleEditConfig?.shouldUpdate) {
+    return (
+      <Form.Item noStyle shouldUpdate={handleEditConfig?.shouldUpdate}>
+        {/* @ts-ignore */}
+        {(formInstance: FormInstance) => {
+          const updateEditComponentProps =
+            typeof editComponentProps === 'function'
+              ? editComponentProps(formInstance)
+              : editComponentProps;
+          /** 这里的配置需要用到formInstance，所以重新执行了一次 */
+          const updateEditConfig =
+            typeof editConfig === 'function' ? editConfig(form) : editConfig;
+          const { ...resetUpdateEditConfig } = updateEditConfig;
+          return (
+            <Form.Item name={dataIndex} {...resetUpdateEditConfig}>
+              <CustomEditNode
+                {...updateEditComponentProps}
+                record={values}
+                text={values?.[dataIndex]}
+                form={formInstance}
+              />
+            </Form.Item>
+          );
+        }}
+      </Form.Item>
+    );
   } else {
-    return new Date().valueOf() + '' + Math.floor(Math.random() * 10 + 1);
+    const handleEditComponentProps =
+      typeof editComponentProps === 'function'
+        ? editComponentProps(form)
+        : editComponentProps;
+    return (
+      <Form.Item style={{ margin: 0 }} {...handleEditConfig} name={dataIndex}>
+        <CustomEditNode
+          {...handleEditComponentProps}
+          record={values}
+          text={values?.[dataIndex]}
+          form={form}
+        />
+      </Form.Item>
+    );
   }
-}
+};
 
 const EditableCell: React.FC<EditableCellProps> = ({
+  form,
   editing,
   dataIndex,
-  title,
-  // record,
+  // title,
+  record,
   // index,
   children,
   component,
   componentProps = {},
-  text,
+  editComponent,
+  editComponentProps = {},
+  editConfig,
+  // text,
   ...restProps
 }) => {
-  const CustomNode = component ? component : Input;
+  const values = form?.getFieldsValue(true);
+  const CustomNode = component ? component : () => children;
+  const CustomEditNode = editComponent ? editComponent : Input;
+  const handleComponentProps =
+    typeof componentProps === 'function'
+      ? componentProps(form)
+      : componentProps;
   return (
     <td {...restProps}>
       {editing ? (
-        <Form.Item
-          name={dataIndex}
-          style={{ margin: 0 }}
-          rules={[
-            {
-              required: true,
-              message: `${text?.placeholderInput}${title}!`,
-            },
-          ]}
-        >
-          <CustomNode {...componentProps} />
-        </Form.Item>
+        renderEditItem({
+          CustomEditNode,
+          dataIndex,
+          values,
+          editComponentProps,
+          editConfig,
+          form,
+        })
       ) : (
-        // 如果需要支持除了Input外的其他组件，那么这里就需要向外抛出，提供自定义处理方式
-        children
+        <CustomNode
+          {...handleComponentProps}
+          record={record}
+          text={record?.[dataIndex]}
+        />
       )}
     </td>
   );
@@ -122,33 +183,36 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
 const EditTable = forwardRef<any, EditTableProps<any>>((props, ref) => {
   const [form] = Form.useForm();
-  const [data, setData] = useState<Record<string, any>[]>([]);
+  const [data, setData] = useState<Array<Partial<Item> & { key: React.Key }>>(
+    [],
+  );
   const [editingKey, setEditingKey] = useState('');
   const [isAdding, setIsAdding] = useState(false);
 
-  const { columns, text, dataSource, ...restProps } = props;
+  const {
+    columns,
+    text,
+    dataSource,
+    onAdd,
+    onCancel,
+    onDelete,
+    onEdit,
+    onSave,
+    ...restProps
+  } = props;
 
   useEffect(() => {
-    if (!dataSource) {
-      return;
-    }
-    const modifyData = [];
-    const len = dataSource?.length || 0;
-    for (let i = 0; i < len; i++) {
-      modifyData.push({
-        ...dataSource[i],
-        key: getRandomKey(i),
-      });
-    }
-    setData(modifyData);
+    dataSource?.map((i: any) => (i.key = i.id));
+    setData((dataSource || []) as Array<Partial<Item> & { key: React.Key }>);
   }, [dataSource]);
 
   const edit = (record: Partial<Item> & { key: React.Key }) => {
-    if (record.key === editingKey) {
+    if (editingKey) {
       message.error(text?.editingMsg || 'Error');
     } else {
       form.setFieldsValue({ ...record });
       setEditingKey(record.key);
+      onEdit?.(record);
     }
   };
 
@@ -158,6 +222,7 @@ const EditTable = forwardRef<any, EditTableProps<any>>((props, ref) => {
       setData(newData);
     }
     setEditingKey('');
+    onCancel?.(record);
   };
 
   const save = async (key: React.Key) => {
@@ -177,22 +242,24 @@ const EditTable = forwardRef<any, EditTableProps<any>>((props, ref) => {
       setData(newData);
       setEditingKey('');
       isAdding && setIsAdding(false);
+      onSave?.(row);
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo);
     }
   };
 
-  const add = (defaultValue?: Record<string, any>) => {
+  const add = (defaultValue?: Partial<Item> & { key: React.Key }) => {
     if (editingKey) {
       message.error(text?.editingMsg || 'Error');
     } else {
-      const key = getRandomKey();
-      // const newData = {...defaultValue,originType:0} || {key,originType:0}
-      const newData = defaultValue || { key, originType: 0 };
+      const key =
+        new Date().valueOf() + '' + Math.floor(Math.random() * 10 + 1);
+      const newData = defaultValue || { key };
       form.resetFields();
       setIsAdding(true);
       setData((origin) => [...origin, newData]);
       setEditingKey(key);
+      onAdd?.(newData);
     }
   };
 
@@ -202,6 +269,7 @@ const EditTable = forwardRef<any, EditTableProps<any>>((props, ref) => {
     } else {
       const newData = data.filter((row) => row.key !== key);
       setData(newData);
+      onDelete?.(key);
     }
   };
 
@@ -211,9 +279,9 @@ const EditTable = forwardRef<any, EditTableProps<any>>((props, ref) => {
     dataIndex: 'operation',
     width: 200,
     render: (_: any, record: Item) => {
-      const editable = record.key === editingKey;
-      return editable ? (
-        <Space>
+      const editing = record.key === editingKey;
+      return editing ? (
+        <Space className={styles['edit-table-operation-editing']}>
           <Typography.Link onClick={() => save(record.key)}>
             {text?.save || 'Save'}
           </Typography.Link>
@@ -253,6 +321,7 @@ const EditTable = forwardRef<any, EditTableProps<any>>((props, ref) => {
       ...col,
       onCell: (record: Item, index: number) => {
         return {
+          form,
           record,
           index,
           dataIndex: col.dataIndex,
@@ -261,18 +330,27 @@ const EditTable = forwardRef<any, EditTableProps<any>>((props, ref) => {
           key: editingKey,
           component: col.component,
           componentProps: col.componentProps,
+          editComponent: col.editComponent,
+          editComponentProps: col.editComponentProps,
+          editConfig: col.editConfig,
           text,
         };
       },
     };
   });
 
-  useImperativeHandle(ref, () => ({
-    data,
-  }));
+  useImperativeHandle(
+    ref,
+    () => ({
+      data,
+      form,
+      isEditing: !!editingKey,
+    }),
+    [data, form, editingKey],
+  );
 
   return (
-    <Form form={form} component={false} className={styles['edit-table']}>
+    <Form form={form} component={false}>
       <Table
         pagination={false}
         {...restProps}
@@ -285,7 +363,7 @@ const EditTable = forwardRef<any, EditTableProps<any>>((props, ref) => {
         dataSource={data}
         // @ts-ignore
         columns={mergedColumns}
-        rowClassName="editable-row"
+        rowClassName={styles['edit-table-row']}
       />
       <div>
         <Button
