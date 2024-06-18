@@ -47,6 +47,10 @@
   "dependencies": {
     "@ant-design/icons": "^5.3.6",
     "@antv/g6": "^4.8.24",
+    "@formily/antd": "^2.3.1",
+    "@formily/core": "^2.3.1",
+    "@formily/react": "^2.3.1",
+    "@formily/reactive": "^2.3.1",
     "antd": "4.24.6",
     "axios": "^1.6.8",
     "dayjs": "^1.11.11",

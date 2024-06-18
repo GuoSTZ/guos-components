@@ -1,5 +1,5 @@
-import { Input, InputProps } from 'antd';
-import React, { memo, useEffect, useState } from 'react';
+import { Input, InputProps, InputRef } from 'antd';
+import React, { memo, useEffect, useRef, useState } from 'react';
 
 import styles from './index.module.less';
 
@@ -10,9 +10,46 @@ export interface DirectoryInputProps extends InputProps {
 const DirectoryInput = (props: DirectoryInputProps) => {
   const { value, onChange, defaultParentDirectory, ...restProps } = props;
   const [directoryPath, setDirectoryPath] = useState<string[]>([]);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState<InputProps['value']>('');
+  const inputRef = useRef<InputRef>(null);
+  const dpRef = useRef(directoryPath);
 
-  useEffect(() => {}, [value]);
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
+
+  useEffect(() => {
+    if (defaultParentDirectory) {
+      if (typeof defaultParentDirectory !== 'string') {
+        throw new Error('defaultParentDirectory is not a string');
+      }
+      const dpdArray = defaultParentDirectory
+        ?.split('/')
+        ?.filter((item) => !!item);
+      setDirectoryPath((dp) => [...dpdArray, ...dp]);
+    }
+  }, [defaultParentDirectory]);
+
+  useEffect(() => {
+    dpRef.current = directoryPath;
+  }, [directoryPath]);
+
+  useEffect(() => {
+    inputRef.current?.input?.addEventListener('keydown', function (event) {
+      if (event.key === 'Backspace' || event.keyCode === 8) {
+        // event.preventDefault(); // 这会阻止输入框中字符的删除
+        if (!inputRef.current?.input?.value && dpRef.current.length > 0) {
+          event.preventDefault();
+          setDirectoryPath((dp) => {
+            const result = dp.slice(0, dp.length - 1);
+            const last = dp[dp.length - 1];
+            setInputValue(last);
+            return result;
+          });
+        }
+      }
+    });
+  }, []);
 
   const handleOnChange = (e: any) => {
     const value: string = e.target.value;
@@ -27,30 +64,19 @@ const DirectoryInput = (props: DirectoryInputProps) => {
     }
   };
 
-  const renderParentDirectory = (value?: string) => {
-    if (!value) {
-      return;
-    }
-    if (typeof value !== 'string') {
-      throw new Error('defaultParentDirectory is not a string');
-    }
-    const valueTrim = value.trim();
-    if (!valueTrim || valueTrim === '/') {
-      return '';
-    }
-    const dArr = value.split('/');
-    return `${dArr.join('/')}/`;
-  };
-
   return (
     <div className={styles['directory-input']}>
       <div className={styles['directory-input-text']}>
-        {renderParentDirectory(defaultParentDirectory)}
         {directoryPath.join('/')}
         {directoryPath.length > 0 ? '/' : null}
       </div>
       <div className={styles['directory-input-control']}>
-        <Input {...restProps} value={inputValue} onChange={handleOnChange} />
+        <Input
+          {...restProps}
+          ref={inputRef}
+          value={inputValue}
+          onChange={handleOnChange}
+        />
       </div>
     </div>
   );

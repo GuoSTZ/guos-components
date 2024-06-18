@@ -1,0 +1,34 @@
+.modal-to-table {
+  &-btn {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  &-tips {
+    margin-left: 8px;
+    color: #82899e;
+  }
+}
+
+.modal-form {
+  :global {
+    .@{ant-prefix}-formily-array-table .@{ant-prefix}-table table {
+      overflow: visible;
+
+      .@{ant-prefix}-table-cell-ellipsis {
+        overflow: visible;
+        .@{ant-prefix}-space {
+          width: 100%;
+
+          > .@{ant-prefix}-space-item {
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+        }
+      }
+    }
+  }
+}
