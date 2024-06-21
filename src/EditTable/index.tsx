@@ -8,7 +8,13 @@ import {
   Table,
   Typography,
   message,
+  TablePaginationConfig,
 } from 'antd';
+import {
+  FilterValue,
+  SorterResult,
+  TableCurrentDataSource,
+} from 'antd/es/table/interface';
 import { FormInstance } from 'antd/es/form/Form';
 import { TableProps, ColumnType } from 'antd/es/table';
 import React, {
@@ -17,6 +23,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
   useEffect,
+  useCallback,
 } from 'react';
 import styles from './index.module.less';
 
@@ -38,7 +45,15 @@ interface ColumnText {
   [key: string]: string | undefined;
 }
 
-interface EditTableProps<T> extends Omit<TableProps<T>, 'columns'> {
+type TypeOfTableParams<T> = {
+  pagination?: TablePaginationConfig;
+  filters?: Record<string, FilterValue | null>;
+  sorter?: SorterResult<T> | SorterResult<T>[];
+  extra?: TableCurrentDataSource<T>;
+};
+
+interface EditTableProps<T>
+  extends Omit<TableProps<T>, 'columns' | 'onChange'> {
   columns: EditTableColumnType<T>[];
   text?: ColumnText;
   onAdd?: (values: Partial<Item> & { key: React.Key }) => void;
@@ -46,6 +61,11 @@ interface EditTableProps<T> extends Omit<TableProps<T>, 'columns'> {
   onCancel?: (values: Partial<Item> & { key: React.Key }) => void;
   onDelete?: (id: React.Key) => void;
   onSave?: (values: Partial<Item> & { key: React.Key }) => void;
+  value?: T[];
+  onChange?: (value: T[], info: TypeOfTableParams<T>) => void;
+  /** 请勿手动传入该属性，仅在Form.Item包裹下会自动传入 */
+  id?: string;
+  // [key: string]: any;
 }
 
 interface EditTableColumnType<T> extends ColumnType<T> {
@@ -188,7 +208,7 @@ const EditTable = forwardRef<any, EditTableProps<any>>((props, ref) => {
   );
   const [editingKey, setEditingKey] = useState('');
   const [isAdding, setIsAdding] = useState(false);
-
+  const [tableParams, setTableParams] = useState<TypeOfTableParams<any>>({});
   const {
     columns,
     text,
@@ -198,13 +218,18 @@ const EditTable = forwardRef<any, EditTableProps<any>>((props, ref) => {
     onDelete,
     onEdit,
     onSave,
+    value,
+    onChange,
     ...restProps
   } = props;
 
   useEffect(() => {
-    dataSource?.map((i: any) => (i.key = i.id));
-    setData((dataSource || []) as Array<Partial<Item> & { key: React.Key }>);
-  }, [dataSource]);
+    if (!!value) {
+      setData(value || []);
+    } else if (!!dataSource) {
+      setData((dataSource || []) as Array<Partial<Item> & { key: React.Key }>);
+    }
+  }, [value, dataSource]);
 
   const edit = (record: Partial<Item> & { key: React.Key }) => {
     if (editingKey) {
@@ -242,6 +267,7 @@ const EditTable = forwardRef<any, EditTableProps<any>>((props, ref) => {
       setData(newData);
       setEditingKey('');
       isAdding && setIsAdding(false);
+      onChange?.(newData, tableParams);
       onSave?.(row);
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo);
@@ -270,6 +296,7 @@ const EditTable = forwardRef<any, EditTableProps<any>>((props, ref) => {
       const newData = data.filter((row) => row.key !== key);
       setData(newData);
       onDelete?.(key);
+      onChange?.(newData, tableParams);
     }
   };
 
@@ -277,7 +304,7 @@ const EditTable = forwardRef<any, EditTableProps<any>>((props, ref) => {
   const operations: EditTableColumnType<any> = {
     title: '操作',
     dataIndex: 'operation',
-    width: 200,
+    width: 120,
     render: (_: any, record: Item) => {
       const editing = record.key === editingKey;
       return editing ? (
@@ -339,6 +366,19 @@ const EditTable = forwardRef<any, EditTableProps<any>>((props, ref) => {
     };
   });
 
+  const tableOnChange = useCallback(
+    (
+      pagination: TablePaginationConfig,
+      filters: Record<string, FilterValue | null>,
+      sorter: SorterResult<any> | SorterResult<any>[],
+      extra: TableCurrentDataSource<any>,
+    ) => {
+      onChange?.(data, { pagination, filters, sorter, extra });
+      setTableParams({ pagination, filters, sorter, extra });
+    },
+    [data],
+  );
+
   useImperativeHandle(
     ref,
     () => ({
@@ -354,6 +394,7 @@ const EditTable = forwardRef<any, EditTableProps<any>>((props, ref) => {
       <Table
         pagination={false}
         {...restProps}
+        onChange={tableOnChange}
         components={{
           body: {
             cell: EditableCell,

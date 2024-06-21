@@ -1,4 +1,4 @@
-import { Button, Table } from 'antd';
+import { Button, ModalProps, Table, Space, Typography, Popconfirm } from 'antd';
 import React, {
   forwardRef,
   memo,
@@ -13,10 +13,6 @@ import ModalForm from './ModalForm';
 import styles from './index.module.less';
 import { FormInstance } from 'antd/es/form/Form';
 
-// const getLabel = (dicts: Record<string, Record<string, unknown>[]>, dictName: string, value: React.Key) => {
-//   return dicts[dictName]?.find(item => item.value === value)?.label || '';
-// }
-
 export interface ModalToTableProps {
   onChange?: (data: any) => void;
   value?: Array<{
@@ -24,7 +20,9 @@ export interface ModalToTableProps {
     [key: string]: any;
   }>;
   tableProps?: any;
-  modalProps?: any;
+  modalProps: ModalProps & {
+    renderFormItem: (form: FormInstance) => React.ReactNode;
+  };
   tips?: string;
 }
 
@@ -38,7 +36,7 @@ const ModalToTable = forwardRef<any, ModalToTableProps>((props, ref) => {
   const [modalStatus, setModalStatus] = useState<string>();
 
   useEffect(() => {
-    if (value) {
+    if (!!value) {
       const data = [];
       value.forEach((item) => {
         if (item.key) {
@@ -71,49 +69,6 @@ const ModalToTable = forwardRef<any, ModalToTableProps>((props, ref) => {
         break;
     }
   };
-
-  const tableConfig = useMemo(
-    () => ({
-      // columns: [
-      //   {
-      //     title: '属性名称',
-      //     key: 'name',
-      //     dataIndex: 'name'
-      //   },
-      //   {
-      //     title: '属性信息',
-      //     key: 'policyValueShow',
-      //     dataIndex: 'policyValueShow',
-      //     ellipsis: true,
-      //     render: (text: Array<{ name: string, value: string | number }>) => {
-      //       return text?.map(item => {
-      //         return `${getLabel(dicts, 'idFactor', item.name)}=${item.value}`;
-      //       }).join(',');
-      //     }
-      //   },
-      //   {
-      //     title: '操作',
-      //     width: 150,
-      //     render: (_: any, record: Record<string, unknown>) => {
-      //       return (
-      //         <Space>
-      //           <Typography.Link onClick={() => handleOperation('edit', record)}>编辑</Typography.Link>
-
-      //           <Popconfirm
-      //             title="确定删除?"
-      //             onConfirm={() => handleOperation('delete', record)}
-      //           >
-      //             <Typography.Link>删除</Typography.Link>
-      //           </Popconfirm>
-      //         </Space>
-      //       )
-      //     }
-      //   }
-      // ],
-      ...tableProps,
-    }),
-    [tableData, tableProps],
-  );
 
   const add = () => {
     setModalOpen(true);
@@ -152,6 +107,29 @@ const ModalToTable = forwardRef<any, ModalToTableProps>((props, ref) => {
     [handleOperation],
   );
 
+  const operations = useMemo(() => {
+    return {
+      title: '操作',
+      width: 150,
+      render: (_: any, record: Record<string, unknown>) => {
+        return (
+          <Space>
+            <Typography.Link onClick={() => handleOperation('edit', record)}>
+              编辑
+            </Typography.Link>
+
+            <Popconfirm
+              title="确定删除?"
+              onConfirm={() => handleOperation('delete', record)}
+            >
+              <Typography.Link>删除</Typography.Link>
+            </Popconfirm>
+          </Space>
+        );
+      },
+    };
+  }, [handleOperation]);
+
   return (
     <div className={styles['modal-to-table']}>
       <div className={styles['modal-to-table-btn']}>
@@ -162,7 +140,11 @@ const ModalToTable = forwardRef<any, ModalToTableProps>((props, ref) => {
           <div className={styles['modal-to-table-tips']}>{tips}</div>
         ) : null}
       </div>
-      <Table {...tableConfig} dataSource={tableData} />
+      <Table
+        {...tableProps}
+        dataSource={tableData}
+        columns={[...tableProps.columns, operations]}
+      />
       <ModalForm
         title={modalStatus === 'add' ? '新增' : '编辑'}
         width={640}

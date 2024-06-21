@@ -1,15 +1,15 @@
-import { Form, Input, Modal, FormInstance, ModalProps } from 'antd';
+import { Form, Modal, FormInstance, ModalProps, Input } from 'antd';
 import React, { memo, useImperativeHandle, forwardRef } from 'react';
-// import { EditTable } from 'guos-components';
 import styles from './index.module.less';
 
 interface ModalFormProps extends Omit<ModalProps, 'onOk'> {
   onOk?: (e: React.MouseEvent<HTMLElement, MouseEvent>, values: any) => void;
+  renderFormItem: (form: FormInstance) => React.ReactNode;
 }
 
 const ModalForm = forwardRef<{ form: FormInstance }, ModalFormProps>(
   (props, ref) => {
-    const { onOk, onCancel, afterClose, ...restProps } = props;
+    const { onOk, onCancel, renderFormItem, ...restProps } = props;
     const [form] = Form.useForm();
 
     useImperativeHandle(
@@ -24,10 +24,15 @@ const ModalForm = forwardRef<{ form: FormInstance }, ModalFormProps>(
       form.validateFields().then((values) => {
         const newValues = Object.assign(
           {},
-          {
-            key: new Date().valueOf() + '' + Math.floor(Math.random() * 10 + 1),
-          },
           values,
+          values.key === undefined || values.key === null
+            ? {
+                key:
+                  new Date().valueOf() +
+                  '' +
+                  Math.floor(Math.random() * 10 + 1),
+              }
+            : {},
         );
         onOk?.(e, newValues);
       });
@@ -37,28 +42,26 @@ const ModalForm = forwardRef<{ form: FormInstance }, ModalFormProps>(
       onCancel?.(e);
     };
 
+    const afterClose = () => {
+      form.resetFields();
+      props?.afterClose?.();
+    };
+
     return (
       <Modal
-        /**
-         * 为了使afterClose中的baseForm.reset()生效，需要禁止destroyOnClose
-         * 如果一定要用该属性，那么请手动在onOk和onCancel中通过ref调用form.resetFields()
-         */
         className={styles['modal-form']}
-        destroyOnClose={false}
+        destroyOnClose
         {...restProps}
+        afterClose={afterClose}
         onOk={handleOnOk}
         onCancel={handleonCancel}
-        afterClose={() => {
-          afterClose?.();
-          form.resetFields();
-        }}
       >
         <Form form={form} labelCol={{ span: 5 }}>
-          <Form.Item name="input" label="输入框">
-            <Input placeholder="请输入" />
+          <Form.Item name="key" hidden>
+            <Input />
           </Form.Item>
+          {renderFormItem(form)}
         </Form>
-        <div>属性间的关系是“and”</div>
       </Modal>
     );
   },
