@@ -14,7 +14,8 @@
       "@@/*": [".dumi/tmp/*"],
       "guos-components": ["src"],
       "guos-components/*": ["src/*", "*"]
-    }
+    },
+    "resolveJsonModule": true
   },
   "include": [".dumirc.ts", "src/**/*"]
 }
