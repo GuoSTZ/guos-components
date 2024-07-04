@@ -1,0 +1,154 @@
+@colors: #ff0000, #00ff00, #0000ff, #ffff00, #00ffff, #ff00ff, #800080, #808000,
+  #008080, #c0c0c0;
+@cardWidth: 100px;
+@cardHeight: 100px;
+@test: ~'444';
+
+#card-wrap {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  perspective: 10px;
+  perspective-origin: top center;
+  transform-style: preserve-3d;
+  overflow: hidden;
+
+  .card {
+    position: absolute;
+    width: @cardWidth;
+    height: @cardHeight;
+    transition: 0.3s;
+  }
+
+  @keyframes move1 {
+    0% {
+      transform: translate(0 * 30px, 500px);
+    }
+    90% {
+      transform: translate(0 * 30px, 0 * 10px - 10px);
+    }
+    100% {
+      transform: translate(0 * 30px, 0 * 10px);
+    }
+  }
+
+  @keyframes move2 {
+    0% {
+      transform: translate(1 * 30px, 500px);
+    }
+    90% {
+      transform: translate(1 * 30px, 1 * 10px - 10px);
+    }
+    100% {
+      transform: translate(1 * 30px, 1 * 10px);
+    }
+  }
+
+  @keyframes move3 {
+    0% {
+      transform: translate(2 * 30px, 500px);
+    }
+    90% {
+      transform: translate(2 * 30px, 2 * 10px - 10px);
+    }
+    100% {
+      transform: translate(2 * 30px, 2 * 10px);
+    }
+  }
+
+  @keyframes move4 {
+    0% {
+      transform: translate(3 * 30px, 500px);
+    }
+    90% {
+      transform: translate(3 * 30px, 3 * 10px - 10px);
+    }
+    100% {
+      transform: translate(3 * 30px, 3 * 10px);
+    }
+  }
+
+  @keyframes move5 {
+    0% {
+      transform: translate(4 * 30px, 500px);
+    }
+    90% {
+      transform: translate(4 * 30px, 4 * 10px - 10px);
+    }
+    100% {
+      transform: translate(4 * 30px, 4 * 10px);
+    }
+  }
+
+  @keyframes move6 {
+    0% {
+      transform: translate(5 * 30px, 500px);
+    }
+    90% {
+      transform: translate(5 * 30px, 5 * 10px - 10px);
+    }
+    100% {
+      transform: translate(5 * 30px, 5 * 10px);
+    }
+  }
+
+  @keyframes move7 {
+    0% {
+      transform: translate(6 * 30px, 500px);
+    }
+    90% {
+      transform: translate(6 * 30px, 6 * 10px - 10px);
+    }
+    100% {
+      transform: translate(6 * 30px, 6 * 10px);
+    }
+  }
+
+  @keyframes move8 {
+    0% {
+      transform: translate(7 * 30px, 500px);
+    }
+    90% {
+      transform: translate(7 * 30px, 7 * 10px - 10px);
+    }
+    100% {
+      transform: translate(7 * 30px, 7 * 10px);
+    }
+  }
+
+  @keyframes move9 {
+    0% {
+      transform: translate(8 * 30px, 500px);
+    }
+    90% {
+      transform: translate(8 * 30px, 8 * 10px - 10px);
+    }
+    100% {
+      transform: translate(8 * 30px, 8 * 10px);
+    }
+  }
+
+  @keyframes move10 {
+    0% {
+      transform: translate(9 * 30px, 500px);
+    }
+    90% {
+      transform: translate(9 * 30px, 9 * 10px - 10px);
+    }
+    100% {
+      transform: translate(9 * 30px, 9 * 10px);
+    }
+  }
+
+  each(range(10), {
+    .card:nth-of-type(@{value}) {
+      background-color: extract(@colors, @value);
+      // transform: translate((@value - 1)   30px, (@value - 1)   10px);
+      animation: ~"move@{value}" 1.5s+(@value - 1) * 0.1s cubic-bezier(0.4, 0, 1, 1) forwards infinite;
+
+      &:hover {
+        transform: translate((@value - 1) * 30px, (@value - 1) * 10px - 30px);
+      }
+    }
+  });
+}
