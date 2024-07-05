@@ -1,4 +1,5 @@
 import { defineConfig } from 'dumi';
+const CompressionPlugin = require('compression-webpack-plugin');
 
 export default defineConfig({
   outputPath: 'docs-dist',
@@ -55,20 +56,29 @@ export default defineConfig({
     },
     javascriptEnabled: true,
   },
-  // chainWebpack(config) {
-  //   // 在这里可以对 webpack 配置进行修改和定制
-  //   config.module
-  //     .rule('svg')
-  //     .test(/\.svg$/)
-  //     .use('@svgr/webpack')
-  //     .loader('svg-url-loader')
-  //     .options({
-  //       // 可选配置，根据需要自行调整
-  //       encoding: 'base64',
-  //     })
-  //     .end();
+  chainWebpack(config) {
+    // 在这里可以对 webpack 配置进行修改和定制
+    // config.module
+    //   .rule('svg')
+    //   .test(/\.svg$/)
+    //   .use('@svgr/webpack')
+    //   .loader('svg-url-loader')
+    //   .options({
+    //     // 可选配置，根据需要自行调整
+    //     encoding: 'base64',
+    //   })
+    //   .end();
 
-  //   // 别名配置
-  //   config.resolve.alias.set('@', require.resolve('./src'));
-  // },
+    // 别名配置
+    // config.resolve.alias.set('@', require.resolve('./src'));
+
+    config.plugin('CompressionPlugin').use(CompressionPlugin, [
+      {
+        algorithm: 'gzip',
+        test: /\.js$|\.css$|\.html$/,
+        threshold: 10240, // 对超过10KB的文件进行压缩
+        minRatio: 0.8, // 压缩率小于这个值时不进行压缩
+      },
+    ]);
+  },
 });
