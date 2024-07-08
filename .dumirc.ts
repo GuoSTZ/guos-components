@@ -9,7 +9,7 @@ export default defineConfig({
       { title: '开始', link: '/guide' },
       { title: '组件', link: '/components' },
     ],
-    footer: 'Copyright © 2023 | Powered by MC-FED',
+    footer: 'Copyright © 2024 | Powered by GuoSTZ',
   },
   headScripts: [],
   extraBabelPlugins: [
