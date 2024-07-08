@@ -1,6 +1,6 @@
 import { message, notification } from 'antd';
 import React, { useEffect, useMemo } from 'react';
-import io from 'socket.io-client';
+import { io } from 'socket.io-client';
 
 export function rootContainer(
   container: React.ReactElement,
@@ -10,6 +10,10 @@ export function rootContainer(
   //   return io('https://guostz.com/guos-components');
   // }, [io]);
   const socket = io('https://guostz.com/guos-components');
+  console.log(socket, '======socket,被建立');
+  socket.on('connect', () => {
+    console.log(socket.connected, '========connected');
+  });
   socket.on('begin updating', (msg) => {
     notification.open({
       message: '正在更新中，请稍后刷新页面',
