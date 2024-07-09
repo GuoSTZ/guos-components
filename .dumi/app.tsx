@@ -61,7 +61,7 @@ export function rootContainer(
 
   socket.on('disconnect', () => {
     socket.disconnect();
-    console.log(`${socket.id} 应用断开连接`);
+    console.log(`当前应用断开连接，请刷新页面尝试重连`);
   });
 
   return container;
