@@ -6,10 +6,14 @@ export function rootContainer(
   container: React.ReactElement,
   args: { routes: any; plugin: any; history: any },
 ) {
-  const socket = io('https://guostz.com');
+  const socket = io('https://guostz.com', {
+    query: {
+      name: 'guos-components',
+    },
+  });
 
   socket.on('connect', () => {
-    console.log('连接状态', socket.connected);
+    console.log(`${socket.id} 应用加入连接`);
   });
 
   socket.on('update successful', (msg) => {
@@ -42,7 +46,7 @@ export function rootContainer(
 
   socket.on('disconnect', () => {
     socket.disconnect();
-    console.log('连接状态', socket.connected);
+    console.log(`${socket.id} 应用断开连接`);
   });
 
   return container;
