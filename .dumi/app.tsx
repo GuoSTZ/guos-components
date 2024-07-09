@@ -16,6 +16,14 @@ export function rootContainer(
     console.log(`${socket.id} 应用加入连接`);
   });
 
+  socket.on('begin updating', (msg) => {
+    notification.info({
+      message: '有新的更新项',
+      description: msg.message,
+      duration: 60,
+    });
+  });
+
   socket.on('update successful', (msg: { commits: any[] }) => {
     console.log(msg);
     notification.success({
@@ -45,7 +53,7 @@ export function rootContainer(
       description: (
         <div>
           <div>请登录服务器查看具体原因</div>
-          <div>{'xxxxxx'}</div>
+          <div>{msg?.message}</div>
         </div>
       ),
       duration: 20,
