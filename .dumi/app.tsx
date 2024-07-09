@@ -37,7 +37,7 @@ export function rootContainer(
             }`}</div>
           ))}
           <div>
-            请<a onClick={() => window.location.reload()}>刷新页面</a>
+            <a onClick={() => window.location.reload()}>刷新页面</a>
             以查看最新内容
           </div>
         </div>
