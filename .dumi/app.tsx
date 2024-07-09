@@ -35,7 +35,7 @@ export function rootContainer(
             <div
               style={{ textIndent: 28 }}
               key={idx}
-            >{`${item?.idx}. ${item?.message}`}</div>
+            >{`${idx}. ${item?.message}`}</div>
           ))}
           <div>
             请<a onClick={() => window.location.reload()}>刷新页面</a>
