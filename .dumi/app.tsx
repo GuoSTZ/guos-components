@@ -16,13 +16,16 @@ export function rootContainer(
     console.log(`${socket.id} 应用加入连接`);
   });
 
-  socket.on('update successful', (msg) => {
+  socket.on('update successful', (msg: { commits: any[] }) => {
     console.log(msg);
     notification.success({
       message: '新内容已部署',
       description: (
         <div>
-          <div>本次提交内容: {'xxxx'}</div>
+          <div>本次提交内容如下</div>
+          {msg?.commits?.map((item) => (
+            <div style={{ textIndent: 8 }}>{item?.message}</div>
+          ))}
           <div>
             请<a onClick={() => window.location.reload()}>刷新页面</a>
             以查看最新内容
