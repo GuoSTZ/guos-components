@@ -32,6 +32,7 @@ export function rootContainer(
           </div>
         </div>
       ),
+      duration: 20,
     });
   });
 
@@ -44,6 +45,7 @@ export function rootContainer(
           <div>{'xxxxxx'}</div>
         </div>
       ),
+      duration: 20,
     });
   });
 
