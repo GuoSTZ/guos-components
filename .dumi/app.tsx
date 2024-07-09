@@ -6,33 +6,43 @@ export function rootContainer(
   container: React.ReactElement,
   args: { routes: any; plugin: any; history: any },
 ) {
-  // const socket = React.useMemo(() => {
-  //   return io('https://guostz.com/guos-components');
-  // }, [io]);
   const socket = io('https://guostz.com');
-  console.log(socket, '======socket,被建立');
+
   socket.on('connect', () => {
-    console.log(socket.connected, '========connected');
+    console.log('连接状态', socket.connected);
   });
-  socket.on('begin updating', (msg) => {
-    notification.open({
-      message: '正在更新中，请稍后刷新页面',
+
+  socket.on('update successful', (msg) => {
+    console.log(msg);
+    notification.info({
+      message: '新的代码已部署',
+      description: (
+        <div>
+          <div>本次提交内容: {'xxxx'}</div>
+          <div>
+            请<a onClick={() => window.location.reload()}>刷新页面</a>
+          </div>
+        </div>
+      ),
     });
   });
 
-  // React.useEffect(() => {
-  //   // 监听来自服务器的'chat message'事件
-  //   socket.on('begin updating', (msg) => {
-  //     notification.open({
-  //       message: '正在更新中，请稍后刷新页面',
-  //     });
-  //   });
+  socket.on('update failed', (msg) => {
+    notification.info({
+      message: '代码更新失败',
+      description: (
+        <div>
+          <div>请登录服务器查看具体原因</div>
+          <div>{'xxxxxx'}</div>
+        </div>
+      ),
+    });
+  });
 
-  //   // 清理函数，在组件卸载时执行
-  //   return () => {
-  //     socket.disconnect();
-  //   };
-  // }, [socket]);
+  socket.on('disconnect', () => {
+    socket.disconnect();
+    console.log('连接状态', socket.connected);
+  });
 
   return container;
 }
