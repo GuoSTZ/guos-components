@@ -18,7 +18,7 @@ export function rootContainer(
 
   socket.on('update successful', (msg) => {
     console.log(msg);
-    notification.info({
+    notification.success({
       message: '新内容已部署',
       description: (
         <div>
@@ -33,7 +33,7 @@ export function rootContainer(
   });
 
   socket.on('update failed', (msg) => {
-    notification.info({
+    notification.error({
       message: '内容更新失败',
       description: (
         <div>
