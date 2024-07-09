@@ -6,4 +6,4 @@ toc: content
 
 ## Demo
 
-<code src='./demos/base.tsx' title='基础使用' description='最简单的使用方式'></code>
+<code src='./demos/base.tsx' title='基础使用' description='基础使用方式'></code>
