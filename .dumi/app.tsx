@@ -20,7 +20,7 @@ export function rootContainer(
     notification.info({
       message: '有新的更新项',
       description: msg.message,
-      duration: 60,
+      duration: 20,
     });
   });
 
