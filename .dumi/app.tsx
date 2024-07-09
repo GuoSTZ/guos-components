@@ -9,7 +9,7 @@ export function rootContainer(
   // const socket = React.useMemo(() => {
   //   return io('https://guostz.com/guos-components');
   // }, [io]);
-  const socket = io('https://guostz.com/guos-components');
+  const socket = io('https://guostz.com');
   console.log(socket, '======socket,被建立');
   socket.on('connect', () => {
     console.log(socket.connected, '========connected');
