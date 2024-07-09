@@ -41,7 +41,7 @@ export function rootContainer(
       message: '内容更新失败',
       description: (
         <div>
-          <div>请登录服务器查看具体原因，下述为部分失败原因展示</div>
+          <div>请登录服务器查看具体原因</div>
           <div>{'xxxxxx'}</div>
         </div>
       ),
