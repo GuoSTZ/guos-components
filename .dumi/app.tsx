@@ -19,7 +19,7 @@ export function rootContainer(
   socket.on('update successful', (msg) => {
     console.log(msg);
     notification.info({
-      message: '新的代码已部署',
+      message: '新内容已部署',
       description: (
         <div>
           <div>本次提交内容: {'xxxx'}</div>
@@ -34,7 +34,7 @@ export function rootContainer(
 
   socket.on('update failed', (msg) => {
     notification.info({
-      message: '代码更新失败',
+      message: '内容更新失败',
       description: (
         <div>
           <div>请登录服务器查看具体原因</div>
