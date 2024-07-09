@@ -32,10 +32,9 @@ export function rootContainer(
         <div>
           <div>本次提交内容如下</div>
           {msg?.commits?.map((item, idx: number) => (
-            <div
-              style={{ textIndent: 28 }}
-              key={idx}
-            >{`${idx}. ${item?.message}`}</div>
+            <div style={{ textIndent: 28 }} key={idx}>{`${idx + 1}. ${
+              item?.message
+            }`}</div>
           ))}
           <div>
             请<a onClick={() => window.location.reload()}>刷新页面</a>
