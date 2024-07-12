@@ -2,8 +2,7 @@ import { defineConfig } from 'dumi';
 const CompressionPlugin = require('compression-webpack-plugin');
 
 export default defineConfig({
-  base: 'g-components',
-  publicPath: '/g-components/',
+  publicPath: '/',
   outputPath: 'g-components',
   themeConfig: {
     name: 'g-components',
