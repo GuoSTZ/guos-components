@@ -1,11 +1,13 @@
 import { defineConfig } from 'dumi';
 const CompressionPlugin = require('compression-webpack-plugin');
 
+const NAMESPACE = 'g-components';
+
 export default defineConfig({
-  publicPath: './',
-  outputPath: 'g-components',
+  publicPath: `/${NAMESPACE}/`,
+  outputPath: NAMESPACE,
   themeConfig: {
-    name: 'g-components',
+    name: NAMESPACE,
     nav: [
       { title: '开始', link: '/guide' },
       { title: '组件', link: '/components' },
