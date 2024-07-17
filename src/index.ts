@@ -8,6 +8,7 @@ export { default as LinkageTreeSelect } from './LinkageTreeSelect';
 export { default as Loading } from './Loading';
 export { default as ModalToTable } from './ModalToTable';
 export { default as OutFlow } from './OutFlow';
+export { default as SelectedWrap } from './SelectedWrap';
 export { default as SvgLine } from './SvgLine';
 export { default as SwitchButton } from './SwitchButton';
 export { default as TipSelect } from './TipSelect';

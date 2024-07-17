@@ -1,0 +1,21 @@
+.selected-wrap {
+  position: relative;
+  width: fit-content;
+  height: fit-content;
+
+  .selected-svg {
+    display: none;
+  }
+}
+
+.selected-wrap.selected-wrap-selected {
+  outline: 1px solid #1890ff;
+
+  .selected-svg {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: block;
+    line-height: 20px;
+  }
+}
