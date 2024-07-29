@@ -56,7 +56,7 @@ const App = () => {
         <animate
           attributeName="fill"
           values="#fff;#fff;#000"
-          keyTimes="0;0.75;0.8;1"
+          keyTimes="0;0.75;1"
           begin="0s"
           dur="1s"
           repeatDur="indefinite"
