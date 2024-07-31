@@ -1,0 +1,53 @@
+{
+  "type": "void",
+  "properties": {
+    "aa": {
+      "type": "string",
+      "title": "AA",
+      "x-decorator": "FormItem",
+      "enum": [
+        {
+          "label": "111",
+          "value": "111"
+        },
+        {
+          "label": "222",
+          "value": "222"
+        }
+      ],
+      "x-component": "Select",
+      "x-component-props": {
+        "placeholder": "这是一个AA的下拉框"
+      }
+    },
+    "bb": {
+      "type": "string",
+      "title": "BB",
+      "x-decorator": "FormItem",
+      "x-component": "Input",
+      "x-component-props": {
+        "placeholder": "这是一个BB的输入框"
+      }
+    },
+    "cc": {
+      "type": "string",
+      "title": "CC",
+      "required": true,
+      "x-decorator": "FormItem",
+      "x-component": "Input",
+      "x-component-props": {
+        "placeholder": "这是一个CC的输入框"
+      }
+    },
+    "dd": {
+      "type": "string",
+      "title": "DD",
+      "enum": [{ "label": "选项3", "value": 3 }],
+      "x-decorator": "FormItem",
+      "x-component": "Select",
+      "x-component-props": {
+        "placeholder": "这是一个DD的下拉框"
+      }
+    }
+  }
+}

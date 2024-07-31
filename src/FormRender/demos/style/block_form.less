@@ -1,0 +1,69 @@
+.block-form {
+  width: 600px;
+
+  .tab1 {
+    .@{ant-prefix}-formily-layout {
+      .@{ant-prefix}-collapse {
+        > .@{ant-prefix}-collapse-item {
+          > .@{ant-prefix}-collapse-header {
+            display: flex;
+            height: 22px;
+            line-height: 22px;
+            padding: 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: #081333;
+            cursor: auto;
+
+            &::before {
+              content: '';
+              display: block;
+              width: 4px;
+              height: 14px;
+              margin: auto 0;
+              margin-right: 4px;
+              border-radius: 2px;
+              background-color: #3385ff;
+            }
+
+            // 隐藏校验失败时显示的徽标
+            > .@{ant-prefix}-badge {
+              height: 22px;
+              line-height: 22px;
+
+              > sup {
+                display: none;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .tab2 {
+    .@{ant-prefix}-formily-layout {
+      .label-to-title {
+        margin-bottom: 0;
+
+        > .@{ant-prefix}-formily-item-label {
+          justify-content: flex-start;
+          height: 22px;
+          min-height: 22px;
+          line-height: 22px;
+
+          &::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 14px;
+            margin: auto 0;
+            margin-right: 4px;
+            border-radius: 2px;
+            background-color: #3385ff;
+          }
+        }
+      }
+    }
+  }
+}

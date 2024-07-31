@@ -1,0 +1,266 @@
+{
+  "form": {
+    "labelCol": 6,
+    "wrapperCol": 10
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "collapse": {
+        "type": "void",
+        "x-decorator": "FormItem",
+        "x-component": "FormCollapse",
+        "x-component-props": {
+          "formCollapse": "{{useFormCollapse()}}",
+          "ghost": true,
+          "collapsible": "disabled"
+        },
+        "properties": {
+          "panel1": {
+            "type": "void",
+            "x-component": "FormCollapse.CollapsePanel",
+            "x-component-props": {
+              "header": "内置规则校验（不同书写方式）",
+              "showArrow": false
+            },
+            "properties": {
+              "layout": {
+                "type": "void",
+                "x-component": "FormLayout",
+                "x-component-props": {
+                  "labelCol": 6,
+                  "wrapperCol": 10
+                },
+                "properties": {
+                  "name1": {
+                    "type": "string",
+                    "title": "名称1",
+                    "required": true,
+                    "x-decorator": "FormItem",
+                    "x-component": "Input",
+                    "x-component-props": {
+                      "placeholder": "请输入名称"
+                    }
+                  },
+                  "name2": {
+                    "type": "string",
+                    "title": "名称2",
+                    "x-decorator": "FormItem",
+                    "x-component": "Input",
+                    "x-component-props": {
+                      "placeholder": "请输入名称"
+                    },
+                    "x-validator": {
+                      "required": true,
+                      "message": "请输入名称"
+                    }
+                  },
+                  "length1": {
+                    "type": "string",
+                    "title": "长度1",
+                    "maxLength": 5,
+                    "x-decorator": "FormItem",
+                    "x-component": "Input",
+                    "x-component-props": {
+                      "placeholder": "请输入长度"
+                    }
+                  },
+                  "length2": {
+                    "type": "string",
+                    "title": "长度2",
+                    "x-decorator": "FormItem",
+                    "x-component": "Input",
+                    "x-component-props": {
+                      "placeholder": "请输入长度"
+                    },
+                    "x-validator": {
+                      "maxLength": 5,
+                      "message": "最大长度为5"
+                    }
+                  },
+                  "length3": {
+                    "type": "string",
+                    "title": "长度3",
+                    "maxLength": 6,
+                    "x-decorator": "FormItem",
+                    "x-component": "Input",
+                    "x-component-props": {
+                      "placeholder": "请输入长度"
+                    },
+                    "x-validator": {
+                      "maxLength": 5,
+                      "message": "最大长度为5"
+                    }
+                  },
+                  "enum": {
+                    "name": "enum",
+                    "title": "枚举匹配",
+                    "type": "string",
+                    "x-validator": [
+                      {
+                        "enum": ["1", "2", "3"]
+                      }
+                    ],
+                    "x-decorator": "FormItem",
+                    "x-component": "Input",
+                    "x-component-props": {
+                      "placeholder": "请输入1或2或3"
+                    }
+                  },
+                  "const": {
+                    "name": "const",
+                    "title": "常量匹配",
+                    "type": "string",
+                    "const": "123",
+                    "x-decorator": "FormItem",
+                    "x-component": "Input",
+                    "x-component-props": {
+                      "placeholder": "请输入常量123"
+                    }
+                  },
+                  "multipleOf": {
+                    "name": "multipleOf",
+                    "title": "整除匹配",
+                    "type": "string",
+                    "multipleOf": 2,
+                    "x-decorator": "FormItem",
+                    "x-component": "NumberPicker",
+                    "x-component-props": {
+                      "placeholder": "请输入能被2整除的数"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "panel2": {
+            "type": "void",
+            "x-component": "FormCollapse.CollapsePanel",
+            "x-component-props": {
+              "header": "内置格式校验（不同书写方式）",
+              "showArrow": false
+            },
+            "properties": {
+              "layout": {
+                "type": "void",
+                "x-component": "FormLayout",
+                "x-component-props": {
+                  "labelCol": 6,
+                  "wrapperCol": 10
+                },
+                "properties": {
+                  "ipv4_1": {
+                    "title": "ipv4_1格式",
+                    "type": "string",
+                    "required": true,
+                    "format": "ipv4",
+                    "x-decorator": "FormItem",
+                    "x-component": "Input"
+                  },
+                  "ipv4_2": {
+                    "title": "ipv4_2格式",
+                    "type": "string",
+                    "required": true,
+                    "x-validator": "ipv4",
+                    "x-decorator": "FormItem",
+                    "x-component": "Input"
+                  },
+                  "ipv4_3": {
+                    "title": "ipv4_3格式",
+                    "type": "string",
+                    "required": true,
+                    "x-validator": {
+                      "format": "ipv4"
+                    },
+                    "x-decorator": "FormItem",
+                    "x-component": "Input"
+                  },
+                  "ipv4_4": {
+                    "title": "ipv4_4格式",
+                    "type": "string",
+                    "required": true,
+                    "x-validator": ["ipv4"],
+                    "x-decorator": "FormItem",
+                    "x-component": "Input"
+                  },
+                  "ipv4_5": {
+                    "title": "ipv4_5格式",
+                    "type": "string",
+                    "required": true,
+                    "x-validator": [
+                      {
+                        "format": "ipv4"
+                      }
+                    ],
+                    "x-decorator": "FormItem",
+                    "x-component": "Input"
+                  }
+                }
+              }
+            }
+          },
+          "panel3": {
+            "type": "void",
+            "x-component": "FormCollapse.CollapsePanel",
+            "x-component-props": {
+              "header": "联动校验",
+              "showArrow": false
+            },
+            "properties": {
+              "layout": {
+                "type": "void",
+                "x-component": "FormLayout",
+                "x-component-props": {
+                  "labelCol": 6,
+                  "wrapperCol": 10
+                },
+                "properties": {
+                  "aa": {
+                    "title": "AA",
+                    "required": true,
+                    "x-reactions": "{{(field) => {field.selfErrors = field.query('bb').value() >= field.value ? 'AA必须大于BB' : ''}}}",
+                    "x-component": "NumberPicker",
+                    "x-decorator": "FormItem"
+                  },
+                  "bb": {
+                    "title": "BB",
+                    "required": true,
+                    "x-reactions": {
+                      "dependencies": ["aa"],
+                      "fulfill": {
+                        "state": {
+                          "selfErrors": "{{$deps[0] <= $self.value ? 'AA必须大于BB' : ''}}"
+                        }
+                      }
+                    },
+                    "x-component": "NumberPicker",
+                    "x-decorator": "FormItem"
+                  },
+                  "password": {
+                    "title": "密码",
+                    "required": true,
+                    "x-component": "Input",
+                    "x-component-props": {
+                      "placeholder": "请输入密码"
+                    },
+                    "x-decorator": "FormItem"
+                  },
+                  "repassword": {
+                    "title": "确认密码",
+                    "required": true,
+                    "x-reactions": "{{(field) => {field.selfErrors = !!field.query('password').value() && !!field.value && field.query('password').value() !== field.value ? '与原密码输入不同' : ''}}}",
+                    "x-component": "Input",
+                    "x-component-props": {
+                      "placeholder": "请确认密码"
+                    },
+                    "x-decorator": "FormItem"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "form": {},
+  "schema": {
+    "type": "object",
+    "properties": {
+      "grid": {
+        "type": "void",
+        "x-component": "FormGrid",
+        "x-component-props": {
+          "maxColumns": 4
+        },
+        "properties": {
+          "name": {
+            "type": "string",
+            "x-decorator": "FormItem",
+            "x-component": "Input",
+            "x-component-props": {
+              "placeholder": "数据源名称"
+            }
+          },
+          "dbType": {
+            "type": "string",
+            "x-decorator": "FormItem",
+            "x-component": "Select",
+            "x-component-props": {
+              "placeholder": "数据源类型"
+            }
+          },
+          "ip": {
+            "type": "string",
+            "x-decorator": "FormItem",
+            "x-component": "Input",
+            "x-component-props": {
+              "placeholder": "IP"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              {
+                "label": "启用",
+                "value": 1
+              },
+              {
+                "label": "停用",
+                "value": 0
+              }
+            ],
+            "x-decorator": "FormItem",
+            "x-component": "Select",
+            "x-component-props": {
+              "placeholder": "启用/停用"
+            }
+          },
+          "port": {
+            "type": "string",
+            "x-decorator": "FormItem",
+            "x-component": "Input",
+            "x-component-props": {
+              "placeholder": "端口"
+            }
+          }
+        }
+      }
+    }
+  }
+}

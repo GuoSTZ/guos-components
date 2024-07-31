@@ -1,0 +1,183 @@
+{
+  "form": {},
+  "schema": {
+    "type": "object",
+    "properties": {
+      "array": {
+        "type": "array",
+        "default": [{}],
+        "x-decorator": "FormItem",
+        "x-component": "ArrayTable",
+        "x-component-props": {
+          "pagination": {
+            "pageSize": 10
+          },
+          "scroll": {
+            "x": "100%"
+          }
+        },
+        "items": {
+          "type": "object",
+          "properties": {
+            "column0": {
+              "type": "void",
+              "x-component": "ArrayTable.Column",
+              "x-component-props": {
+                "width": 50,
+                "title": "Sort",
+                "align": "center"
+              },
+              "properties": {
+                "sort": {
+                  "type": "void",
+                  "x-component": "ArrayTable.SortHandle"
+                }
+              }
+            },
+            "column1": {
+              "type": "void",
+              "x-component": "ArrayTable.Column",
+              "x-component-props": {
+                "width": 50,
+                "title": "索引",
+                "align": "center"
+              },
+              "properties": {
+                "index": {
+                  "type": "void",
+                  "x-component": "ArrayTable.Index"
+                }
+              }
+            },
+            "column2": {
+              "type": "void",
+              "x-component": "ArrayTable.Column",
+              "x-component-props": {
+                "width": 100,
+                "title": "自定义索引",
+                "align": "center"
+              },
+              "properties": {
+                "index1": {
+                  "type": "void",
+                  "x-component": "ArrayBaseIndex",
+                  "x-component-props": {
+                    "render": "{{index => `${index}级`}}"
+                  }
+                }
+              }
+            },
+
+            "column3": {
+              "type": "void",
+              "x-component": "ArrayTable.Column",
+              "x-component-props": {
+                "width": 200,
+                "title": "A2"
+              },
+              "properties": {
+                "a2": {
+                  "type": "string",
+                  "x-decorator": "FormItem",
+                  "x-component": "Input"
+                }
+              }
+            },
+            "column4": {
+              "type": "void",
+              "x-component": "ArrayTable.Column",
+              "x-component-props": {
+                "width": 200,
+                "title": "A3"
+              },
+              "properties": {
+                "a3": {
+                  "type": "string",
+                  "x-decorator": "FormItem",
+                  "x-component": "Input",
+                  "required": true
+                }
+              }
+            },
+            "column5": {
+              "type": "void",
+              "x-component": "ArrayTable.Column",
+              "x-component-props": {
+                "title": "Operations",
+                "dataIndex": "operations",
+                "width": 200,
+                "fixed": "right"
+              },
+              "properties": {
+                "item": {
+                  "type": "void",
+                  "x-component": "FormItem",
+                  "properties": {
+                    "remove": {
+                      "type": "void",
+                      "x-component": "ArrayBaseRemove",
+                      "x-component-props": {
+                        "type": "link",
+                        "icon": null,
+                        "children": "删除",
+                        "confirmTitle": "确认删除该数据？",
+                        "style": {
+                          "color": "#000"
+                        }
+                      }
+                    },
+                    "moveDown": {
+                      "type": "void",
+                      "x-component": "ArrayBaseMoveDown",
+                      "x-component-props": {
+                        "type": "link",
+                        "icon": null,
+                        "children": "下移",
+                        "style": {
+                          "color": "#000"
+                        }
+                      }
+                    },
+                    "moveUp": {
+                      "type": "void",
+                      "x-component": "ArrayBaseMoveUp",
+                      "x-component-props": {
+                        "type": "link",
+                        "icon": null,
+                        "children": "上移",
+                        "style": {
+                          "color": "#000"
+                        }
+                      }
+                    },
+                    "add": {
+                      "type": "void",
+                      "x-component": "ArrayBaseAddition",
+                      "x-component-props": {
+                        "type": "link",
+                        "icon": null,
+                        "block": false,
+                        "children": "添加",
+                        "style": {
+                          "color": "#000"
+                        },
+                        "max": 3,
+                        "maxMessage": "最多添加3条"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "properties": {
+          "add": {
+            "type": "void",
+            "x-component": "ArrayTable.Addition"
+          }
+        }
+      }
+    }
+  }
+}

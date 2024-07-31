@@ -51,6 +51,8 @@ import {
   ArrayBaseMoveUp,
   ArrayBaseIndex,
 } from './components/CustomArrayBaseComponent';
+import 'antd/dist/antd.css';
+import '@formily/antd/dist/antd.css';
 
 export interface McFormilyProps {
   /** Form 实例获取 */

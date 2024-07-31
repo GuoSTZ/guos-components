@@ -1,19 +1,21 @@
 import { Button, Col, Row } from 'antd';
 import { FormRender } from 'guos-components';
 import { Form as IFrom } from 'guos-components/FormRender/dependencies/formilyCore';
-import React from 'react';
+import React, { useRef } from 'react';
 import schema from './schema/basic.json';
 
 const App = () => {
-  let baseForm: IFrom;
+  const ref = useRef<{
+    form: IFrom;
+  }>(null);
 
   const handleSubmit = () => {
-    baseForm.submit().then(console.log);
+    ref.current?.form.submit().then(console.log);
   };
 
   return (
     <>
-      <FormRender getForm={(form) => (baseForm = form)} schema={schema} />
+      <FormRender ref={ref} schema={schema} />
       <Row>
         <Col offset={schema.form.labelCol}>
           <Button type="primary" onClick={handleSubmit}>

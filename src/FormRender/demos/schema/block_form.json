@@ -1,0 +1,129 @@
+{
+  "form": {
+    "labelCol": 6,
+    "wrapperCol": 14
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "collapse": {
+        "type": "void",
+        "x-decorator": "FormItem",
+        "x-component": "FormCollapse",
+        "x-component-props": {
+          "formCollapse": "{{useFormCollapse()}}",
+          "ghost": true,
+          "collapsible": "disabled"
+        },
+        "properties": {
+          "panel1": {
+            "type": "void",
+            "x-component": "FormCollapse.CollapsePanel",
+            "x-component-props": {
+              "header": "基本信息",
+              "showArrow": false
+            },
+            "properties": {
+              "layout": {
+                "type": "void",
+                "x-component": "FormLayout",
+                "x-component-props": {
+                  "labelCol": 6,
+                  "wrapperCol": 14
+                },
+                "properties": {
+                  "apiName": {
+                    "type": "string",
+                    "title": "名称",
+                    "x-decorator": "FormItem",
+                    "x-component": "Input",
+                    "x-component-props": {
+                      "placeholder": "请输入API名称，最多20字"
+                    },
+                    "x-validator": [
+                      {
+                        "required": true,
+                        "message": "请输入API名称"
+                      },
+                      {
+                        "max": 20,
+                        "message": "最多输入20字"
+                      },
+                      {
+                        "validateName": true
+                      }
+                    ]
+                  },
+                  "apiDesc": {
+                    "type": "string",
+                    "title": "描述",
+                    "x-decorator": "FormItem",
+                    "x-component": "Input.TextArea",
+                    "x-component-props": {
+                      "placeholder": "请输入API相关描述，例：接口使用场景，最多200个字符"
+                    },
+                    "x-validator": [
+                      {
+                        "required": true,
+                        "message": "请输入API描述"
+                      },
+                      {
+                        "max": 200,
+                        "message": "最多输入200字"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "panel2": {
+            "type": "void",
+            "x-component": "FormCollapse.CollapsePanel",
+            "x-component-props": {
+              "header": "请求参数",
+              "showArrow": false
+            },
+            "properties": {
+              "layout": {
+                "type": "void",
+                "x-component": "FormLayout",
+                "x-component-props": {
+                  "labelCol": 6,
+                  "wrapperCol": 14
+                },
+                "properties": {
+                  "apiUrl": {
+                    "type": "string",
+                    "title": "API URL",
+                    "x-decorator": "FormItem",
+                    "x-component": "Input",
+                    "x-component-props": {
+                      "placeholder": "请输入URL，不超过300字符"
+                    },
+                    "x-validator": [
+                      {
+                        "required": true,
+                        "message": "请输入URL"
+                      },
+                      {
+                        "max": 300,
+                        "message": "最多输入300字"
+                      }
+                    ]
+                  },
+                  "requestBody": {
+                    "type": "string",
+                    "title": "请求BODY",
+                    "x-decorator": "FormItem",
+                    "x-component": "Select"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

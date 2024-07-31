@@ -1,0 +1,128 @@
+{
+  "form": {
+    "labelCol": 6,
+    "wrapperCol": 10
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "source1": {
+        "title": "控制项1",
+        "type": "boolean",
+        "enum": [
+          { "label": "开启", "value": true },
+          { "label": "关闭", "value": false }
+        ],
+        "default": false,
+        "x-decorator": "FormItem",
+        "x-component": "Radio.Group"
+      },
+      "target1": {
+        "title": "受控项1",
+        "type": "string",
+        "x-decorator": "FormItem",
+        "x-component": "Input",
+        "x-component-props": {
+          "placeholder": "请输入内容"
+        },
+        "x-visible": "{{$values['source1'] === true}}",
+        "description": "通过表达式的方式来做逻辑处理，$values可以获取到Form表单所有字段的values值，然后控制x-visible属性"
+      },
+      "source2-1": {
+        "title": "控制项2-1",
+        "type": "boolean",
+        "enum": [
+          { "label": "开启", "value": true },
+          { "label": "关闭", "value": false }
+        ],
+        "default": false,
+        "x-decorator": "FormItem",
+        "x-component": "Radio.Group"
+      },
+      "source2-2": {
+        "title": "控制项2-2",
+        "type": "boolean",
+        "enum": [
+          { "label": "开启", "value": true },
+          { "label": "关闭", "value": false }
+        ],
+        "default": false,
+        "x-decorator": "FormItem",
+        "x-component": "Radio.Group"
+      },
+      "target2": {
+        "title": "受控项2",
+        "type": "string",
+        "x-decorator": "FormItem",
+        "x-component": "Input",
+        "x-component-props": {
+          "placeholder": "请输入内容"
+        },
+        "x-reactions": {
+          "dependencies": ["source2-1", "source2-2"],
+          "fulfill": {
+            "schema": {
+              "x-visible": "{{$deps[0] === true && $deps[1] === false}}"
+            }
+          }
+        },
+        "description": "被动控制，同时受控于 控制项2-1 和 控制项2-2 两个字段"
+      },
+      "source3": {
+        "title": "控制项3",
+        "type": "boolean",
+        "enum": [
+          { "label": "状态1", "value": 1 },
+          { "label": "状态2", "value": 2 },
+          { "label": "状态3", "value": 3 }
+        ],
+        "default": 3,
+        "x-decorator": "FormItem",
+        "x-component": "Radio.Group",
+        "x-reactions": [
+          {
+            "target": "target3-1",
+            "when": "{{$self.value === 1}}",
+            "fulfill": {
+              "state": {
+                "visible": true
+              }
+            },
+            "otherwise": {
+              "state": {
+                "visible": false
+              }
+            }
+          },
+          {
+            "target": "target3-2",
+            "fulfill": {
+              "state": {
+                "visible": "{{$self.value === 2}}"
+              }
+            }
+          }
+        ],
+        "description": "主动控制其他字段，同时控制 受控项3-1 和 受控项3-2"
+      },
+      "target3-1": {
+        "title": "受控项3-1",
+        "type": "string",
+        "x-decorator": "FormItem",
+        "x-component": "Input",
+        "x-component-props": {
+          "placeholder": "请输入内容"
+        }
+      },
+      "target3-2": {
+        "title": "受控项3-2",
+        "type": "string",
+        "x-decorator": "FormItem",
+        "x-component": "Input",
+        "x-component-props": {
+          "placeholder": "请输入内容"
+        }
+      }
+    }
+  }
+}

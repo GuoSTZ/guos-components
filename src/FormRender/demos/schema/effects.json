@@ -1,0 +1,47 @@
+{
+  "form": {
+    "labelCol": 6,
+    "wrapperCol": 10
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "dsName": {
+        "type": "string",
+        "title": "数据源名称",
+        "x-decorator": "FormItem",
+        "x-component": "Input",
+        "x-component-props": {
+          "placeholder": "请输入数据源名称"
+        }
+      },
+      "dsVersion": {
+        "type": "number",
+        "title": "数据源版本",
+        "x-decorator": "FormItem",
+        "x-component": "Select",
+        "x-component-props": {
+          "placeholder": "请选择数据源版本"
+        }
+      },
+      "dsGroup": {
+        "type": "number",
+        "title": "数据源分组",
+        "x-decorator": "FormItem",
+        "x-component": "Select",
+        "x-component-props": {
+          "placeholder": "请选择数据源分组"
+        }
+      },
+      "desc": {
+        "type": "string",
+        "title": "描述信息",
+        "x-decorator": "FormItem",
+        "x-component": "Input",
+        "x-component-props": {
+          "placeholder": "请输入描述信息"
+        }
+      }
+    }
+  }
+}

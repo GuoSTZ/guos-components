@@ -1,0 +1,40 @@
+{
+  "form": {
+    "labelCol": 6,
+    "wrapperCol": 10
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "aa": {
+        "type": "string",
+        "title": "字段一",
+        "x-decorator": "FormItem",
+        "x-component": "Input",
+        "x-component-props": {
+          "placeholder": "请输入字段一"
+        }
+      },
+      "bb": {
+        "type": "string",
+        "title": "字段二",
+        "required": true,
+        "x-decorator": "FormItem",
+        "x-component": "Select",
+        "x-component-props": {
+          "placeholder": "请选择字段二"
+        },
+        "enum": [
+          {
+            "label": "选项1",
+            "value": 1
+          },
+          {
+            "label": "选项2",
+            "value": 2
+          }
+        ]
+      }
+    }
+  }
+}
