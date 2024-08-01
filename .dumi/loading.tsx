@@ -1,8 +1,8 @@
+import { Skeleton } from 'antd';
 import React from 'react';
-import Svg1 from '@/Loading/svg1';
 
 const Loading = () => {
-  return <Svg1 />;
+  return <Skeleton active />;
 };
 
 export default Loading;
