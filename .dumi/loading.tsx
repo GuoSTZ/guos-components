@@ -1,7 +1,8 @@
 import React from 'react';
+import Svg1 from '@/Loading/svg1';
 
 const Loading = () => {
-  return <div>Loading...</div>;
+  return <Svg1 />;
 };
 
 export default Loading;
