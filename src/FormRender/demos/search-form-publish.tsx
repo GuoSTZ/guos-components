@@ -2,8 +2,8 @@ import { Button } from 'antd';
 import { FormRender } from 'guos-components';
 import { Form as IFrom } from 'guos-components/FormRender/dependencies/formilyCore';
 import React, { useRef, useEffect, useCallback } from 'react';
-import schema from './schema/search_form.json';
-import './style/search_form.less';
+import schema from './schema/search-form.json';
+import './style/search-form.less';
 
 const PAYLOAD_TYPE = {
   SEARCH: 'handleSearch',

@@ -2,8 +2,8 @@ import { Button, Col, Row } from 'antd';
 import { FormRender } from 'guos-components';
 import { Form as IFrom } from 'guos-components/FormRender/dependencies/formilyCore';
 import React, { useMemo, useRef, useState } from 'react';
-import schema from './schema/form_control.json';
-import schema2 from './schema/form_control2.json';
+import schema from './schema/form-control.json';
+import schema2 from './schema/form-control2.json';
 
 const DYNAMIC_INJECT_SCHEMA: Record<string, unknown> = {
   type_1: schema,

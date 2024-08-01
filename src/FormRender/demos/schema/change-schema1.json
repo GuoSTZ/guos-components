@@ -1,0 +1,20 @@
+{
+  "form": {
+    "labelCol": 6,
+    "wrapperCol": 10
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "source1": {
+        "title": "标题1",
+        "type": "string",
+        "x-decorator": "FormItem",
+        "x-component": "Input",
+        "x-component-props": {
+          "placeholder": "这是schema1，请输入标题1"
+        }
+      }
+    }
+  }
+}

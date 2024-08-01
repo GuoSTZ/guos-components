@@ -1,8 +1,10 @@
+import { DeleteOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { Button, Col, Row } from 'antd';
 import { FormRender } from 'guos-components';
 import { Form as IFrom } from 'guos-components/FormRender/dependencies/formilyCore';
 import React, { useRef } from 'react';
-import schema from './schema/array_table.json';
+import schema from './schema/array-items.json';
+
 const App = () => {
   const ref = useRef<{
     form: IFrom;
@@ -14,9 +16,16 @@ const App = () => {
 
   return (
     <>
-      <FormRender ref={ref} schema={schema} />
+      <FormRender
+        ref={ref}
+        schema={schema}
+        scope={{
+          getDelete: () => <DeleteOutlined />,
+          getPlus: () => <PlusCircleOutlined />,
+        }}
+      />
       <Row>
-        <Col>
+        <Col offset={schema.form.labelCol}>
           <Button type="primary" onClick={handleSubmit}>
             提交
           </Button>

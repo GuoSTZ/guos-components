@@ -1,0 +1,103 @@
+{
+  "form": {
+    "labelCol": 6,
+    "wrapperCol": 14
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "string_array": {
+        "type": "array",
+        "x-component": "ArrayItems",
+        "x-decorator": "FormItem",
+        "default": [[]],
+        "title": "字符串数组",
+        "items": {
+          "type": "void",
+          "x-component": "Space",
+          "properties": {
+            "input": {
+              "type": "string",
+              "x-decorator": "FormItem",
+              "x-component": "Input",
+              "required": true
+            },
+            "remove": {
+              "type": "void",
+              "x-decorator": "FormItem",
+              "x-component": "ArrayBaseRemove",
+              "x-component-props": {
+                "type": "link",
+                "icon": "{{getDelete()}}",
+                "style": {
+                  "color": "#000"
+                }
+              },
+              "x-display": "{{$values['string_array'].length > 1 ? 'visible' : 'none'}}"
+            },
+            "add": {
+              "type": "void",
+              "x-decorator": "FormItem",
+              "x-component": "ArrayBaseAddition",
+              "x-component-props": {
+                "type": "link",
+                "icon": "{{getPlus()}}",
+                "style": {
+                  "color": "#000"
+                },
+                "max": 3,
+                "maxMessage": "最多添加3条"
+              }
+            }
+          }
+        }
+      },
+      "date_array": {
+        "type": "array",
+        "x-component": "ArrayItems",
+        "x-decorator": "FormItem",
+        "default": [{}],
+        "title": "日期数组",
+        "items": {
+          "type": "void",
+          "x-component": "Space",
+          "properties": {
+            "input": {
+              "type": "string",
+              "x-decorator": "FormItem",
+              "x-component": "DatePicker.RangePicker",
+              "required": true
+            },
+            "remove": {
+              "type": "void",
+              "x-decorator": "FormItem",
+              "x-component": "ArrayBaseRemove",
+              "x-component-props": {
+                "type": "link",
+                "icon": "{{getDelete()}}",
+                "style": {
+                  "color": "#000"
+                }
+              },
+              "x-display": "{{$values['date_array'].length > 1 ? 'visible' : 'none'}}"
+            },
+            "add": {
+              "type": "void",
+              "x-decorator": "FormItem",
+              "x-component": "ArrayBaseAddition",
+              "x-component-props": {
+                "type": "link",
+                "icon": "{{getPlus()}}",
+                "style": {
+                  "color": "#000"
+                },
+                "max": 3,
+                "maxMessage": "最多添加3条"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

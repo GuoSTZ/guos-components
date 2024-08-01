@@ -2,9 +2,9 @@ import { Button, Col, Row, Tabs, TabsProps } from 'antd';
 import { FormRender } from 'guos-components';
 import { Form as IFrom } from 'guos-components/FormRender/dependencies/formilyCore';
 import React, { useRef } from 'react';
-import schema from './schema/block_form.json';
-import schema2 from './schema/block_form2.json';
-import './style/block_form.less';
+import schema from './schema/block-form.json';
+import schema2 from './schema/block-form2.json';
+import './style/block-form.less';
 
 const App = () => {
   const ref = useRef<{

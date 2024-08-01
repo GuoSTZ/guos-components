@@ -4,7 +4,7 @@ const CompressionPlugin = require('compression-webpack-plugin');
 const NAMESPACE = 'g-components';
 
 export default defineConfig({
-  base: NAMESPACE,
+  base: `/${NAMESPACE}/`,
   publicPath: `/${NAMESPACE}/`,
   outputPath: NAMESPACE,
   themeConfig: {

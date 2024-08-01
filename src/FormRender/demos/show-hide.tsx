@@ -1,6 +1,6 @@
 import { FormRender } from 'guos-components';
 import React from 'react';
-import schema from './schema/show_hide.json';
+import schema from './schema/show-hide.json';
 
 const App = () => {
   return (
