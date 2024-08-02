@@ -8,6 +8,22 @@
         > .dumi-default-header-left {
           width: auto;
           margin-right: 40px;
+
+          > .dumi-default-logo {
+            animation: show-logo 2s ease-in-out;
+          }
+
+          @keyframes show-logo {
+            0% {
+              letter-spacing: -13px;
+              filter: blur(1px);
+            }
+
+            100% {
+              letter-spacing: 0;
+              filter: blur(0);
+            }
+          }
         }
       }
     }
