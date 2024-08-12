@@ -1,0 +1,50 @@
+{
+  "form": {
+    "labelCol": 6
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "grid": {
+        "type": "void",
+        "x-component": "FormGrid",
+        "x-component-props": {
+          "maxColumns": 2
+        },
+        "properties": {
+          "aa": {
+            "type": "string",
+            "title": "",
+            "x-decorator": "FormItem",
+            "x-decorator-props": {
+              "gridSpan": 2
+            },
+            "x-component": "BlockRadioGroup",
+            "x-component-props": {
+              "title": "aaaaaa",
+              "options": [
+                {
+                  "label": "选项1",
+                  "value": 1
+                },
+                {
+                  "label": "选项2",
+                  "value": 2
+                }
+              ]
+            }
+          },
+          "bb": {
+            "type": "string",
+            "title": "",
+            "x-decorator": "FormItem",
+            "x-component": "BlockSwitch",
+            "x-component-props": {
+              "title": "bbbbbb"
+            }
+          }
+        }
+      }
+    }
+  }
+}
