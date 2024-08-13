@@ -1,9 +1,10 @@
+import { DingdingOutlined, DropboxOutlined } from '@ant-design/icons';
 import { Button, Col, Row } from 'antd';
 import { FormRender } from 'guos-components';
 import { Form as IFrom } from 'guos-components/FormRender/dependencies/formilyCore';
 import React, { useMemo } from 'react';
-import schema from './schema/box.json';
-import Block from './components/Block';
+import schema from './schema/card.json';
+import Card from './components/Card';
 
 const App = () => {
   let baseForm: IFrom;
@@ -14,17 +15,27 @@ const App = () => {
 
   const components = useMemo(() => {
     return {
-      BlockRadioGroup: Block.RadioGroup,
-      BlockSwitch: Block.Switch,
-      BlockTitle: Block.Title,
+      CardRadioGroup: Card.RadioGroup,
+      CardSwitch: Card.Switch,
+      CardTitle: Card.Title,
+      CardCheckboxGroup: Card.CheckboxGroup,
     };
-  }, []);
+  }, [Card]);
+
+  const scope = useMemo(
+    () => ({
+      getDing: () => <DingdingOutlined />,
+      getDropbox: () => <DropboxOutlined />,
+    }),
+    [],
+  );
 
   return (
     <>
       <FormRender
         getForm={(form) => (baseForm = form)}
         schema={schema}
+        scope={scope}
         components={components}
       />
       <Row>

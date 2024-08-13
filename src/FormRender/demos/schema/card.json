@@ -22,7 +22,7 @@
                 "margin-bottom": 0
               }
             },
-            "x-component": "BlockTitle",
+            "x-component": "CardTitle",
             "x-component-props": {
               "title": "分块标题1",
               "description": "描述12312312321312"
@@ -35,7 +35,7 @@
             "x-decorator-props": {
               "gridSpan": 2
             },
-            "x-component": "BlockRadioGroup",
+            "x-component": "CardRadioGroup",
             "x-component-props": {
               "title": "aaaaaa",
               "options": [
@@ -47,16 +47,41 @@
                   "label": "选项2",
                   "value": 2
                 }
-              ]
+              ],
+              "avatarProps": {
+                "icon": "{{getDing()}}"
+              }
             }
           },
           "bb": {
             "type": "string",
             "title": "",
             "x-decorator": "FormItem",
-            "x-component": "BlockSwitch",
+            "x-component": "CardSwitch",
             "x-component-props": {
               "title": "bbbbbb"
+            }
+          },
+          "cc": {
+            "type": "string",
+            "title": "",
+            "x-decorator": "FormItem",
+            "x-component": "CardCheckboxGroup",
+            "x-component-props": {
+              "title": "cccccc",
+              "options": [
+                {
+                  "label": "选项1",
+                  "value": 1
+                },
+                {
+                  "label": "选项2",
+                  "value": 2
+                }
+              ],
+              "avatarProps": {
+                "icon": "{{getDropbox()}}"
+              }
             }
           }
         }
