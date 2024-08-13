@@ -12,6 +12,22 @@
           "maxColumns": 2
         },
         "properties": {
+          "title1": {
+            "type": "string",
+            "title": "",
+            "x-decorator": "FormItem",
+            "x-decorator-props": {
+              "gridSpan": 2,
+              "style": {
+                "margin-bottom": 0
+              }
+            },
+            "x-component": "BlockTitle",
+            "x-component-props": {
+              "title": "分块标题1",
+              "description": "描述12312312321312"
+            }
+          },
           "aa": {
             "type": "string",
             "title": "",

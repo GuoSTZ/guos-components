@@ -16,6 +16,7 @@ const App = () => {
     return {
       BlockRadioGroup: Block.RadioGroup,
       BlockSwitch: Block.Switch,
+      BlockTitle: Block.Title,
     };
   }, []);
 

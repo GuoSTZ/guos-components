@@ -44,4 +44,14 @@ Block.Switch = (props: any) => {
     </Block>
   );
 };
+Block.Title = (props: any) => {
+  const { title, description } = props;
+  return (
+    <div className={styles['block-title']}>
+      <span className={styles['block-title-title']}>{title}</span>
+      <span className={styles['block-title-desc']}>{description}</span>
+    </div>
+  );
+};
+
 export default Block;
