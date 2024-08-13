@@ -19,5 +19,5 @@ toc: content
 <code src="./demos/validate.tsx" title="校验规则" description="给出部分书写校验规则的方式"></code>
 <code src="./demos/change-schema.tsx" title="切换schema" description="整块schema的切换"></code>
 <code src="./demos/array-items.tsx" title="单项自增" description="支持增加控件，完成数组形式的输出"></code>
-<code src="./demos/box.tsx" title="非常规输入控件布局" description="111"></code>
+<code src="./demos/card.tsx" title="非常规输入控件布局" description="111"></code>
 <code src="./demos/modal.tsx" title="弹窗表单" description="弹窗中实现表单操作效果"></code>
