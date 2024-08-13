@@ -49,6 +49,8 @@ export interface TreeToTableProps<T> {
     checkAllText?: string;
     /** 避免children字段的存在，移动数据时，右侧表格出现children数据展开 */
     aliasChildren?: string;
+    /** 当只有一层数据时，勾选框进行对准处理，做成类List样式，如果数据为多层结构，该属性自动失效 */
+    alignCheckbox?: boolean;
   };
   /** 表格数据 */
   tableProps: TableProps<T> & {
@@ -97,6 +99,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       checkAll,
       checkAllText = 'Check All',
       aliasChildren = 'childrenStored',
+      alignCheckbox = false,
       ...restTreeProps
     } = treeProps;
     const {
@@ -116,6 +119,9 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
     const [treeSearchValue, setTreeSearchValue] = useState('');
     const [tableSearchValue, setTableSearchValue] = useState('');
     const [isCheckAll, setIsCheckAll] = useState(false);
+    const [treeMergedClassName, setTreeMergedClassName] = useState<
+      string | undefined
+    >();
 
     const allKeys = useRef(new Set<Key>());
     const parentNodeMap = useRef(new Map());
@@ -160,6 +166,23 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       loop(treeData);
     }, [treeData, loop]);
 
+    useEffect(() => {
+      // 避免一些无效渲染
+      if (!treeData || treeData?.length === 0) {
+        return;
+      }
+      const isOneLevel = !treeData.some((item) => item?.children?.length > 1);
+      if (!!isOneLevel && !!alignCheckbox) {
+        setTreeMergedClassName(
+          treeProps?.className
+            ? `${treeProps?.className} ${styles['tree-to-table-left-tree-align-checkbox']}`
+            : styles['tree-to-table-left-tree-align-checkbox'],
+        );
+      } else if (!!treeProps?.className) {
+        setTreeMergedClassName(treeProps?.className);
+      }
+    }, [treeProps.className, alignCheckbox, treeData]);
+
     // 将Set转换为Array
     const transferData = (params?: {
       needReverse?: boolean;
@@ -174,7 +197,10 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       }
       needReverse && data.reverse();
       setTableData(data);
-      needOnChange && onChange?.(data);
+      // needOnChange && onChange?.(data);
+      if (needOnChange) {
+        onChange?.(data);
+      }
     };
 
     /** 循环该节点的子节点，并勾选 */
@@ -237,7 +263,6 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
     // 处理回填
     useEffect(() => {
       if (treeData?.length > 0) {
-        // tableKeySet.current?.clear();
         checkedKeySet.current?.clear();
         value?.forEach((item) => {
           if (!item[rowKey]) {
@@ -320,6 +345,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
 
           if (
             (node.pKey === undefined && node[aliasChildren] === undefined) || // 这个是独立节点，既没有父节点，也没有子节点
+            (node.pKey !== undefined && pNode.disabled === true) || // 父节点存在且父节点置灰
             (node.pKey === undefined && parentNodeMap.current?.has(key)) || // 这个是根节点
             pNode?.checkable === false // 这个是父节点不可选的节点
           ) {
@@ -511,6 +537,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
               onCheck={onCheck}
               onSelect={onCheck}
               treeData={!!treeSearchValue ? filterTreeData : treeData}
+              className={treeMergedClassName}
             />
           ) : null}
         </div>

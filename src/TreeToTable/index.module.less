@@ -13,6 +13,22 @@
     border-radius: 2px;
   }
 
+  &-left {
+    &-tree-align-checkbox {
+      :global {
+        .@{ant-prefix}-tree-list {
+          .@{ant-prefix}-tree-treenode {
+            padding-left: 12px;
+
+            .@{ant-prefix}-tree-switcher {
+              display: none;
+            }
+          }
+        }
+      }
+    }
+  }
+
   &-header {
     display: flex;
     align-items: center;
@@ -33,6 +49,15 @@
 
   &-checkAll {
     padding-left: 12px;
+    padding-bottom: 4px;
+    height: 28px;
+    line-height: 24px;
+
+    :global {
+      .@{ant-prefix}-checkbox {
+        margin-right: 4px;
+      }
+    }
   }
 
   :global {

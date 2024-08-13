@@ -12,3 +12,4 @@ toc: content
 <code src="./g6/demos/demo2.tsx" title="网格布局"></code>
 <code src="./g6/demos/demo3.tsx" title="Dagre流程图"></code>
 <code src="./hooks/demos/useState.tsx" title="setState顺序问题测试"></code>
+<code src="./form/demos/watch.tsx" title="表单联动"></code>
