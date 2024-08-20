@@ -54,7 +54,7 @@ import {
 import 'antd/dist/antd.css';
 import '@formily/antd/dist/antd.css';
 
-export interface McFormilyProps {
+export interface FormRenderProps {
   /** Form 实例获取 */
   getForm?: (form: IForm<any>) => any;
   /** JSON 数据 */
@@ -137,7 +137,7 @@ const SchemaField = createSchemaField({
   },
 });
 
-const McFormily = React.forwardRef((props: McFormilyProps, ref: any) => {
+const FormRender = React.forwardRef((props: FormRenderProps, ref: any) => {
   const {
     getForm,
     schema = {},
@@ -213,7 +213,7 @@ const McFormily = React.forwardRef((props: McFormilyProps, ref: any) => {
   );
 });
 
-export default McFormily;
+export default FormRender;
 export {
   ArrayBaseAddition,
   ArrayBaseRemove,
