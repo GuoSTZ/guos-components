@@ -1,4 +1,4 @@
-import { Form, Select } from 'antd';
+import { Form, Select, Button } from 'antd';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 const DATA_HAS_B = ['x', 'y'];
@@ -116,7 +116,7 @@ const App = () => {
   return (
     <>
       <Form form={form} layout="vertical" autoComplete="off">
-        <Form.Item name="a" label="A">
+        <Form.Item name={['a', 0]} label="A">
           <Select options={aOptions} onChange={aOnChange} />
         </Form.Item>
 
@@ -134,6 +134,10 @@ const App = () => {
           <Select options={dOptions} />
         </Form.Item>
       </Form>
+
+      <Button onClick={() => form.validateFields().then(console.log)}>
+        提交
+      </Button>
     </>
   );
 };
