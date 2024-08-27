@@ -12,10 +12,6 @@ import {
 import { Button, Popconfirm, message } from 'antd';
 import cls from 'classnames';
 
-message.config({
-  prefixCls: 'McFormily-ant-message',
-});
-
 const { useArray, useIndex } = ArrayBase;
 
 const getSchemaDefaultValue = (schema: Schema): any => {

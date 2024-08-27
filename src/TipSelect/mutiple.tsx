@@ -35,13 +35,15 @@ type IOption = {
 
 export interface TipSelectProps extends Omit<SelectProps, 'options'> {
   options: Array<IOption>;
-  /** 数据变更时的方法回调，需要返回一个Promise */
+  /** 数据变更时的方法回调，需要返回一个 Promise */
   onChangeFn?: (value: string | number, option: IOption) => Promise<any>;
-  /** onChange的前置回调方式，返回为false时，则阻断组件onChange事件 */
+  /** onChangeFn 的前置回调方式，返回为 false 时，则阻断组件 onChangeFn 事件 */
   beforeOnChange?: (value: string | number, option: IOption) => boolean;
   /** 一些额外信息的传入 */
   extra?: Record<string, unknown>;
+  /** Tooltip 组件属性 */
   tooltipProps?: TooltipProps;
+  /** Tooltip 弹出框标题 */
   tooltipTitle?: string;
 }
 
@@ -144,6 +146,7 @@ function compareArrays(arr1: any[], arr2: any[]) {
 const TipSelect = (props: TipSelectProps) => {
   const {
     options = [],
+    onChange,
     onChangeFn,
     beforeOnChange,
     tooltipProps,
@@ -157,6 +160,7 @@ const TipSelect = (props: TipSelectProps) => {
   const [selectOption, setSelectOption] = useState<IOption>();
   const [nextSelectOption, setNextSelectOption] = useState<IOption>();
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
   const renderTip = (descriptions: IOption['descriptions']) => {
     return (
@@ -261,32 +265,46 @@ const TipSelect = (props: TipSelectProps) => {
       selectOption === undefined ||
       !isChanged(selectOption.descriptions, option.descriptions)
     ) {
-      // 如果是没有值时进行数据选择，那么不需要进行变更明细弹窗展示
-      props?.onChange?.(value, option);
-      setConfirmLoading(true);
-      onChangeFn &&
-        onChangeFn(value, option as IOption).finally(() => {
-          setConfirmLoading(false);
-        });
+      if (onChangeFn) {
+        setActionLoading(true);
+        onChangeFn(value, option)
+          .then(() => {
+            setActionLoading(false);
+            props?.onChange?.(value, option);
+          })
+          .catch(() => {
+            setConfirmLoading(false);
+            setActionLoading(false);
+          });
+      } else {
+        props?.onChange?.(value, option);
+      }
     } else {
       setModalOpen(true);
     }
   };
 
-  const handleModalOnOk = () => {
-    // setSelectOption(nextSelectOption);
+  const handleModalOnOk = useCallback(() => {
     setConfirmLoading(true);
-    onChangeFn &&
+    if (onChangeFn) {
+      setActionLoading(true);
       onChangeFn(nextSelectOption?.value as any, nextSelectOption as any)
         .then(() => {
           setConfirmLoading(false);
           setModalOpen(false);
+          setActionLoading(false);
+          onChange?.(nextSelectOption?.value, nextSelectOption as any);
         })
         .catch(() => {
           setConfirmLoading(false);
+          setActionLoading(false);
         });
-    props?.onChange?.(nextSelectOption?.value, nextSelectOption as any);
-  };
+    } else {
+      setConfirmLoading(false);
+      setModalOpen(false);
+      onChange?.(nextSelectOption?.value, nextSelectOption as any);
+    }
+  }, [nextSelectOption, onChange, onChangeFn]);
 
   const renderTemplate = (type: 'curr' | 'next') => {
     const config = {
@@ -350,6 +368,7 @@ const TipSelect = (props: TipSelectProps) => {
     <>
       <Select
         filterOption={handleFilter}
+        loading={actionLoading}
         {...restProps}
         value={(selectOption?.value as string) ?? null}
         showSearch
@@ -378,7 +397,7 @@ const TipSelect = (props: TipSelectProps) => {
           className={styles['tip-select-modal-alert']}
           type="warning"
           showIcon
-          message={`确定更改当前“${extra?.identityShowName}”的授权模板？`}
+          message={`确定更改当前“${extra?.origin}”的授权模板？`}
         />
         <div className={styles['tip-select-modal-templates']}>
           {renderTemplate('curr')}
