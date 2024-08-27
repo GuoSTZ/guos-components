@@ -12,8 +12,11 @@ import React, {
   memo,
   ReactElement,
   ReactNode,
+  Ref,
   useCallback,
   useEffect,
+  useLayoutEffect,
+  useRef,
   useState,
 } from 'react';
 import SvgLine from '../SvgLine';
@@ -78,6 +81,7 @@ function sortObjArray(arr1: any[], arr2: any[], attr: string) {
   return data;
 }
 
+/** 暂不考虑性能问题，，实现功能为主，故不做数据遍历相关限制 */
 function compareContent(content1: any[], content2: any[]) {
   let changes = [];
   let index1 = 0,
@@ -115,6 +119,7 @@ function compareContent(content1: any[], content2: any[]) {
   return changes;
 }
 
+/** 暂不考虑性能问题，，实现功能为主，故不做数据遍历相关限制 */
 function compareArrays(arr1: any[], arr2: any[]) {
   let array1 = [...arr1],
     array2 = [...arr2];
@@ -160,11 +165,40 @@ const TipSelect = (props: TipSelectProps) => {
   } = props;
   const mergedValue = props.value || props.defaultValue;
 
+  const leftRef = useRef<HTMLDivElement>(null);
+  const centerRef = useRef<HTMLDivElement>(null);
+  const rightRef = useRef<HTMLDivElement>(null);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [selectOption, setSelectOption] = useState<IOption>();
   const [nextSelectOption, setNextSelectOption] = useState<IOption>();
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+
+  useLayoutEffect(() => {
+    if (modalOpen) {
+      setTimeout(() => {
+        // const obj: any = {};
+        // for(let key in (leftRef?.current || {})) {
+        //   // @ts-ignore
+        //   obj[key] = leftRef?.current?.[key];
+        // }
+        // console.log(obj, leftRef.current)
+        const newMarginTop = Math.floor(
+          (Math.min(
+            leftRef.current?.offsetHeight || 0,
+            rightRef.current?.offsetHeight || 0,
+          ) -
+            (centerRef.current?.offsetHeight || 0)) /
+            2,
+        );
+        centerRef.current?.style?.setProperty(
+          'margin-top',
+          `${newMarginTop}px`,
+        );
+      }, 0);
+    }
+  }, [modalOpen, leftRef.current]);
 
   const renderTip = (descriptions: IOption['descriptions']) => {
     return (
@@ -310,7 +344,7 @@ const TipSelect = (props: TipSelectProps) => {
     }
   }, [nextSelectOption, onChange, onChangeFn]);
 
-  const renderTemplate = (type: 'curr' | 'next') => {
+  const renderTemplate = (type: 'curr' | 'next', ref: Ref<HTMLDivElement>) => {
     const config = {
       curr: {
         title: '原模板：',
@@ -335,7 +369,7 @@ const TipSelect = (props: TipSelectProps) => {
     }
 
     return (
-      <div className={styles['tip-select-modal-template']}>
+      <div className={styles['tip-select-modal-template']} ref={ref}>
         <div className={styles['tip-select-modal-template-title']}>
           {config[type].title}
         </div>
@@ -386,7 +420,7 @@ const TipSelect = (props: TipSelectProps) => {
         title="提醒"
         wrapClassName={styles['tip-select-modal']}
         bodyStyle={{
-          maxHeight: 400,
+          maxHeight: 550,
           overflowY: 'auto',
         }}
         open={modalOpen}
@@ -404,11 +438,14 @@ const TipSelect = (props: TipSelectProps) => {
           message={`确定更改当前“${extra?.origin}”的授权模板？`}
         />
         <div className={styles['tip-select-modal-templates']}>
-          {renderTemplate('curr')}
-          <div className={styles['tip-select-modal-templates-separate']}>
+          {renderTemplate('curr', leftRef)}
+          <div
+            className={styles['tip-select-modal-templates-separate']}
+            ref={centerRef}
+          >
             <SvgLine width={'100%'} text="变更明细" />
           </div>
-          {renderTemplate('next')}
+          {renderTemplate('next', rightRef)}
         </div>
       </Modal>
     </>
