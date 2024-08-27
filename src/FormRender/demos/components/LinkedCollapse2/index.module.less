@@ -1,0 +1,44 @@
+.linked-collapse-wrap {
+  .linked-collapse {
+    background: transparent;
+    border: none;
+
+    &-panel {
+      background: #fafafa;
+      border: 1px solid #d9d9d9;
+
+      &:not(:last-child) {
+        margin-bottom: 16px;
+      }
+
+      :global {
+        .@{ant-prefix}-collapse-content-box {
+          display: flex;
+
+          // 设置「全选」样式
+          > label {
+            align-self: flex-start;
+          }
+        }
+
+        .@{ant-prefix}-checkbox-wrapper {
+          margin-left: unset;
+        }
+      }
+
+      &-group {
+        display: flex;
+        flex-wrap: wrap;
+        flex: 1;
+      }
+
+      &-item {
+        flex: 1 1 50%;
+
+        &-with-child {
+          flex: unset;
+        }
+      }
+    }
+  }
+}

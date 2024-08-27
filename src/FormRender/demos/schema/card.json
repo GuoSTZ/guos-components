@@ -28,7 +28,7 @@
               "description": "描述12312312321312"
             }
           },
-          "aa": {
+          "data.{value, type: 1}": {
             "type": "string",
             "title": "",
             "x-decorator": "FormItem",
@@ -53,7 +53,7 @@
               }
             }
           },
-          "bb": {
+          "data[1].status": {
             "type": "string",
             "title": "",
             "x-decorator": "FormItem",
@@ -62,7 +62,7 @@
               "title": "bbbbbb"
             }
           },
-          "cc": {
+          "data[2].status": {
             "type": "string",
             "title": "",
             "x-decorator": "FormItem",

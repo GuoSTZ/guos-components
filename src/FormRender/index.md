@@ -22,3 +22,4 @@ toc: content
 <code src="./demos/card.tsx" title="非常规输入控件布局" description="111"></code>
 <code src="./demos/modal.tsx" title="弹窗表单" description="弹窗中实现表单操作效果"></code>
 <code src="./demos/linked-collapse.tsx" title="业务场景1" description="某个业务场景的demo实现"></code>
+<code src="./demos/linked-collapse2.tsx" title="业务场景1-第二种实现" description="不同数据结构下的实现"></code>
