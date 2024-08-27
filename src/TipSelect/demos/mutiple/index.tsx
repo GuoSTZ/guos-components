@@ -16,6 +16,10 @@ const App = () => {
       <Form form={form} layout="vertical" autoComplete="off">
         <Form.Item name="data" label="测试">
           <TipSelect
+            tooltipProps={{
+              placement: 'right',
+            }}
+            tooltipTitle="详情"
             style={{ width: 300 }}
             options={template}
             placeholder="请选择"

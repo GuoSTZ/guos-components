@@ -12,11 +12,14 @@
   }
 
   &-tips {
-    max-width: 400px;
+    width: 420px;
+    min-width: 420px;
 
     :global {
       .@{ant-prefix}-tooltip-inner {
+        max-height: 300px;
         padding: 16px;
+        overflow-y: auto;
         background: #fff;
       }
 
@@ -57,6 +60,45 @@
       .@{ant-prefix}-descriptions-item {
         padding-left: 8px;
         padding-bottom: 0;
+        white-space: nowrap;
+      }
+    }
+  }
+}
+
+.tip-select-tips-title {
+  position: relative;
+  padding-left: 8px;
+  font-size: 14px;
+  color: #000;
+
+  &::before {
+    position: absolute;
+    left: 0;
+    top: 4px;
+    content: '';
+    width: 4px;
+    height: 14px;
+    background: #3385ff;
+    border-radius: 2px;
+  }
+}
+
+.tip-select-tips-desc {
+  :global {
+    .@{ant-prefix}-descriptions-header {
+      margin: 0;
+
+      .@{ant-prefix}-descriptions-title {
+        font-size: 14px;
+        background-color: #f7f8fa;
+      }
+    }
+    .@{ant-prefix}-descriptions-row {
+      .@{ant-prefix}-descriptions-item {
+        padding-left: 8px;
+        padding-bottom: 0;
+        white-space: nowrap;
       }
     }
   }
@@ -78,23 +120,26 @@
 }
 
 .tip-select-modal {
+  @separateWith: 100px;
+
   &-templates {
     display: flex;
     align-items: center;
 
     &-separate {
-      width: 100px;
+      width: @separateWith;
       text-align: center;
     }
   }
 
   &-template {
-    width: 50%;
+    width: calc(50% - @separateWith / 2);
     padding: 8px;
     border: 1px solid #ced2de;
 
     &-text {
       font-weight: 600;
+      white-space: nowrap;
     }
   }
 

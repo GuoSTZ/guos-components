@@ -16,9 +16,9 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-
-import styles from './index.module.less';
 import SvgLine from '../SvgLine';
+
+import styles from './mutiple.module.less';
 
 type IOption = {
   label: string | ReactNode;
