@@ -7,7 +7,6 @@ import {
   Modal,
   TooltipProps,
 } from 'antd';
-import { DefaultOptionType } from 'antd/lib/select';
 import React, {
   Key,
   memo,
@@ -249,19 +248,15 @@ const TipSelect = (props: TipSelectProps) => {
     });
   };
 
-  const handleOnChange = (
-    value: string,
-    option: DefaultOptionType | DefaultOptionType[],
-  ) => {
-    const status = beforeOnChange?.(value, option as IOption);
+  const handleOnChange = (value: string, option: IOption) => {
+    const status = beforeOnChange?.(value, option);
     if (status === false) {
       props?.onChange?.(value, option);
       return;
     }
 
-    setNextSelectOption(option as IOption);
+    setNextSelectOption(option);
 
-    // @ts-ignore
     if (
       selectOption === undefined ||
       !isChanged(selectOption.descriptions, option.descriptions)
@@ -361,6 +356,7 @@ const TipSelect = (props: TipSelectProps) => {
         className={styles['tip-select']}
         popupClassName={styles['tip-select-dropdown']}
         options={getOptions()}
+        // @ts-ignore
         onChange={handleOnChange}
       />
       <Modal
