@@ -56,21 +56,26 @@ function getDifferentElements(array1: Array<Key>, array2: Array<Key>) {
   return Array.from([...diff1, ...diff2]);
 }
 
-function sortArray(arr: any[]) {
-  return arr
-    .sort((a, b) => {
-      if (a.name !== b.name) return a.name.localeCompare(b.name);
-      return a.content
-        .map((c: any) => c.label)
-        .join(',')
-        .localeCompare(b.content.map((c: any) => c.label).join(','));
-    })
-    .map((item) => ({
-      ...item,
-      content: item.content.sort((c1: any, c2: any) =>
-        c1.label.localeCompare(c2.label),
-      ),
-    }));
+/**
+ * 对象数组的排序，第二个数组按照第一个数组的属性顺序进行调整
+ * @param arr1 第一个对象数组
+ * @param arr2 第二个对象数据
+ * @param attr 根据对象的具体某个属性来进行排列 */
+function sortObjArray(arr1: any[], arr2: any[], attr: string) {
+  const map2 = arr2.reduce((acc, cur) => {
+    acc.set(cur?.[attr], cur);
+    return acc;
+  }, new Map());
+
+  const data = [];
+  arr1.forEach((item) => {
+    if (map2.has(item?.[attr])) {
+      data.push(map2.get(item?.[attr]));
+      map2.delete(item?.[attr]);
+    }
+  });
+  data.push(...map2.values());
+  return data;
 }
 
 function compareContent(content1: any[], content2: any[]) {
@@ -114,8 +119,7 @@ function compareArrays(arr1: any[], arr2: any[]) {
   let array1 = [...arr1],
     array2 = [...arr2];
   // 排序两个数组
-  array1 = sortArray(array1);
-  array2 = sortArray(array2);
+  array2 = sortObjArray(arr1, arr2, 'name');
 
   let result: any[] = [];
   let map1 = new Map(array1.map((item) => [item.name, item.content])); // 用于快速查找array1中的项

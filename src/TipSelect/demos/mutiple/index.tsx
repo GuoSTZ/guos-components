@@ -2,7 +2,7 @@ import TipSelect from 'guos-components/TipSelect/mutiple';
 import React, { useEffect } from 'react';
 import { Form, Button, message } from 'antd';
 
-import { template } from './data';
+import { template, template2 } from './data';
 
 function generateRandomString(length: number) {
   let result = '';
@@ -37,17 +37,10 @@ const App = () => {
             }}
             tooltipTitle="详情"
             style={{ width: 300 }}
-            options={template}
+            options={template2}
             placeholder="请选择"
             extra={{
               origin: randomString,
-            }}
-            onChangeFn={() => {
-              return new Promise((reslove) => {
-                setTimeout(() => {
-                  reslove(true);
-                }, 1000);
-              });
             }}
           />
         </Form.Item>
