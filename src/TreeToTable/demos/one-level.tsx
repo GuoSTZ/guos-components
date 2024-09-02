@@ -14,6 +14,11 @@ const App = () => {
         treeData: treeData_1_level,
         header: '待选项',
         showSearch: true,
+        filterSearch(filterValue, option) {
+          return option?.title
+            ?.toLowerCase?.()
+            ?.includes(filterValue?.toLowerCase?.());
+        },
         placeholder: '请输入',
         checkAllText: '全选',
         alignCheckbox: true,
@@ -42,6 +47,11 @@ const App = () => {
           <a onClick={() => treeToTableRef.current?.tableDeleteAll()}>清空</a>,
         ],
         showSearch: true,
+        filterSearch(filterValue, option) {
+          return option?.title
+            ?.toLowerCase?.()
+            ?.includes(filterValue?.toLowerCase?.());
+        },
         placeholder: '请输入',
       }}
     />
