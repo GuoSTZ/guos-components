@@ -1,0 +1,59 @@
+.collapse-tree {
+  width: 320px;
+  padding-right: 8px;
+  overflow-y: auto;
+
+  div.collapse-tree-wrap {
+    position: relative;
+    align-items: center;
+    height: 40px;
+    padding-bottom: 0;
+    border: 1px solid #e6e9f0;
+    border-radius: 4px;
+    transition: 0.2s;
+
+    &:hover {
+      cursor: pointer;
+      border-color: #3385ff;
+    }
+
+    &:not(:first-child) {
+      margin-top: 8px;
+    }
+
+    &:global(.@{ant-prefix}-tree-treenode-checkbox-checked),
+    &:global(.@{ant-prefix}-tree-treenode-checkbox-indeterminate) {
+      border-color: #3385ff;
+    }
+    &:global(.@{ant-prefix}-tree-treenode) {
+      width: 100%;
+    }
+
+    :global {
+      .@{ant-prefix}-tree-switcher {
+        display: none;
+      }
+      .@{ant-prefix}-tree-checkbox {
+        margin: 0;
+        margin-left: 12px;
+        z-index: 1;
+      }
+      .@{ant-prefix}-tree-node-content-wrapper {
+        position: absolute;
+        width: 100%;
+        padding: 8px 0 8px 36px;
+
+        &:hover {
+          background-color: transparent;
+        }
+      }
+      .@{ant-prefix}-tree-node-selected {
+        background-color: transparent;
+      }
+    }
+  }
+
+  :global(.@{ant-prefix}-tree-treenode):not(.collapse-tree-wrap) {
+    transform: translateX(-24px);
+  }
+}

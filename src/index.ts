@@ -1,3 +1,4 @@
+export { default as CollapseTree } from './CollapseTree';
 export { default as DataBlock } from './DataBlock';
 export { default as DirectoryInput } from './DirectoryInput';
 export { default as EditTable } from './EditTable';
