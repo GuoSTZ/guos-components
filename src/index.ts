@@ -1,3 +1,4 @@
+export { default as AllSelect } from './AllSelect';
 export { default as CollapseTree } from './CollapseTree';
 export { default as DataBlock } from './DataBlock';
 export { default as DirectoryInput } from './DirectoryInput';
