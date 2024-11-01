@@ -16,7 +16,7 @@ const App = () => {
         header: '待选项',
         showSearch: true,
         filterSearch(filterValue, option) {
-          return option?.title
+          return option?.name
             ?.toLowerCase?.()
             ?.includes(filterValue?.toLowerCase?.());
         },
@@ -53,7 +53,7 @@ const App = () => {
         ],
         showSearch: true,
         filterSearch(filterValue, option) {
-          return option?.title
+          return option?.name
             ?.toLowerCase?.()
             ?.includes(filterValue?.toLowerCase?.());
         },
