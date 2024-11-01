@@ -68,6 +68,7 @@ export interface TreeToTableProps<T> {
   };
   /** 回填用的数据 */
   value?: any[];
+  /** 数据变化时的回调 */
   onChange?: (value: TreeToTableDataNode[]) => void;
 }
 
@@ -171,7 +172,9 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       if (!treeData || treeData?.length === 0) {
         return;
       }
-      const isOneLevel = !treeData.some((item) => item?.children?.length > 1);
+      const isOneLevel = !treeData.some(
+        (item) => item?.children && item?.children?.length > 1,
+      );
       if (!!isOneLevel && !!alignCheckbox) {
         setTreeMergedClassName(
           treeProps?.className

@@ -14,6 +14,18 @@
   }
 
   &-left {
+    :global {
+      .@{ant-prefix}-tree-list {
+        .@{ant-prefix}-tree-treenode {
+          padding-left: 5px;
+
+          .@{ant-prefix}-tree-switcher {
+            display: block;
+          }
+        }
+      }
+    }
+
     &-tree-align-checkbox {
       :global {
         .@{ant-prefix}-tree-list {
