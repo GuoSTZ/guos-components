@@ -29,15 +29,27 @@ const App = () => {
         },
       }}
       tableProps={{
-        dataSource: [],
         columns: [
           {
             title: '名称',
             dataIndex: 'name',
             key: 'name',
+            width: '100',
           },
           {
             title: '操作',
+            width: 100,
+            render: (_, record) => (
+              <Typography.Link
+                onClick={() => treeToTableRef.current?.tableDelete(record?.id)}
+              >
+                删除
+              </Typography.Link>
+            ),
+          },
+          {
+            title: '操作',
+            width: '200px',
             render: (_, record) => (
               <Typography.Link
                 onClick={() => treeToTableRef.current?.tableDelete(record?.id)}
@@ -58,6 +70,10 @@ const App = () => {
             ?.includes(filterValue?.toLowerCase?.());
         },
         placeholder: '请输入',
+        scroll: {
+          x: 400,
+          y: 150,
+        },
       }}
     />
   );

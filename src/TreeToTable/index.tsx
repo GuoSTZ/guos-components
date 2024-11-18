@@ -108,6 +108,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       showSearch: rightShowSearch,
       filterSearch: rightFilterSearch,
       placeholder: rightPlaceholder,
+      scroll: rightScroll,
       ...restTableProps
     } = tableProps;
 
@@ -558,9 +559,8 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
           ) : null}
           <VirtualTable
             size="small"
-            scroll={{ y: 356, x: 'hidden' }}
-            columns={[]}
             {...restTableProps}
+            scroll={{ y: 356, ...rightScroll }}
             dataSource={!!tableSearchValue ? filterTableData : tableData}
           />
         </div>

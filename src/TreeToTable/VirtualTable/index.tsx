@@ -1,9 +1,11 @@
-import { Table } from 'antd';
+import { Table, Empty } from 'antd';
 import type { TableProps } from 'antd';
 import ResizeObserver from 'rc-resize-observer';
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { VariableSizeGrid as Grid } from 'react-window';
 import styles from './index.module.less';
+
+const percentageRegex = /^(100|[1-9]?\d(\.\d+)?)%$/;
 
 const VirtualTable = <RecordType extends object>(
   props: TableProps<RecordType>,
@@ -11,17 +13,72 @@ const VirtualTable = <RecordType extends object>(
   const { columns = [], scroll } = props;
   const [tableWidth, setTableWidth] = useState(0);
 
-  const widthColumnCount = columns!.filter(({ width }) => !width).length;
-  const mergedColumns = columns!.map((column) => {
-    if (column.width) {
-      return column;
-    }
+  /** 未设置列宽的列数 */
+  const widthColumnCount = useMemo(
+    () => columns.filter(({ width }) => !width).length,
+    [columns],
+  );
 
-    return {
-      ...column,
-      width: Math.floor(tableWidth / widthColumnCount),
-    };
-  });
+  /** 定宽 */
+  const fixedWidth = useMemo(() => {
+    return columns.reduce((total, { width }) => {
+      if (!!width) {
+        if (typeof width === 'string' && percentageRegex.test(width)) {
+          return total + (parseFloat(width) * tableWidth) / 100;
+        } else {
+          return total + parseFloat(`${width || 0}`);
+        }
+      }
+      return total;
+    }, 0);
+  }, [columns, tableWidth]);
+
+  /** 处理后的columns数组 */
+  const mergedColumns = useMemo(() => {
+    return columns.map((column) => {
+      // 当所有列都设置了宽度，但总宽度小于等于表格时，均分剩余宽度
+      if (fixedWidth <= tableWidth && widthColumnCount === 0) {
+        const remainingWidth = parseFloat(
+          ((tableWidth - fixedWidth) / columns.length).toFixed(2),
+        );
+        let width = parseFloat(`${column.width || 0}`);
+        if (
+          typeof column.width === 'string' &&
+          percentageRegex.test(column.width)
+        ) {
+          width = (parseFloat(column.width) * tableWidth) / 100;
+        }
+        return {
+          ...column,
+          width: width + remainingWidth,
+        };
+      } else if (column.width) {
+        // 仅部分列设置宽度，对宽度进行计算
+        if (
+          typeof column.width === 'string' &&
+          percentageRegex.test(column.width)
+        ) {
+          const width = (parseFloat(column.width) * tableWidth) / 100;
+          return { ...column, width };
+        } else {
+          return { ...column, width: parseFloat(`${column.width || 0}`) };
+        }
+      } else {
+        /**
+         * 部分列未设置定宽时
+         * 如果定宽已经超出表格宽，则每列宽度为【表格宽/未设置宽度列数】
+         * 如果定宽没有超出表格宽，则每列宽度为【（表格宽-定宽）/未设置宽度列数】
+         */
+        return {
+          ...column,
+          width:
+            fixedWidth < tableWidth
+              ? Math.floor((tableWidth - fixedWidth) / widthColumnCount)
+              : Math.floor(tableWidth / widthColumnCount),
+        };
+      }
+    });
+  }, [columns, fixedWidth, tableWidth, widthColumnCount]);
 
   const gridRef = useRef<any>();
   const [connectObject] = useState<any>(() => {
@@ -66,10 +123,14 @@ const VirtualTable = <RecordType extends object>(
         columnCount={mergedColumns.length}
         columnWidth={(index: number) => {
           const { width } = mergedColumns[index];
+          let computedWidth = parseFloat(`${width || 0}`);
+          if (typeof width === 'string' && percentageRegex.test(width)) {
+            computedWidth = (tableWidth * parseFloat(width)) / 100;
+          }
           return totalHeight > Number(scroll!.y!) &&
             index === mergedColumns.length - 1
-            ? (width as number) - scrollbarSize - 1
-            : (width as number);
+            ? computedWidth - scrollbarSize - 1
+            : computedWidth;
         }}
         height={scroll!.y as number}
         rowCount={rawData.length}
@@ -78,7 +139,6 @@ const VirtualTable = <RecordType extends object>(
         onScroll={({ scrollLeft }: { scrollLeft: number }) => {
           onScroll({ scrollLeft });
         }}
-        style={{ overflowX: 'hidden' }}
       >
         {({
           columnIndex,
@@ -103,7 +163,9 @@ const VirtualTable = <RecordType extends object>(
                   : styles['virtual-table-cell']
               }
               style={style}
-              title={content}
+              title={
+                ['string', 'number'].includes(typeof content) ? content : ''
+              }
             >
               {content}
             </div>
@@ -126,7 +188,10 @@ const VirtualTable = <RecordType extends object>(
         pagination={false}
         components={{
           // @ts-ignore
-          body: renderVirtualList,
+          body:
+            props.dataSource?.length === 0
+              ? () => <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+              : renderVirtualList,
         }}
       />
     </ResizeObserver>
