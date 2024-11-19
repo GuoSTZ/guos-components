@@ -1,38 +1,22 @@
 # guos-components
 
-[![NPM version](https://img.shields.io/npm/v/guos-components.svg?style=flat)](https://npmjs.org/package/guos-components)
-[![NPM downloads](http://img.shields.io/npm/dm/guos-components.svg?style=flat)](https://npmjs.org/package/guos-components)
-
-A react library developed with dumi
-
-## Usage
-
-TODO
-
-## Options
-
-TODO
+个人日常开发和使用的组件库
+线上环境: https://guostz.com/g-components
 
 ## Development
 
 ```bash
-# install dependencies
-$ pnpm install
+# 安装
+pnpm install
 
-# develop library by docs demo
-$ pnpm start
+# 启动
+pnpm start
 
-# build library source code
-$ pnpm run build
+# 组件代码打包
+pnpm build
 
-# build library source code in watch mode
-$ pnpm run build:watch
-
-# build docs
-$ pnpm run docs:build
-
-# check your project for potential problems
-$ pnpm run doctor
+# 文档打包
+pnpm docs:build
 ```
 
 ## LICENSE
