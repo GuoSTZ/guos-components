@@ -93,7 +93,6 @@ export default defineConfig({
       .options({
         name: '[name].[ext]',
         outputPath: 'images/',
-      })
-      .end();
+      });
   },
 });
