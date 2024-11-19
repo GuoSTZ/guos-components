@@ -84,5 +84,16 @@ export default defineConfig({
         minRatio: 0.8, // 压缩率小于这个值时不进行压缩
       },
     ]);
+
+    config.module
+      .rule('png')
+      .test(/\.png$/)
+      .use('file-loader')
+      .loader('file-loader')
+      .options({
+        name: '[name].[ext]',
+        outputPath: 'images/',
+      })
+      .end();
   },
 });
