@@ -97,6 +97,232 @@
             }
           }
         }
+      },
+      "array": {
+        "type": "array",
+        "x-component": "ArrayItems",
+        "x-decorator": "FormItem",
+        "title": "对象数组",
+        "default": [{}],
+        "items": {
+          "type": "object",
+          "properties": {
+            "space": {
+              "type": "void",
+              "x-component": "Space",
+              "properties": {
+                "input": {
+                  "type": "string",
+                  "title": "输入框",
+                  "x-decorator": "FormItem",
+                  "x-component": "Input",
+                  "required": true
+                },
+                "select": {
+                  "type": "string",
+                  "title": "下拉框",
+                  "enum": [
+                    {
+                      "label": "选项1",
+                      "value": 1
+                    },
+                    {
+                      "label": "选项2",
+                      "value": 2
+                    }
+                  ],
+                  "x-decorator": "FormItem",
+                  "x-component": "Select",
+                  "x-component-props": {
+                    "style": {
+                      "width": 160
+                    }
+                  }
+                },
+                "remove": {
+                  "type": "void",
+                  "x-decorator": "FormItem",
+                  "x-component": "ArrayItems.Remove"
+                },
+                "add": {
+                  "type": "void",
+                  "x-decorator": "FormItem",
+                  "x-component": "ArrayBaseAddition",
+                  "x-component-props": {
+                    "type": "link",
+                    "icon": "{{getPlus()}}",
+                    "style": {
+                      "color": "#000"
+                    },
+                    "max": 3,
+                    "maxMessage": "最多添加3条"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "array1": {
+        "type": "array",
+        "x-component": "ArrayItems",
+        "x-decorator": "FormItem",
+        "title": "对象数组1",
+        "items": {
+          "type": "object",
+          "properties": {
+            "space": {
+              "type": "void",
+              "x-component": "Space",
+              "properties": {
+                "sort": {
+                  "type": "void",
+                  "x-decorator": "FormItem",
+                  "x-component": "ArrayItems.SortHandle"
+                },
+                "date": {
+                  "type": "string",
+                  "title": "日期",
+                  "x-decorator": "FormItem",
+                  "x-component": "DatePicker.RangePicker",
+                  "x-component-props": {
+                    "style": {
+                      "width": 160
+                    }
+                  }
+                },
+                "input": {
+                  "type": "string",
+                  "title": "输入框",
+                  "x-decorator": "FormItem",
+                  "x-component": "Input"
+                },
+                "select": {
+                  "type": "string",
+                  "title": "下拉框",
+                  "enum": [
+                    {
+                      "label": "选项1",
+                      "value": 1
+                    },
+                    {
+                      "label": "选项2",
+                      "value": 2
+                    }
+                  ],
+                  "x-decorator": "FormItem",
+                  "x-component": "Select",
+                  "x-component-props": {
+                    "style": {
+                      "width": 160
+                    }
+                  }
+                },
+                "remove": {
+                  "type": "void",
+                  "x-decorator": "FormItem",
+                  "x-component": "ArrayItems.Remove"
+                }
+              }
+            }
+          }
+        },
+        "properties": {
+          "add": {
+            "type": "void",
+            "title": "添加条目",
+            "x-component": "ArrayItems.Addition"
+          }
+        }
+      },
+      "array2": {
+        "type": "array",
+        "x-component": "ArrayItems",
+        "x-decorator": "FormItem",
+        "x-component-props": {
+          "style": {
+            "width": 300
+          }
+        },
+        "title": "对象数组2",
+        "items": {
+          "type": "object",
+          "x-decorator": "ArrayItems.Item",
+          "properties": {
+            "sort": {
+              "type": "void",
+              "x-decorator": "FormItem",
+              "x-component": "ArrayItems.SortHandle"
+            },
+            "input": {
+              "type": "string",
+              "title": "输入框",
+              "x-decorator": "Editable",
+              "x-component": "Input",
+              "x-component-props": {
+                "bordered": false
+              }
+            },
+            "config": {
+              "type": "object",
+              "title": "配置复杂数据",
+              "x-component": "Editable.Popover",
+              "x-reactions": "{{(field)=>field.title = field.value && field.value.input || field.title}}",
+              "properties": {
+                "date": {
+                  "type": "string",
+                  "title": "日期",
+                  "x-decorator": "FormItem",
+                  "x-component": "DatePicker.RangePicker",
+                  "x-component-props": {
+                    "style": {
+                      "width": 160
+                    }
+                  }
+                },
+                "input": {
+                  "type": "string",
+                  "title": "输入框",
+                  "x-decorator": "FormItem",
+                  "x-component": "Input"
+                },
+                "select": {
+                  "type": "string",
+                  "title": "下拉框",
+                  "enum": [
+                    {
+                      "label": "选项1",
+                      "value": 1
+                    },
+                    {
+                      "label": "选项2",
+                      "value": 2
+                    }
+                  ],
+                  "x-decorator": "FormItem",
+                  "x-component": "Select",
+                  "x-component-props": {
+                    "style": {
+                      "width": 160
+                    }
+                  }
+                }
+              }
+            },
+            "remove": {
+              "type": "void",
+              "x-decorator": "FormItem",
+              "x-component": "ArrayItems.Remove"
+            }
+          }
+        },
+        "properties": {
+          "add": {
+            "type": "void",
+            "title": "添加条目",
+            "x-component": "ArrayItems.Addition"
+          }
+        }
       }
     }
   }
