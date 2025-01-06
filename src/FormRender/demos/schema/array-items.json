@@ -323,6 +323,126 @@
             "x-component": "ArrayItems.Addition"
           }
         }
+      },
+      "array3": {
+        "type": "array",
+        "x-component": "ArrayItems",
+        "x-decorator": "FormItem",
+        "x-decorator-props": {
+          "wrapperCol": 24
+        },
+        "default": [{}],
+        "items": {
+          "type": "object",
+          "properties": {
+            "block": {
+              "type": "void",
+              "x-component": "div",
+              "x-component-props": {
+                "style": {
+                  "display": "flex",
+                  "alignItems": "center",
+                  "columnGap": 8
+                }
+              },
+              "properties": {
+                "block": {
+                  "type": "void",
+                  "x-component": "div",
+                  "x-component-props": {
+                    "style": {
+                      "display": "flex",
+                      "flex": 1,
+                      "flexDirection": "column",
+                      "backgroundColor": "#f0f0f0"
+                    }
+                  },
+                  "properties": {
+                    "input": {
+                      "type": "string",
+                      "title": "输入框",
+                      "x-decorator": "FormItem",
+                      "x-decorator-props": {
+                        "labelCol": 6,
+                        "wrapperStyle": {
+                          "paddingRight": 56
+                        }
+                      },
+                      "x-component": "Input",
+                      "required": true
+                    },
+                    "select": {
+                      "type": "string",
+                      "title": "下拉框",
+                      "enum": [
+                        {
+                          "label": "选项1",
+                          "value": 1
+                        },
+                        {
+                          "label": "选项2",
+                          "value": 2
+                        }
+                      ],
+                      "x-decorator": "FormItem",
+                      "x-decorator-props": {
+                        "labelCol": 6,
+                        "wrapperStyle": {
+                          "paddingRight": 56
+                        }
+                      },
+                      "x-component": "Select",
+                      "x-component-props": {
+                        "style": {
+                          "width": "100%"
+                        }
+                      },
+                      "required": true
+                    }
+                  }
+                },
+                "operation": {
+                  "type": "void",
+                  "x-component": "Space",
+                  "x-component-props": {
+                    "style": {
+                      "position": "absolute",
+                      "right": 0
+                    }
+                  },
+                  "properties": {
+                    "add": {
+                      "type": "void",
+                      "x-decorator": "FormItem",
+                      "x-component": "ArrayBaseAddition",
+                      "x-component-props": {
+                        "type": "link",
+                        "icon": "{{getPlus()}}",
+                        "style": {
+                          "color": "#000"
+                        },
+                        "max": 3,
+                        "maxMessage": "最多添加3条"
+                      }
+                    },
+                    "remove": {
+                      "type": "void",
+                      "x-decorator": "FormItem",
+                      "x-component": "ArrayBaseRemove",
+                      "x-component-props": {
+                        "type": "link",
+                        "icon": "{{getDelete()}}",
+                        "style": {
+                          "color": "#000"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
