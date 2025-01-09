@@ -53,7 +53,7 @@ export const ArrayBaseAddition = (props: any) => {
       {...props}
       disabled={self?.disabled}
       className={cls(`${prefixCls}-addition`, props.className)}
-      onClick={(e) => {
+      onClick={async (e) => {
         if (array.props?.disabled) return;
         if (
           typeof props.max === 'number' &&
@@ -62,16 +62,31 @@ export const ArrayBaseAddition = (props: any) => {
           message.error(props.maxMessage);
           return;
         }
-        const defaultValue = getDefaultValue(props.defaultValue, array.schema);
-        if (props.method === 'unshift') {
-          array.field?.unshift?.(defaultValue);
-          array.props?.onAdd?.(0);
+        const addData = () => {
+          const defaultValue = getDefaultValue(
+            props.defaultValue,
+            array.schema,
+          );
+          if (props.method === 'unshift') {
+            array.field?.unshift?.(defaultValue);
+            array.props?.onAdd?.(0);
+          } else {
+            array.field?.push?.(defaultValue);
+            array.props?.onAdd?.(array?.field?.value?.length - 1);
+          }
+          if (props.onClick) {
+            props.onClick(e);
+          }
+        };
+        if (props.validate) {
+          try {
+            await array.field?.validate();
+            addData();
+          } catch (error) {
+            console.log(error);
+          }
         } else {
-          array.field?.push?.(defaultValue);
-          array.props?.onAdd?.(array?.field?.value?.length - 1);
-        }
-        if (props.onClick) {
-          props.onClick(e);
+          addData();
         }
       }}
     />
