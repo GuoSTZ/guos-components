@@ -197,7 +197,7 @@ const AllSelect: CompoundedComponent = (props) => {
       const menu = (
         <React.Fragment>
           {selectAll && !!options?.length && (
-            <div className={styles['mc-tree-select-all']}>
+            <div className={styles['all-select-all']}>
               <Checkbox
                 checked={selectedAll}
                 onChange={selectAllOnChange}
