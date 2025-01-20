@@ -10,7 +10,7 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import { Tree, TreeProps, Checkbox, TableProps, Input } from 'antd';
+import { Tree, TreeProps, Checkbox, TableProps, Input, Empty } from 'antd';
 import { DataNode } from 'antd/lib/tree';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import VirtualTable from './VirtualTable';
@@ -37,6 +37,11 @@ export interface TreeToTableProps<T> {
     showSearch?: boolean;
     /** 树自定义搜索回调 */
     filterSearch?: (filterValue: string, data: any) => boolean;
+    /** 树自定义过滤数据 */
+    filterData?: (
+      treeData: TreeToTableDataNode[],
+      searchValue: string,
+    ) => TreeToTableDataNode[];
     /** 树搜索框底部文字 */
     placeholder?: string;
     /** 树组件是否显示全选组件 */
@@ -94,6 +99,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       header: leftHeader,
       showSearch: leftShowSearch,
       filterSearch: leftFilterSearch,
+      filterData: leftFilterData,
       placeholder: leftPlaceholder,
       showCheckAll = true,
       onCheckAll,
@@ -108,6 +114,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       showSearch: rightShowSearch,
       filterSearch: rightFilterSearch,
       placeholder: rightPlaceholder,
+      // dataSource: rightDataSource,
       scroll: rightScroll,
       ...restTableProps
     } = tableProps;
@@ -423,6 +430,9 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       tree: TreeToTableDataNode[],
       searchValue: string,
     ) => {
+      if (!!leftFilterData) {
+        return leftFilterData(tree, searchValue);
+      }
       const result = [];
       for (const node of tree) {
         const data = searchTree(node, searchValue);
@@ -465,21 +475,22 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
     }, [tableData, tableSearchValue]);
 
     /** 自定义渲染组件头部 */
-    const renderHeader = (
-      header: string | ReactNode[] | ((info: any) => ReactNode[]),
-    ) => {
-      if (typeof header === 'string') {
-        return header;
-      } else if (typeof header === 'function') {
-        return header({ checkedKeySet: Array.from(checkedKeySet.current) }).map(
-          (item: React.ReactNode) => <div>{item}</div>,
-        );
-      } else if (Array.isArray(header)) {
-        return header.map((item) => <div>{item}</div>);
-      } else {
-        return null;
-      }
-    };
+    const renderHeader = useCallback(
+      (header: string | ReactNode[] | ((info: any) => ReactNode[])) => {
+        if (typeof header === 'string') {
+          return header;
+        } else if (typeof header === 'function') {
+          return header({
+            checkedKeySet: Array.from(checkedKeySet.current),
+          }).map((item: React.ReactNode) => <div>{item}</div>);
+        } else if (Array.isArray(header)) {
+          return header.map((item) => <div>{item}</div>);
+        } else {
+          return null;
+        }
+      },
+      [],
+    );
 
     useImperativeHandle(
       ref,
@@ -494,6 +505,9 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
 
     // 树组件全选组件，受控处理
     useEffect(() => {
+      if (treeData?.length === 0) {
+        return;
+      }
       if (checkAll === true) {
         treeCheckAll({ target: { checked: true } } as CheckboxChangeEvent);
       } else if (checkAll === false) {
@@ -518,7 +532,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
               />
             </div>
           ) : null}
-          {showCheckAll ? (
+          {showCheckAll && treeData?.length > 0 ? (
             <div className={styles['tree-to-table-checkAll']}>
               <Checkbox
                 checked={checkAll ?? isCheckAll}
@@ -543,7 +557,9 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
               treeData={!!treeSearchValue ? filterTreeData : treeData}
               className={treeMergedClassName}
             />
-          ) : null}
+          ) : (
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+          )}
         </div>
 
         <div className={styles['tree-to-table-right']}>
