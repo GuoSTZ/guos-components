@@ -91,6 +91,16 @@ const defaultTreeFilterSearch = (value: string, record: any) =>
 const defaultTableFilterSearch = (value: string, record: any) =>
   record.name && record.name.toLowerCase().includes(value.toLowerCase());
 
+const debounce = <T extends (...args: any[]) => any>(fn: T, delay: number) => {
+  let timeoutId: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      fn(...args);
+    }, delay);
+  };
+};
+
 const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
   (props, ref) => {
     const { treeProps, tableProps, value, onChange } = props;
@@ -143,17 +153,15 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
         const len = data.length;
         const childKeySet = new Set();
         for (let i = 0; i < len; i++) {
-          const item = data[i];
+          const item = { ...data[i] };
           pKey && (item.pKey = pKey);
           pName && (item.pName = pName);
           const key = item[rowKey];
           const name = item[rowTitle];
           item[aliasChildren] = item[rowChildren];
-          treeDataMap.current?.set(key, {
-            ...item,
-            children: null,
-            [aliasChildren]: item[rowChildren],
-          });
+          delete item.children;
+          treeDataMap.current?.set(key, item);
+
           // 过滤掉「禁用」和「不可勾选」的数据
           item.disabled !== true &&
             item.checkable !== false &&
@@ -208,13 +216,12 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       }
       needReverse && data.reverse();
       setTableData(data);
-      // needOnChange && onChange?.(data);
       if (needOnChange) {
         onChange?.(data);
       }
     };
 
-    /** 循环该节点的子节点，并勾选 */
+    /** 遍历指定节点的子节点，并勾选 */
     const loopCNodeForCheck = useCallback(
       (key: Key, callback: (key: Key) => void) => {
         const childKeySet = parentNodeMap.current?.get(key);
@@ -232,7 +239,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       [],
     );
 
-    /** 循环该节点的子节点，并取消勾选 */
+    /** 遍历指定节点的子节点，并取消勾选 */
     const loopCNodeForCancelCheck = useCallback(
       (key: Key, callback: (key: Key) => void) => {
         const childKeySet = parentNodeMap.current?.get(key);
@@ -250,7 +257,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       [],
     );
 
-    /** 找到该节点的父节点，并处理 */
+    /** 找到指定节点的父节点，并处理 */
     const loopPNode = useCallback((key: Key) => {
       const pKey = treeDataMap.current?.get(key)?.pKey;
       if (checkedKeySet.current?.has(pKey)) {
@@ -397,67 +404,81 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       onChange?.([]);
     };
 
+    const leftMergedFilterValue = useMemo(
+      () => leftFilterSearch || defaultTreeFilterSearch,
+      [leftFilterSearch],
+    );
+
+    /** 树搜索方法 */
+    const searchTree = useCallback(
+      (
+        treeNode: TreeToTableDataNode,
+        searchValue: string,
+      ): TreeToTableDataNode | null => {
+        if (leftMergedFilterValue(searchValue, treeNode)) {
+          return { ...treeNode };
+        }
+
+        // 如果没有子节点或子节点数组为空，直接返回null
+        if (!treeNode[rowChildren] || !treeNode[rowChildren].length) {
+          return null;
+        }
+
+        const children = treeNode[rowChildren];
+        const filteredChildren: TreeToTableDataNode[] = [];
+
+        for (let i = 0; i < children.length; i++) {
+          const filteredChild = searchTree(children[i], searchValue);
+          if (filteredChild !== null) {
+            filteredChildren.push(filteredChild);
+          }
+        }
+
+        return filteredChildren.length
+          ? { ...treeNode, [rowChildren]: filteredChildren }
+          : null;
+      },
+      [leftMergedFilterValue, rowChildren],
+    );
+
+    /** 计算搜索后的树数据方法 */
+    const getFilterTree = useCallback(
+      (tree: TreeToTableDataNode[], searchValue: string) => {
+        if (leftFilterData) {
+          return leftFilterData(tree, searchValue);
+        }
+
+        return (tree || [])
+          .map((node) => searchTree(node, searchValue))
+          .filter((node): node is TreeToTableDataNode => node !== null);
+      },
+      [leftFilterData, searchTree],
+    );
+
+    /** 计算搜索后的树数据 */
+    const filterTreeData = useMemo(
+      () =>
+        treeSearchValue ? getFilterTree(treeData, treeSearchValue) : treeData,
+      [treeData, treeSearchValue, getFilterTree],
+    );
+
     /** 树搜索 */
-    const leftMergedFilterValue = leftFilterSearch || defaultTreeFilterSearch;
     const treeSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       setTreeSearchValue(value);
     };
-    const searchTree: (
-      treeNode: TreeToTableDataNode,
-      searchValue: string,
-    ) => TreeToTableDataNode | null = (
-      treeNode: TreeToTableDataNode,
-      searchValue: string,
-    ) => {
-      if (leftMergedFilterValue(searchValue, treeNode)) {
-        return { ...treeNode };
-      }
-      if (!treeNode[rowChildren]) {
-        return null;
-      }
-      const result = [];
-      for (const child of treeNode[rowChildren]) {
-        const data = searchTree(child, searchValue);
-        data && result.push(data);
-      }
-      if (result.length === 0) {
-        return null;
-      }
-      return { ...treeNode, [rowChildren]: result };
-    };
-    const getFilterTree = (
-      tree: TreeToTableDataNode[],
-      searchValue: string,
-    ) => {
-      if (!!leftFilterData) {
-        return leftFilterData(tree, searchValue);
-      }
-      const result = [];
-      for (const node of tree) {
-        const data = searchTree(node, searchValue);
-        if (data) {
-          result.push(data);
-        }
-      }
-      return result;
-    };
-    const [filterTreeData] = useMemo(() => {
-      if (treeSearchValue) {
-        const data = getFilterTree(treeData, treeSearchValue);
-        return [data];
-      } else {
-        return [treeData];
-      }
-    }, [treeData, treeSearchValue]);
 
     /** 表格搜索 */
     const rightMergedFilterValue =
       rightFilterSearch || defaultTableFilterSearch;
+
+    /** 表格输入框回调 */
     const tableSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       setTableSearchValue(value);
     };
+
+    /** 计算搜索后的表格数据 */
     const [filterTableData] = useMemo(() => {
       if (tableSearchValue) {
         const len = tableData.length;
@@ -527,12 +548,14 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
             <div className={styles['tree-to-table-search']}>
               <Input
                 placeholder={leftPlaceholder}
-                onChange={treeSearch}
-                value={treeSearchValue}
+                onChange={debounce(treeSearch, 300)}
               />
             </div>
           ) : null}
-          {showCheckAll && treeData?.length > 0 ? (
+          {showCheckAll &&
+          (!!treeSearchValue
+            ? filterTreeData?.length > 0
+            : treeData?.length > 0) ? (
             <div className={styles['tree-to-table-checkAll']}>
               <Checkbox
                 checked={checkAll ?? isCheckAll}
@@ -542,7 +565,11 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
               </Checkbox>
             </div>
           ) : null}
-          {treeData?.length ? (
+          {(
+            !!treeSearchValue
+              ? filterTreeData?.length > 0
+              : treeData?.length > 0
+          ) ? (
             <Tree
               height={356}
               defaultExpandAll
