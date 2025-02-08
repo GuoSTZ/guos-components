@@ -1,4 +1,12 @@
-import { Button, ModalProps, Table, Space, Typography, Popconfirm } from 'antd';
+import {
+  Button,
+  ModalProps,
+  Table,
+  TableProps,
+  Space,
+  Typography,
+  Popconfirm,
+} from 'antd';
 import React, {
   forwardRef,
   memo,
@@ -19,7 +27,13 @@ export interface ModalToTableProps {
     key: string;
     [key: string]: any;
   }>;
-  tableProps?: any;
+  tableProps?: TableProps<any> & {
+    operations?: {
+      delete?: {
+        renderable?: boolean;
+      };
+    };
+  };
   modalProps: ModalProps & {
     renderFormItem: (form: FormInstance) => React.ReactNode;
   };
@@ -118,12 +132,14 @@ const ModalToTable = forwardRef<any, ModalToTableProps>((props, ref) => {
               编辑
             </Typography.Link>
 
-            <Popconfirm
-              title="确定删除?"
-              onConfirm={() => handleOperation('delete', record)}
-            >
-              <Typography.Link>删除</Typography.Link>
-            </Popconfirm>
+            {tableProps?.operations?.delete?.renderable ? (
+              <Popconfirm
+                title="确定删除?"
+                onConfirm={() => handleOperation('delete', record)}
+              >
+                <Typography.Link>删除</Typography.Link>
+              </Popconfirm>
+            ) : null}
           </Space>
         );
       },
@@ -143,7 +159,7 @@ const ModalToTable = forwardRef<any, ModalToTableProps>((props, ref) => {
       <Table
         {...tableProps}
         dataSource={tableData}
-        columns={[...tableProps.columns, operations]}
+        columns={[...(tableProps?.columns || []), operations]}
       />
       <ModalForm
         title={modalStatus === 'add' ? '新增' : '编辑'}
