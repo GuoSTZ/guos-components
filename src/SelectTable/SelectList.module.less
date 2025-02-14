@@ -1,0 +1,43 @@
+.select-list {
+  padding: 12px;
+  border: 1px solid #e4e9ec;
+
+  .select-list-item-wrap {
+    display: flex;
+    align-items: center;
+    padding-bottom: 4px;
+  }
+
+  li.select-list-item {
+    display: flex;
+    height: 24px;
+    line-height: 24px;
+    margin: 0;
+    padding: 0 4px;
+  }
+
+  .select-list-item-selected {
+    background: skyblue;
+  }
+
+  .select-list-item-checkbox {
+    margin-right: 8px;
+  }
+
+  &-tree {
+    padding: 12px;
+    border: 1px solid #e4e9ec;
+
+    :global {
+      .@{ant-prefix}-tree-list {
+        .@{ant-prefix}-tree-treenode {
+          width: 100%;
+
+          .@{ant-prefix}-tree-switcher {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+}

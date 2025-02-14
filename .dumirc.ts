@@ -53,6 +53,7 @@ export default defineConfig({
     '@table-header-icon-color': '#82899e', // 表格 表头 icon颜色
     '@form-item-margin-bottom': '16px', // 表格item 距离底部边距
     '@table-expanded-row-bg': '#f7f8fa', // 表格展开背景色
+    '@ant-prefix': 'ant',
   },
   lessLoader: {
     modifyVars: {
