@@ -3,11 +3,12 @@ import { SelectTable } from 'guos-components';
 import { data as mockSchemaData } from './data/schema';
 import { data as mockTableData } from './data/table';
 import { data as mockColumnData } from './data/column';
+import { Button, Form } from 'antd';
 
 const schemaData = new Array(50).fill(0).map((item, index) => {
   return {
     ...mockSchemaData,
-    schema: `schema${index}`,
+    schema: `schemaschemaschemaschema${index}`,
   };
 });
 
@@ -51,8 +52,8 @@ const tableData = new Array(2500).fill(0).map((item, index) => {
   const schemaIndex = Math.floor(index / 50);
   return {
     ...mockTableData,
-    table: `table${index}`,
-    schema: `schema${schemaIndex}`,
+    table: `tabletabletabletable${index}`,
+    schema: `schemaschemaschemaschema${schemaIndex}`,
   };
 });
 
@@ -101,9 +102,9 @@ const columnData = new Array(125000).fill(0).map((item, index) => {
   const schemaIndex = Math.floor(tableIndex / 50);
   return {
     ...mockColumnData,
-    column: `column${index}`,
-    table: `table${tableIndex}`,
-    schema: `schema${schemaIndex}`,
+    column: `columncolumncolumncolumn${index}`,
+    table: `tabletabletabletable${tableIndex}`,
+    schema: `schemaschemaschemaschema${schemaIndex}`,
   };
 });
 
@@ -151,6 +152,7 @@ const mockFetchColumn = (params: any) => {
 
 const App = () => {
   const listConfig = {
+    header: '待选项',
     config: [
       {
         fetchData: mockFetchSchema,
@@ -159,7 +161,6 @@ const App = () => {
       },
       {
         fetchData: mockFetchTable,
-        checkable: false,
         needFetchParams: true,
         nextFetchParam: 'table',
       },
@@ -172,13 +173,26 @@ const App = () => {
   };
 
   const tableConfig = {
+    header: '已选项',
     columns: [
       { title: 'schema', dataIndex: 'schema', key: 'schema' },
       { title: '表', dataIndex: 'table', key: 'table' },
       { title: '列', dataIndex: 'column', key: 'column' },
     ],
+    rowKey: (record: any) =>
+      `${record.schema}-${record.table}-${record.column}`,
   };
 
-  return <SelectTable listProps={listConfig} tableProps={tableConfig} />;
+  // return <SelectTable listProps={listConfig} tableProps={tableConfig} />;
+  return (
+    <Form onFinish={console.log}>
+      <Form.Item label="aaa" name="aaa">
+        <SelectTable listProps={listConfig} tableProps={tableConfig} />
+      </Form.Item>
+      <Form.Item>
+        <Button htmlType="submit">提交</Button>
+      </Form.Item>
+    </Form>
+  );
 };
 export default App;

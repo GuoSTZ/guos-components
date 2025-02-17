@@ -1,7 +1,16 @@
 import { Checkbox, Input, List } from 'antd';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 import { WrapTree } from 'guos-components';
-import React, { Key, memo, useCallback, useEffect, useState } from 'react';
+import React, {
+  Key,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useImperativeHandle,
+  forwardRef,
+} from 'react';
 
 import styles from './SelectList.module.less';
 
@@ -17,15 +26,20 @@ export interface SelectListProps {
   /** 当前选中的值 */
   value?: string;
   /** 选择变化时的回调函数 */
-  onChange?: (value: Array<Key>) => void;
+  onChange?: (value: Array<Key>, items: Array<any>) => void;
   /** 是否使用虚拟滚动，默认不使用，采用分页方式 */
   virtual?: boolean;
   /** 是否可勾选 */
   checkable?: boolean;
 }
 
-const BOX_WIDTH = 212;
-const SelectList = (props: SelectListProps) => {
+export interface SelectListRef {
+  deleteOne: (key: Key) => void;
+  deleteAll: () => void;
+}
+
+const BOX_WIDTH = 188;
+const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
   const {
     fetchData,
     hasChildren,
@@ -37,8 +51,10 @@ const SelectList = (props: SelectListProps) => {
     checkable,
   } = props;
   const [checkRowKeys, setCheckRowKeys] = useState<Set<Key>>(new Set());
+  const [checkRows, setCheckRows] = useState(new Map());
   const [selectedItem, setSelectedItem] = useState<Record<string, string>>({});
-  const [data, setData] = useState<any[]>([]);
+  const [dataSource, setDataSource] = useState<any[]>([]);
+  const dataSourceMap = useRef(null);
   const [page, setPage] = useState({
     current: 1,
     pageSize: 10,
@@ -47,6 +63,7 @@ const SelectList = (props: SelectListProps) => {
 
   useEffect(() => {
     if (value) {
+      console.log(value, '======value');
       setCheckRowKeys(new Set(value || []));
     }
   }, [value]);
@@ -59,7 +76,11 @@ const SelectList = (props: SelectListProps) => {
       try {
         fetchData({ ...(fetchParams || {}), ...params, isPage: !virtual }).then(
           (data: any) => {
-            setData(data.items);
+            setDataSource(data.items);
+            dataSourceMap.current = data.items.reduce((pre: any, cur: any) => {
+              pre[cur.key] = cur;
+              return pre;
+            }, {});
             setPage({
               current: data.current,
               pageSize: data.pageSize,
@@ -88,17 +109,25 @@ const SelectList = (props: SelectListProps) => {
 
   /** list组件，勾选checkbox */
   const onCheck = useCallback(
-    (e: CheckboxChangeEvent, key: string) => {
+    (e: CheckboxChangeEvent, item: any) => {
       const newCheckRowKeys = new Set(checkRowKeys);
+      const newCheckRows = new Map(checkRows);
       if (e.target.checked) {
-        newCheckRowKeys.add(key);
+        newCheckRowKeys.add(item?.key);
+        newCheckRows.set(item?.key, item);
       } else {
-        newCheckRowKeys.delete(key);
+        newCheckRowKeys.delete(item?.key);
+        newCheckRows.delete(item?.key);
       }
       setCheckRowKeys(newCheckRowKeys);
-      onChange?.(Array.from(newCheckRowKeys));
+      setCheckRows(newCheckRows);
+
+      onChange?.(
+        Array.from(newCheckRowKeys),
+        Array.from(newCheckRows.values()),
+      );
     },
-    [checkRowKeys],
+    [checkRowKeys, checkRows, onChange],
   );
 
   /** list组件，点击item */
@@ -109,10 +138,10 @@ const SelectList = (props: SelectListProps) => {
       if (checkable) {
         onCheck(
           { ...e, target: { checked: !checkRowKeys.has(item.key) } },
-          item.key,
+          item,
         );
       } else {
-        onChange?.([item.key]);
+        onChange?.([item.key], [item]);
       }
     },
     [onCheck, checkRowKeys, checkable],
@@ -129,9 +158,8 @@ const SelectList = (props: SelectListProps) => {
   /** 树组件点击 */
   const treeOnSelect = useCallback(
     (keys: Key[], info: any) => {
-      console.log(keys, info, '======treeOnSelect');
       setCheckRowKeys(new Set(keys));
-      onChange?.(keys);
+      onChange?.(keys, info.selectedNodes);
     },
     [onChange],
   );
@@ -139,31 +167,47 @@ const SelectList = (props: SelectListProps) => {
   /** 树组件勾选 */
   const treeOnCheck = useCallback(
     (keys: Key[], info: any) => {
-      console.log(keys, info, '======treeOnCheck');
       setCheckRowKeys(new Set(keys));
-      onChange?.(keys);
+      onChange?.(keys, info.checkedNodes);
     },
     [onChange],
   );
+
+  const deleteOne = useCallback(
+    (key: Key) => {
+      // @ts-ignore
+      onCheck({ target: { checked: false } }, { key });
+    },
+    [onCheck],
+  );
+
+  const deleteAll = useCallback(() => {
+    setCheckRowKeys(new Set());
+    setCheckRows(new Map());
+
+    onChange?.([], []);
+  }, []);
+
+  useImperativeHandle(ref, () => ({
+    deleteOne,
+    deleteAll,
+  }));
 
   const renderListItem = useCallback(
     (item: any) => {
       let checkboxNode = null;
 
-      if (!hasChildren && checkable) {
+      if (checkable) {
         checkboxNode = (
           <Checkbox
             className={styles['list-item-checkbox']}
             checked={checkRowKeys.has(item.key)}
-            onChange={(e) => onCheck(e, item.key)}
+            onChange={(e) => onCheck(e, item)}
           />
         );
       }
       return (
-        <div
-          className={styles['select-list-item-wrap']}
-          style={{ display: 'flex', alignItems: 'center' }}
-        >
+        <div className={styles['select-list-item-wrap']}>
           {checkboxNode}
           <List.Item
             onClick={(e) => onSelect(e, item)}
@@ -172,7 +216,7 @@ const SelectList = (props: SelectListProps) => {
                 ? `${styles['select-list-item']} ${styles['select-list-item-selected']}`
                 : styles['select-list-item']
             }
-            style={{ cursor: 'pointer', width: '100%' }}
+            title={item.name}
           >
             {item.name}
           </List.Item>
@@ -193,7 +237,7 @@ const SelectList = (props: SelectListProps) => {
         height={336}
         checkable={checkable}
         selectable={!checkable}
-        treeData={data || []}
+        treeData={dataSource || []}
         fieldNames={{
           title: 'name',
         }}
@@ -209,18 +253,22 @@ const SelectList = (props: SelectListProps) => {
       <Input placeholder="请输入" onChange={onSearch} />
       <List
         size="small"
-        dataSource={data || []}
+        dataSource={dataSource || []}
         renderItem={renderListItem}
-        pagination={{
-          simple: true,
-          onChange: paginationOnChange,
-          total: page?.total || 0,
-          current: page?.current || 1,
-          pageSize: page?.pageSize || 10,
-        }}
+        pagination={
+          page?.total
+            ? {
+                simple: true,
+                onChange: paginationOnChange,
+                total: page?.total || 0,
+                current: page?.current || 1,
+                pageSize: page?.pageSize || 10,
+              }
+            : false
+        }
       />
     </div>
   );
-};
+});
 
 export default memo(SelectList);
