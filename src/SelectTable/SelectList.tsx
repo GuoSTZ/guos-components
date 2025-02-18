@@ -18,11 +18,9 @@ export interface SelectListProps {
   /** 获取数据的方法，返回一个Promise */
   fetchData: (params: Record<string, any>) => Promise<any>;
   /** 是否需要传递请求参数，开启后，如果不传递fetchParams参数，则不会发送请求 */
-  needFetchParams?: boolean;
+  needFetchParam?: boolean;
   /** 传递给fetchData的参数 */
   fetchParams?: Record<string, any>;
-  /** 是否存在下一层数据 */
-  hasChildren?: boolean;
   /** 当前选中的值 */
   value?: string;
   /** 选择变化时的回调函数 */
@@ -44,8 +42,7 @@ const BOX_WIDTH = 188;
 const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
   const {
     fetchData,
-    hasChildren,
-    needFetchParams = false,
+    needFetchParam = true,
     fetchParams,
     value,
     onChange,
@@ -65,14 +62,29 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
 
   useEffect(() => {
     if (value) {
-      console.log(value, '=========value');
       setCheckRowKeys(new Set(value || []));
     }
   }, [value]);
 
+  /** 清除选中数据 */
+  const clearSelected = useCallback(() => {
+    setSelectedItem({});
+  }, [setSelectedItem]);
+
+  /** 清空数据及分页 */
+  const clearDataSource = useCallback(() => {
+    setDataSource([]);
+    dataSourceMap.current = null;
+    setPage({
+      current: 1,
+      pageSize: 10,
+      total: 0,
+    });
+  }, [setDataSource]);
+
   const getData = useCallback(
     (params: Record<string, any> = {}) => {
-      if (needFetchParams && !fetchParams) {
+      if (needFetchParam && !fetchParams) {
         return;
       }
       try {
@@ -92,9 +104,11 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
         );
       } catch (error) {
         console.log(error);
+        // 请求失败的话，执行一遍清除操作，避免脏数据
+        clearDataSource();
       }
     },
-    [virtual, needFetchParams, fetchParams],
+    [virtual, needFetchParam, fetchParams, clearDataSource],
   );
 
   useEffect(() => {
@@ -191,14 +205,6 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
     onChange?.([], []);
   }, [setCheckRowKeys, setCheckRows, onChange]);
 
-  const clearSelected = useCallback(() => {
-    setSelectedItem({});
-  }, [setSelectedItem]);
-
-  const clearDataSource = useCallback(() => {
-    setDataSource([]);
-  }, [setDataSource]);
-
   useImperativeHandle(
     ref,
     () => ({
@@ -240,7 +246,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
         </div>
       );
     },
-    [hasChildren, checkRowKeys, onCheck, onSelect, selectedItem.key, checkable],
+    [checkRowKeys, onCheck, onSelect, selectedItem.key, checkable],
   );
 
   if (virtual) {
@@ -251,7 +257,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
         showSearch={{
           placeholder: '请输入',
         }}
-        height={336}
+        height={309}
         checkable={checkable}
         selectable={!checkable}
         treeData={dataSource || []}
@@ -267,7 +273,9 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
 
   return (
     <div className={styles['select-list']} style={{ width: BOX_WIDTH }}>
-      <Input placeholder="请输入" onChange={onSearch} />
+      <div className={styles['select-list-input']}>
+        <Input placeholder="请输入" onChange={onSearch} />
+      </div>
       <List
         size="small"
         dataSource={dataSource || []}

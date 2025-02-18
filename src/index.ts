@@ -22,5 +22,5 @@ export {
   type TreeToTableDataNode,
   type TreeToTableRef,
 } from './TreeToTable';
-export { default as VirtualTable } from './TreeToTable/VirtualTable';
+export { default as VirtualTable } from './VirtualTable';
 export { default as WrapTree, type WrapTreeProps } from './WrapTree';

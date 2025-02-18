@@ -115,7 +115,7 @@ const VirtualTable = <RecordType extends object>(
   ) => {
     ref.current = connectObject;
     const totalHeight = rawData.length * 40;
-
+    console.log(rawData, '=======raw');
     return (
       <Grid
         ref={gridRef}
@@ -125,7 +125,7 @@ const VirtualTable = <RecordType extends object>(
           const { width } = mergedColumns[index];
           let computedWidth = parseFloat(`${width || 0}`);
           if (typeof width === 'string' && percentageRegex.test(width)) {
-            computedWidth = (tableWidth * parseFloat(width)) / 100;
+            computedWidth = ((tableWidth - 15) * parseFloat(width)) / 100;
           }
           return totalHeight > Number(scroll!.y!) &&
             index === mergedColumns.length - 1

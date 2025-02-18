@@ -161,13 +161,10 @@ const App = () => {
       },
       {
         fetchData: mockFetchTable,
-        needFetchParams: true,
         nextFetchParam: 'table',
       },
       {
         fetchData: mockFetchColumn,
-        checkable: true,
-        needFetchParams: true,
       },
     ],
   };
@@ -175,7 +172,7 @@ const App = () => {
   const tableConfig = {
     header: '已选项',
     columns: [
-      { title: 'schema', dataIndex: 'schema', key: 'schema' },
+      { title: 'schema', dataIndex: 'schema', key: 'schema', width: 80 },
       { title: '表', dataIndex: 'table', key: 'table', width: 80 },
       { title: '列', dataIndex: 'column', key: 'column', width: 80 },
     ],

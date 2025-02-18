@@ -13,7 +13,7 @@ import React, {
 import { Tree, TreeProps, Checkbox, TableProps, Input, Empty } from 'antd';
 import { DataNode } from 'antd/lib/tree';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
-import VirtualTable from './VirtualTable';
+import VirtualTable from '../VirtualTable';
 import styles from './index.module.less';
 
 export type TreeToTableDataNode = Omit<DataNode, 'children'> & {

@@ -1,5 +1,21 @@
 .select-list {
-  padding: 12px;
+  &-input {
+    padding: 12px 12px 0;
+  }
+
+  :global {
+    .@{ant-prefix}-list {
+      &-items {
+        padding: 0 12px;
+      }
+
+      &-pagination {
+        margin-top: 0;
+        padding-top: 8px;
+        border-top: 1px solid #ced2de;
+      }
+    }
+  }
 
   .select-list-item-wrap {
     display: flex;
