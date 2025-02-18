@@ -67,7 +67,7 @@ const SelectTable = (props: SelectTableProps) => {
       size: 'small' as TableProps<any>['size'],
       bordered: true,
       ...restTableProps,
-      scroll: { y: 325, ...(restTableProps.scroll || {}) },
+      scroll: { y: 269, ...(restTableProps.scroll || {}) },
       dataSource: filterDataSource,
       columns: [
         ...(restTableProps.columns || [])?.map((item) => ({
@@ -215,8 +215,8 @@ const SelectTable = (props: SelectTableProps) => {
           style={{ columnGap: 8, padding: 12 }}
         >
           {props.tableProps?.columns?.map((col) => (
-            // @ts-ignore
             <Form.Item
+              // @ts-ignore
               name={`${col.dataIndex || col.key}`}
               style={{
                 width: `calc( 100% / ${
