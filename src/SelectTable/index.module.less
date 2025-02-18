@@ -2,15 +2,37 @@
   display: flex;
 
   &-left {
-    flex: 1;
+    border: 1px solid #ced2de;
+    border-right: none;
 
     &-lists {
       display: flex;
+
+      > div:not(:last-child) {
+        border-right: 1px solid #ced2de;
+      }
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      column-gap: 16px;
+      border-bottom: 1px solid #ced2de;
     }
   }
 
   &-right {
-    flex: 1;
-    width: 300px;
+    max-width: calc(50% + 2px);
+    border: 1px solid #ced2de;
+    background: #fff;
+
+    header {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      column-gap: 16px;
+      border-bottom: 1px solid #ced2de;
+    }
   }
 }

@@ -8,7 +8,7 @@ import { Button, Form } from 'antd';
 const schemaData = new Array(50).fill(0).map((item, index) => {
   return {
     ...mockSchemaData,
-    schema: `schemaschemaschemaschema${index}`,
+    schema: `schema${index}`,
   };
 });
 
@@ -52,8 +52,8 @@ const tableData = new Array(2500).fill(0).map((item, index) => {
   const schemaIndex = Math.floor(index / 50);
   return {
     ...mockTableData,
-    table: `tabletabletabletable${index}`,
-    schema: `schemaschemaschemaschema${schemaIndex}`,
+    table: `table${index}`,
+    schema: `schema${schemaIndex}`,
   };
 });
 
@@ -102,9 +102,9 @@ const columnData = new Array(125000).fill(0).map((item, index) => {
   const schemaIndex = Math.floor(tableIndex / 50);
   return {
     ...mockColumnData,
-    column: `columncolumncolumncolumn${index}`,
-    table: `tabletabletabletable${tableIndex}`,
-    schema: `schemaschemaschemaschema${schemaIndex}`,
+    column: `column${index}`,
+    table: `table${tableIndex}`,
+    schema: `schema${schemaIndex}`,
   };
 });
 
@@ -176,8 +176,8 @@ const App = () => {
     header: '已选项',
     columns: [
       { title: 'schema', dataIndex: 'schema', key: 'schema' },
-      { title: '表', dataIndex: 'table', key: 'table' },
-      { title: '列', dataIndex: 'column', key: 'column' },
+      { title: '表', dataIndex: 'table', key: 'table', width: 80 },
+      { title: '列', dataIndex: 'column', key: 'column', width: 80 },
     ],
     rowKey: (record: any) =>
       `${record.schema}-${record.table}-${record.column}`,

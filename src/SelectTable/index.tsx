@@ -1,5 +1,5 @@
-// import { VirtualTable } from 'guos-components';
-import { Table, TableProps, Typography } from 'antd';
+import { VirtualTable } from 'guos-components';
+import { TableProps, Typography } from 'antd';
 import React, {
   Key,
   memo,
@@ -42,6 +42,7 @@ const SelectTable = (props: SelectTableProps) => {
   const [selectListValue, setSelectListValue] = useState<any[]>([]);
 
   const selectListRef = useRef<SelectListRef>(null);
+  const selectListRefs = useRef(new Map<number, SelectListRef>());
 
   const relationKeys = useMemo(() => {
     if (props.relationKeys) {
@@ -62,14 +63,18 @@ const SelectTable = (props: SelectTableProps) => {
     return {
       size: 'small' as TableProps<any>['size'],
       bordered: true,
-      scroll: { y: 299 },
       ...restTableProps,
+      scroll: { y: 354, ...(restTableProps.scroll || {}) },
+      dataSource,
       columns: [
-        ...(restTableProps.columns || []),
+        ...(restTableProps.columns || [])?.map((item) => ({
+          width: 100,
+          ...item,
+        })),
         {
           title: '操作',
           dataIndex: 'operation',
-          width: 60,
+          width: 75,
           render: (_: any, record: any) => {
             return (
               <Typography.Link
@@ -84,10 +89,14 @@ const SelectTable = (props: SelectTableProps) => {
         },
       ].map((item) => ({ ...item, ellipsis: true })),
     };
-  }, [restTableProps, selectListRef, relationKeys]);
+  }, [restTableProps, selectListRef, relationKeys, dataSource]);
 
   const handleOnChange = useCallback(
     (keys: Key[], rows: any[], idx: number, nextFetchParam?: string) => {
+      selectListRefs.current?.forEach((item, key) => {
+        key > idx && item.clearSelected();
+        key > idx && item.clearDataSource();
+      });
       if (nextFetchParam) {
         setFetchParams((origin) => {
           return {
@@ -138,7 +147,12 @@ const SelectTable = (props: SelectTableProps) => {
                   handleOnChange(keys, rows, idx, nextFetchParam)
                 }
                 fetchParams={fetchParams[idx] ? fetchParams[idx] : void 0}
-                {...(idx === config.length - 1 ? { ref: selectListRef } : {})}
+                // {...(idx === config.length - 1 ? { ref: selectListRef } : {})}
+                ref={(el) => {
+                  if (el) {
+                    selectListRefs.current.set(idx, el);
+                  }
+                }}
               />
             );
           })}
@@ -154,7 +168,7 @@ const SelectTable = (props: SelectTableProps) => {
             </Typography.Link>,
           ]}
         </header>
-        <Table {...tableConfig} dataSource={dataSource} />
+        <VirtualTable {...tableConfig} />
       </div>
     </div>
   );

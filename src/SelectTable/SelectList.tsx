@@ -36,6 +36,8 @@ export interface SelectListProps {
 export interface SelectListRef {
   deleteOne: (key: Key) => void;
   deleteAll: () => void;
+  clearSelected: () => void;
+  clearDataSource: () => void;
 }
 
 const BOX_WIDTH = 188;
@@ -63,7 +65,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
 
   useEffect(() => {
     if (value) {
-      console.log(value, '======value');
+      console.log(value, '=========value');
       setCheckRowKeys(new Set(value || []));
     }
   }, [value]);
@@ -119,6 +121,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
         newCheckRowKeys.delete(item?.key);
         newCheckRows.delete(item?.key);
       }
+
       setCheckRowKeys(newCheckRowKeys);
       setCheckRows(newCheckRows);
 
@@ -186,12 +189,26 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
     setCheckRows(new Map());
 
     onChange?.([], []);
-  }, []);
+  }, [setCheckRowKeys, setCheckRows, onChange]);
 
-  useImperativeHandle(ref, () => ({
-    deleteOne,
-    deleteAll,
-  }));
+  const clearSelected = useCallback(() => {
+    setSelectedItem({});
+  }, [setSelectedItem]);
+
+  const clearDataSource = useCallback(() => {
+    setDataSource([]);
+  }, [setDataSource]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      deleteOne,
+      deleteAll,
+      clearSelected,
+      clearDataSource,
+    }),
+    [deleteOne, deleteAll, clearSelected, clearDataSource],
+  );
 
   const renderListItem = useCallback(
     (item: any) => {
