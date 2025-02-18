@@ -121,7 +121,7 @@ const mockFetchColumn = (params: any) => {
   }
   if (keyword) {
     data = data.filter((item) =>
-      item.table?.toLowerCase().includes(keyword?.toLowerCase()),
+      item.column?.toLowerCase().includes(keyword?.toLowerCase()),
     );
   }
   // 模拟后端分页
@@ -158,13 +158,22 @@ const App = () => {
         fetchData: mockFetchSchema,
         virtual: true,
         nextFetchParam: 'schema',
+        showSearch: {
+          placeholder: '请输入schema',
+        },
       },
       {
         fetchData: mockFetchTable,
         nextFetchParam: 'table',
+        showSearch: {
+          placeholder: '请输入表',
+        },
       },
       {
         fetchData: mockFetchColumn,
+        showSearch: {
+          placeholder: '请输入列',
+        },
       },
     ],
   };

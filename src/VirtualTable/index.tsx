@@ -115,7 +115,6 @@ const VirtualTable = <RecordType extends object>(
   ) => {
     ref.current = connectObject;
     const totalHeight = rawData.length * 40;
-    console.log(rawData, '=======raw');
     return (
       <Grid
         ref={gridRef}

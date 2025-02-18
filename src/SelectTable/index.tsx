@@ -1,4 +1,4 @@
-import { TableProps, Typography } from 'antd';
+import { TableProps, Typography, Form, Input } from 'antd';
 import React, {
   Key,
   memo,
@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import SelectList, { SelectListRef } from './SelectList';
+import SelectList, { SelectListRef, SelectListProps } from './SelectList';
 import VirtualTable from '../VirtualTable';
 
 import styles from './index.module.less';
@@ -16,18 +16,7 @@ import styles from './index.module.less';
 export interface SelectTableProps {
   /** 左侧列表props */
   listProps: {
-    config: Array<{
-      /** 数据请求接口 */
-      fetchData: (params: Record<string, unknown>) => Promise<any>;
-      /** 下一个list组件的请求，依赖当前list数据，根据该字段传递响应数据作为下一个list请求的参数 */
-      nextFetchParam?: string;
-      /** 当前请求，是否依赖上一个list组件的数据，如果是，则在上一个list传递参数后，才会发起请求 */
-      needFetchParam?: boolean;
-      /** 开启可选模式 */
-      checkable?: boolean;
-      /** 开启虚拟滚动模式，将关闭分页功能 */
-      virtual?: boolean;
-    }>;
+    config: Array<SelectListProps>;
     /** 头部自定义 */
     header?: React.ReactNode;
   };
@@ -53,6 +42,7 @@ const SelectTable = (props: SelectTableProps) => {
   } = props;
   const [fetchParams, setFetchParams] = useState<Record<number, any>>({});
   const [dataSource, setDataSource] = useState<any[]>([]);
+  const [filterDataSource, setFilterDataSource] = useState<any[]>([]);
   const [selectListValue, setSelectListValue] = useState<any[]>([]);
 
   const selectListRefs = useRef(new Map<number, SelectListRef>());
@@ -78,7 +68,7 @@ const SelectTable = (props: SelectTableProps) => {
       bordered: true,
       ...restTableProps,
       scroll: { y: 325, ...(restTableProps.scroll || {}) },
-      dataSource,
+      dataSource: filterDataSource,
       columns: [
         ...(restTableProps.columns || [])?.map((item) => ({
           width: 100,
@@ -92,7 +82,6 @@ const SelectTable = (props: SelectTableProps) => {
             return (
               <Typography.Link
                 onClick={() =>
-                  // selectListRefs.current?.deleteOne(record?.[relationKey])
                   [...selectListRefs.current?.values()]
                     .at(-1)
                     ?.deleteOne(record?.[relationKey])
@@ -105,7 +94,7 @@ const SelectTable = (props: SelectTableProps) => {
         },
       ].map((item) => ({ ...item, ellipsis: true })),
     };
-  }, [restTableProps, selectListRefs.current, relationKeys, dataSource]);
+  }, [restTableProps, selectListRefs.current, relationKeys, filterDataSource]);
 
   const handleOnChange = useCallback(
     (keys: Key[], rows: any[], idx: number, nextFetchParam?: string) => {
@@ -131,16 +120,36 @@ const SelectTable = (props: SelectTableProps) => {
       }
       if (idx === config.length - 1) {
         const reverseRows = rows.reverse();
+        // 数据备份，供搜索时使用
         setDataSource(reverseRows);
+        setFilterDataSource(reverseRows);
         onChange?.(reverseRows);
       }
     },
     [config, onChange],
   );
 
+  const handleOnSearch = useCallback(
+    (changeValues: any, values: any) => {
+      const filterDataSource = dataSource.filter((item) => {
+        return Object.entries(values).every(([key, value]) => {
+          if (!value) return true;
+          return item[key]
+            ?.toString()
+            ?.toLowerCase()
+            .includes(value?.toString()?.toLowerCase());
+        });
+      });
+      setFilterDataSource(filterDataSource);
+    },
+    [dataSource],
+  );
+
   useEffect(() => {
     if (value) {
+      // 数据备份，供搜索时使用
       setDataSource(value);
+      setFilterDataSource(value);
       const slValue: any[] = [];
       relationKeys?.forEach((key) => {
         const set = new Set();
@@ -200,6 +209,26 @@ const SelectTable = (props: SelectTableProps) => {
             </Typography.Link>,
           ]}
         </header>
+        <Form
+          layout="inline"
+          onValuesChange={handleOnSearch}
+          style={{ columnGap: 8, padding: 12 }}
+        >
+          {props.tableProps?.columns?.map((col) => (
+            // @ts-ignore
+            <Form.Item
+              name={`${col.dataIndex || col.key}`}
+              style={{
+                width: `calc( 100% / ${
+                  props?.tableProps?.columns?.length || 1
+                } - 8px)`,
+                marginRight: 0,
+              }}
+            >
+              <Input placeholder={`请输入${col.title}`} />
+            </Form.Item>
+          ))}
+        </Form>
         <VirtualTable {...tableConfig} />
       </div>
     </div>

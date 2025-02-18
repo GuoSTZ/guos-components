@@ -10,25 +10,36 @@ import React, {
   useState,
   useImperativeHandle,
   forwardRef,
+  useMemo,
 } from 'react';
+import { useDebounce } from '@/_utils/useDebounce';
 
 import styles from './SelectList.module.less';
 
 export interface SelectListProps {
-  /** 获取数据的方法，返回一个Promise */
-  fetchData: (params: Record<string, any>) => Promise<any>;
-  /** 是否需要传递请求参数，开启后，如果不传递fetchParams参数，则不会发送请求 */
-  needFetchParam?: boolean;
   /** 传递给fetchData的参数 */
   fetchParams?: Record<string, any>;
+  /** 数据请求接口 */
+  fetchData: (params: Record<string, unknown>) => Promise<any>;
+  /** 下一个list组件的请求，依赖当前list数据，根据该字段传递响应数据作为下一个list请求的参数 */
+  nextFetchParam?: string;
+  /** 当前请求，是否依赖上一个list组件的数据，如果是，则在上一个list传递参数后，才会发起请求 */
+  needFetchParam?: boolean;
+  /** 开启可选模式 */
+  checkable?: boolean;
+  /** 开启虚拟滚动模式，将关闭分页功能 */
+  virtual?: boolean;
+  /** 搜索功能 */
+  showSearch?:
+    | boolean
+    | {
+        placeholder?: string;
+        onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+      };
   /** 当前选中的值 */
   value?: string;
   /** 选择变化时的回调函数 */
   onChange?: (value: Array<Key>, items: Array<any>) => void;
-  /** 是否使用虚拟滚动，默认不使用，采用分页方式 */
-  virtual?: boolean;
-  /** 是否可勾选 */
-  checkable?: boolean;
 }
 
 export interface SelectListRef {
@@ -48,6 +59,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
     onChange,
     virtual,
     checkable,
+    showSearch = true,
   } = props;
   const [checkRowKeys, setCheckRowKeys] = useState<Set<Key>>(new Set());
   const [checkRows, setCheckRows] = useState(new Map());
@@ -119,9 +131,12 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
   const onSearch = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       getData({ keyword: e.target.value, current: 1, pageSize: 10 });
+      typeof showSearch === 'object' && showSearch.onChange?.(e);
     },
-    [getData],
+    [getData, showSearch],
   );
+
+  const debounceSearch = useDebounce(onSearch);
 
   /** list组件，勾选checkbox */
   const onCheck = useCallback(
@@ -249,14 +264,30 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
     [checkRowKeys, onCheck, onSelect, selectedItem.key, checkable],
   );
 
+  const renderSearch = useMemo(() => {
+    if (showSearch === true) {
+      return (
+        <div className={styles['select-list-input']}>
+          <Input placeholder="请输入" onChange={debounceSearch} />
+        </div>
+      );
+    } else if (typeof showSearch === 'object') {
+      return (
+        <div className={styles['select-list-input']}>
+          <Input {...showSearch} onChange={debounceSearch} />
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }, [showSearch, debounceSearch]);
+
   if (virtual) {
     return (
       <WrapTree
         wrapClassName={styles['select-list-tree']}
         wrapStyle={{ width: BOX_WIDTH }}
-        showSearch={{
-          placeholder: '请输入',
-        }}
+        showSearch={showSearch}
         height={309}
         checkable={checkable}
         selectable={!checkable}
@@ -273,9 +304,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
 
   return (
     <div className={styles['select-list']} style={{ width: BOX_WIDTH }}>
-      <div className={styles['select-list-input']}>
-        <Input placeholder="请输入" onChange={onSearch} />
-      </div>
+      {renderSearch}
       <List
         size="small"
         dataSource={dataSource || []}
