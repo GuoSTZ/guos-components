@@ -117,7 +117,6 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
 
             if (checkFirst && data?.items?.length) {
               const firstItem = data?.items?.[0];
-              console.log(firstItem, '=====fi');
               const newCheckRowKeys = new Set([firstItem.key]);
               const newCheckRows = new Map();
               newCheckRows.set(firstItem.key, firstItem);
