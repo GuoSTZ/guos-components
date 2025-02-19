@@ -250,7 +250,6 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
 
   const renderListItem = useCallback(
     (item: any) => {
-      console.log(selectedItem, '=======sele');
       let checkboxNode = null;
 
       if (checkable) {
@@ -279,7 +278,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
         </div>
       );
     },
-    [checkRowKeys, onCheck, onSelect, selectedItem, checkable],
+    [checkRowKeys, onCheck, onSelect, selectedItem.key, checkable],
   );
 
   const renderSearch = useMemo(() => {
