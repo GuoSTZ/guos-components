@@ -48,6 +48,48 @@ const mockFetchSchema = (params: any) => {
   });
 };
 
+const tableSpaceData = new Array(50).fill(0).map((item, index) => {
+  return {
+    tableSpace: `tableSpace${index}`,
+  };
+});
+
+const mockFetchTableSpace = (params: any) => {
+  const { pageSize, current, keyword, isPage } = params;
+  console.log('mockFetchTableSpace=========', params);
+  // 模拟后端检索
+  let data = tableSpaceData;
+  if (keyword) {
+    data = data.filter((item) =>
+      item.tableSpace?.toLowerCase().includes(keyword?.toLowerCase()),
+    );
+  }
+  // 模拟后端分页
+  let pageData = data;
+  if (isPage || isPage === undefined) {
+    pageData = data.slice((current - 1) * pageSize, current * pageSize);
+  }
+  // 模拟前端获取接口返回数据后的数据处理流程
+  let result: any[] = pageData.map((item) => {
+    return {
+      ...item,
+      key: item.tableSpace,
+      name: item.tableSpace,
+    };
+  });
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        pageSize,
+        current,
+        total: data.length,
+        items: result,
+      });
+    }, 100);
+  });
+};
+
 const tableData = new Array(2500).fill(0).map((item, index) => {
   const schemaIndex = Math.floor(index / 50);
   return {
@@ -153,95 +195,134 @@ const mockFetchColumn = (params: any) => {
 const App = () => {
   const [aaa, setAaa] = useState(4);
 
-  const schema配置 = [
-    {
-      fetchData: mockFetchSchema,
-      virtual: true,
-      showSearch: {
-        placeholder: '请输入schema',
-      },
-    },
-  ];
+  const leftHeader = '待选项';
+  const rightHeader = '已选项';
 
-  const 表配置 = [
-    {
-      fetchData: mockFetchSchema,
-      virtual: true,
-      nextFetchParam: 'schema',
-      showSearch: {
-        placeholder: '请输入schema',
-      },
-      checkFirst: true,
-    },
-    {
-      fetchData: mockFetchTable,
-      showSearch: {
-        placeholder: '请输入表',
-      },
-    },
-  ];
+  const tableRowKey = (record: any) =>
+    `${record.schema}-${record.table}-${record.column}`;
 
-  const 列配置 = [
-    {
-      fetchData: mockFetchSchema,
-      virtual: true,
-      nextFetchParam: 'schema',
-      showSearch: {
-        placeholder: '请输入schema',
-      },
-      checkFirst: true,
+  const schema配置 = {
+    listProps: {
+      header: leftHeader,
+      config: [
+        {
+          fetchData: mockFetchSchema,
+          virtual: true,
+          showSearch: {
+            placeholder: '请输入schema',
+          },
+        },
+      ],
     },
-    {
-      fetchData: mockFetchTable,
-      nextFetchParam: 'table',
-      showSearch: {
-        placeholder: '请输入表',
-      },
-      checkFirst: true,
+    tableProps: {
+      header: rightHeader,
+      columns: [{ title: 'schema', dataIndex: 'schema', key: 'schema' }],
+      rowKey: tableRowKey,
     },
-    {
-      fetchData: mockFetchColumn,
-      showSearch: {
-        placeholder: '请输入列',
-      },
+  };
+
+  const 表空间配置 = {
+    listProps: {
+      header: leftHeader,
+      config: [
+        {
+          fetchData: mockFetchTableSpace,
+          virtual: true,
+          showSearch: {
+            placeholder: '请输入表空间',
+          },
+        },
+      ],
     },
-  ];
+    tableProps: {
+      header: rightHeader,
+      columns: [
+        { title: '表空间', dataIndex: 'tableSpace', key: 'tableSpace' },
+      ],
+      rowKey: tableRowKey,
+    },
+  };
+
+  const 表配置 = {
+    listProps: {
+      header: leftHeader,
+      config: [
+        {
+          fetchData: mockFetchSchema,
+          virtual: true,
+          nextFetchParam: 'schema',
+          showSearch: {
+            placeholder: '请输入schema',
+          },
+          checkFirst: true,
+        },
+        {
+          fetchData: mockFetchTable,
+          showSearch: {
+            placeholder: '请输入表',
+          },
+        },
+      ],
+    },
+    tableProps: {
+      header: rightHeader,
+      columns: [
+        { title: 'schema', dataIndex: 'schema', key: 'schema', width: 80 },
+        { title: '表', dataIndex: 'table', key: 'table', width: 80 },
+      ],
+      rowKey: tableRowKey,
+    },
+  };
+
+  const 列配置 = {
+    listProps: {
+      header: leftHeader,
+      config: [
+        {
+          fetchData: mockFetchSchema,
+          virtual: true,
+          nextFetchParam: 'schema',
+          showSearch: {
+            placeholder: '请输入schema',
+          },
+          checkFirst: true,
+        },
+        {
+          fetchData: mockFetchTable,
+          nextFetchParam: 'table',
+          showSearch: {
+            placeholder: '请输入表',
+          },
+          checkFirst: true,
+        },
+        {
+          fetchData: mockFetchColumn,
+          showSearch: {
+            placeholder: '请输入列',
+          },
+        },
+      ],
+    },
+    tableProps: {
+      header: rightHeader,
+      columns: [
+        { title: 'schema', dataIndex: 'schema', key: 'schema', width: 80 },
+        { title: '表', dataIndex: 'table', key: 'table', width: 80 },
+        { title: '列', dataIndex: 'column', key: 'column', width: 80 },
+      ],
+      rowKey: tableRowKey,
+    },
+  };
 
   const listConfig: Record<number, any> = useMemo(() => {
     return {
-      1: {
-        header: '待选项',
-        config: [],
-      },
-      2: {
-        header: '待选项',
-        config: schema配置,
-      },
-      3: {
-        header: '待选项',
-        config: schema配置,
-      },
-      4: {
-        header: '待选项',
-        config: 表配置,
-      },
-      5: {
-        header: '待选项',
-        config: 列配置,
-      },
+      1: null,
+      2: schema配置,
+      3: 表空间配置,
+      4: 表配置,
+      5: 列配置,
     };
   }, []);
-
-  const tableConfig = {
-    header: '已选项',
-    columns: [
-      { title: 'schema', dataIndex: 'schema', key: 'schema', width: 80 },
-      { title: '表', dataIndex: 'table', key: 'table', width: 80 },
-      { title: '列', dataIndex: 'column', key: 'column', width: 80 },
-    ],
-    rowKey: (record: any) =>
-      `${record.schema}-${record.table}-${record.column}`,
-  };
 
   return (
     <Form onFinish={console.log}>
@@ -259,11 +340,7 @@ const App = () => {
       </Form.Item>
       {aaa !== 1 ? (
         <Form.Item label="bbb" name="bbb">
-          <SelectTable
-            key={aaa}
-            listProps={listConfig[aaa]}
-            tableProps={tableConfig}
-          />
+          <SelectTable key={aaa} {...listConfig[aaa]} />
         </Form.Item>
       ) : null}
 
