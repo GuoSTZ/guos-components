@@ -153,6 +153,7 @@ const mockFetchColumn = (params: any) => {
 const App = () => {
   const listConfig = {
     header: '待选项',
+    // 目前要求数据中必须包含key和name
     config: [
       {
         fetchData: mockFetchSchema,
