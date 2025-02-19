@@ -161,6 +161,7 @@ const App = () => {
         showSearch: {
           placeholder: '请输入schema',
         },
+        checkFirst: true,
       },
       {
         fetchData: mockFetchTable,
@@ -168,6 +169,7 @@ const App = () => {
         showSearch: {
           placeholder: '请输入表',
         },
+        checkFirst: true,
       },
       {
         fetchData: mockFetchColumn,
@@ -183,7 +185,7 @@ const App = () => {
     columns: [
       { title: 'schema', dataIndex: 'schema', key: 'schema', width: 80 },
       { title: '表', dataIndex: 'table', key: 'table', width: 80 },
-      { title: '列', dataIndex: 'column', key: 'column', width: 80 },
+      // { title: '列', dataIndex: 'column', key: 'column', width: 80 },
     ],
     rowKey: (record: any) =>
       `${record.schema}-${record.table}-${record.column}`,

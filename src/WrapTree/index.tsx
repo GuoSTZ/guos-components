@@ -173,7 +173,10 @@ const WrapTree = (props: WrapTreeProps) => {
     <div className={wrapClassName} style={wrapStyle}>
       {!!searchProps
         ? renderSearch?.(searchProps) || (
-            <Input {...(typeof searchProps === 'object' ? searchProps : {})} />
+            <Input
+              {...(typeof searchProps === 'object' ? searchProps : {})}
+              style={{ marginBottom: 4 }}
+            />
           )
         : null}
       {treeData.length > 0 ? (

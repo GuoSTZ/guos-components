@@ -36,6 +36,7 @@ export interface SelectListProps {
         placeholder?: string;
         onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
       };
+  checkFirst?: boolean;
   /** 当前选中的值 */
   value?: string;
   /** 选择变化时的回调函数 */
@@ -60,6 +61,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
     virtual,
     checkable,
     showSearch = true,
+    checkFirst = false,
   } = props;
   const [checkRowKeys, setCheckRowKeys] = useState<Set<Key>>(new Set());
   const [checkRows, setCheckRows] = useState(new Map());
@@ -102,7 +104,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
       try {
         fetchData({ ...(fetchParams || {}), ...params, isPage: !virtual }).then(
           (data: any) => {
-            setDataSource(data.items);
+            setDataSource(data?.items);
             dataSourceMap.current = data.items.reduce((pre: any, cur: any) => {
               pre[cur.key] = cur;
               return pre;
@@ -112,6 +114,21 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
               pageSize: data.pageSize,
               total: data.total,
             });
+
+            if (checkFirst && data?.items?.length) {
+              const firstItem = data?.items?.[0];
+              console.log(firstItem, '=====fi');
+              const newCheckRowKeys = new Set([firstItem.key]);
+              const newCheckRows = new Map();
+              newCheckRows.set(firstItem.key, firstItem);
+              setCheckRowKeys(newCheckRowKeys);
+              setCheckRows(newCheckRows);
+              onChange?.(
+                Array.from(newCheckRowKeys),
+                Array.from(newCheckRows.values()),
+              );
+              setSelectedItem(firstItem);
+            }
           },
         );
       } catch (error) {
@@ -120,23 +137,12 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
         clearDataSource();
       }
     },
-    [virtual, needFetchParam, fetchParams, clearDataSource],
+    [virtual, needFetchParam, fetchParams, clearDataSource, setSelectedItem],
   );
 
   useEffect(() => {
     getData({ current: 1, pageSize: 10 });
   }, [getData]);
-
-  /** 输入框搜索 */
-  const onSearch = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      getData({ keyword: e.target.value, current: 1, pageSize: 10 });
-      typeof showSearch === 'object' && showSearch.onChange?.(e);
-    },
-    [getData, showSearch],
-  );
-
-  const debounceSearch = useDebounce(onSearch);
 
   /** list组件，勾选checkbox */
   const onCheck = useCallback(
@@ -161,6 +167,17 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
     },
     [checkRowKeys, checkRows, onChange],
   );
+
+  /** 输入框搜索 */
+  const onSearch = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      getData({ keyword: e.target.value, current: 1, pageSize: 10 });
+      typeof showSearch === 'object' && showSearch.onChange?.(e);
+    },
+    [getData, showSearch],
+  );
+
+  const debounceSearch = useDebounce(onSearch);
 
   /** list组件，点击item */
   const onSelect = useCallback(
@@ -233,6 +250,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
 
   const renderListItem = useCallback(
     (item: any) => {
+      console.log(selectedItem, '=======sele');
       let checkboxNode = null;
 
       if (checkable) {
@@ -261,7 +279,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
         </div>
       );
     },
-    [checkRowKeys, onCheck, onSelect, selectedItem.key, checkable],
+    [checkRowKeys, onCheck, onSelect, selectedItem, checkable],
   );
 
   const renderSearch = useMemo(() => {
@@ -292,6 +310,8 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
         checkable={checkable}
         selectable={!checkable}
         treeData={dataSource || []}
+        selectedKeys={Array.from(checkRowKeys)}
+        checkedKeys={Array.from(checkRowKeys)}
         fieldNames={{
           title: 'name',
         }}
