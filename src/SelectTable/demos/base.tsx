@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { SelectTable } from 'guos-components';
 import { data as mockSchemaData } from './data/schema';
 import { data as mockTableData } from './data/table';
 import { data as mockColumnData } from './data/column';
-import { Button, Form } from 'antd';
+import { Button, Form, Radio } from 'antd';
 
 const schemaData = new Array(50).fill(0).map((item, index) => {
   return {
@@ -151,53 +151,122 @@ const mockFetchColumn = (params: any) => {
 };
 
 const App = () => {
-  const listConfig = {
-    header: '待选项',
-    // 目前要求数据中必须包含key和name
-    config: [
-      {
-        fetchData: mockFetchSchema,
-        virtual: true,
-        nextFetchParam: 'schema',
-        showSearch: {
-          placeholder: '请输入schema',
-        },
-        checkFirst: true,
+  const [aaa, setAaa] = useState(4);
+
+  const schema配置 = [
+    {
+      fetchData: mockFetchSchema,
+      virtual: true,
+      showSearch: {
+        placeholder: '请输入schema',
       },
-      {
-        fetchData: mockFetchTable,
-        nextFetchParam: 'table',
-        showSearch: {
-          placeholder: '请输入表',
-        },
-        checkFirst: true,
+    },
+  ];
+
+  const 表配置 = [
+    {
+      fetchData: mockFetchSchema,
+      virtual: true,
+      nextFetchParam: 'schema',
+      showSearch: {
+        placeholder: '请输入schema',
       },
-      {
-        fetchData: mockFetchColumn,
-        showSearch: {
-          placeholder: '请输入列',
-        },
+      checkFirst: true,
+    },
+    {
+      fetchData: mockFetchTable,
+      showSearch: {
+        placeholder: '请输入表',
       },
-    ],
-  };
+    },
+  ];
+
+  const 列配置 = [
+    {
+      fetchData: mockFetchSchema,
+      virtual: true,
+      nextFetchParam: 'schema',
+      showSearch: {
+        placeholder: '请输入schema',
+      },
+      checkFirst: true,
+    },
+    {
+      fetchData: mockFetchTable,
+      nextFetchParam: 'table',
+      showSearch: {
+        placeholder: '请输入表',
+      },
+      checkFirst: true,
+    },
+    {
+      fetchData: mockFetchColumn,
+      showSearch: {
+        placeholder: '请输入列',
+      },
+    },
+  ];
+
+  const listConfig: Record<number, any> = useMemo(() => {
+    return {
+      1: {
+        header: '待选项',
+        config: [],
+      },
+      2: {
+        header: '待选项',
+        config: schema配置,
+      },
+      3: {
+        header: '待选项',
+        config: schema配置,
+      },
+      4: {
+        header: '待选项',
+        config: 表配置,
+      },
+      5: {
+        header: '待选项',
+        config: 列配置,
+      },
+    };
+  }, []);
 
   const tableConfig = {
     header: '已选项',
     columns: [
       { title: 'schema', dataIndex: 'schema', key: 'schema', width: 80 },
       { title: '表', dataIndex: 'table', key: 'table', width: 80 },
-      // { title: '列', dataIndex: 'column', key: 'column', width: 80 },
+      { title: '列', dataIndex: 'column', key: 'column', width: 80 },
     ],
     rowKey: (record: any) =>
       `${record.schema}-${record.table}-${record.column}`,
   };
 
-  // return <SelectTable listProps={listConfig} tableProps={tableConfig} />;
   return (
     <Form onFinish={console.log}>
-      <Form.Item label="aaa" name="aaa">
-        <SelectTable listProps={listConfig} tableProps={tableConfig} />
+      <Form.Item label="aaa" name={'aaa'} initialValue={4}>
+        <Radio.Group
+          options={[
+            { label: '整库', value: 1 },
+            { label: 'schema', value: 2 },
+            { label: '表空间', value: 3 },
+            { label: '表', value: 4 },
+            { label: '列', value: 5 },
+          ]}
+          onChange={(e) => setAaa(e.target.value)}
+        />
       </Form.Item>
+      {aaa !== 1 ? (
+        <Form.Item label="bbb" name="bbb">
+          <SelectTable
+            key={aaa}
+            listProps={listConfig[aaa]}
+            tableProps={tableConfig}
+          />
+        </Form.Item>
+      ) : null}
+
       <Form.Item>
         <Button htmlType="submit">提交</Button>
       </Form.Item>
