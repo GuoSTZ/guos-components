@@ -1,14 +1,18 @@
+import { QuestionCircleFilled } from '@ant-design/icons';
 import React, { useMemo, useState } from 'react';
 import { SelectTable } from 'guos-components';
 import { data as mockSchemaData } from './data/schema';
 import { data as mockTableData } from './data/table';
 import { data as mockColumnData } from './data/column';
-import { Button, Form, Radio } from 'antd';
+import { Button, Form, Radio, Tooltip } from 'antd';
 
 const schemaData = new Array(50).fill(0).map((item, index) => {
   return {
     ...mockSchemaData,
-    schema: `schema${index}`,
+    encryptStatus: 1,
+    notSupportReason: '测试一下提示信息',
+    childCount: 12300,
+    schema: `schemaschemaschemaschema${index}`,
   };
 });
 
@@ -31,6 +35,7 @@ const mockFetchSchema = (params: any) => {
   let result: any[] = pageData.map((item) => {
     return {
       ...item,
+      status: item.encryptStatus,
       key: item.schema,
       name: item.schema,
     };
@@ -50,6 +55,7 @@ const mockFetchSchema = (params: any) => {
 
 const tableSpaceData = new Array(50).fill(0).map((item, index) => {
   return {
+    encryptStatus: 1,
     tableSpace: `tableSpace${index}`,
   };
 });
@@ -73,6 +79,7 @@ const mockFetchTableSpace = (params: any) => {
   let result: any[] = pageData.map((item) => {
     return {
       ...item,
+      status: item.encryptStatus,
       key: item.tableSpace,
       name: item.tableSpace,
     };
@@ -94,8 +101,9 @@ const tableData = new Array(2500).fill(0).map((item, index) => {
   const schemaIndex = Math.floor(index / 50);
   return {
     ...mockTableData,
-    table: `table${index}`,
-    schema: `schema${schemaIndex}`,
+    childCount: 123,
+    table: `tabletabletabletabletable${index}`,
+    schema: schemaData[schemaIndex].schema,
   };
 });
 
@@ -122,6 +130,7 @@ const mockFetchTable = (params: any) => {
   let result: any[] = pageData.map((item) => {
     return {
       ...item,
+      status: item.encryptStatus,
       key: item.table,
       name: item.table,
     };
@@ -145,8 +154,8 @@ const columnData = new Array(125000).fill(0).map((item, index) => {
   return {
     ...mockColumnData,
     column: `column${index}`,
-    table: `table${tableIndex}`,
-    schema: `schema${schemaIndex}`,
+    table: tableData[tableIndex].table,
+    schema: schemaData[schemaIndex].schema,
   };
 });
 
@@ -175,6 +184,7 @@ const mockFetchColumn = (params: any) => {
   let result: any[] = pageData.map((item) => {
     return {
       ...item,
+      status: item.encryptStatus,
       key: item.column,
       name: item.column,
     };
@@ -201,6 +211,62 @@ const App = () => {
   const tableRowKey = (record: any) =>
     `${record.schema}-${record.table}-${record.column}`;
 
+  const renderErrorTitle = (record: any, dom: React.ReactNode) => {
+    console.log();
+    if (record.encryStatus === 1) {
+      return (
+        <div style={{ display: 'flex' }}>
+          <div>{record.name}</div>
+          <div
+            style={{
+              border: '1px solid',
+              borderRadius: 2,
+              fontSize: 12,
+              fontWeight: 400,
+              lineHeight: '20px',
+              padding: '1px 8px',
+              marginLeft: 8,
+              background: '#ebfff5',
+              borderColor: '#99ffd3',
+              color: '#1ad999',
+            }}
+          >
+            已加密
+          </div>
+        </div>
+      );
+    } else if (record.encryptStatus === 2) {
+      return (
+        <div style={{ display: 'flex' }}>
+          <div>{record.name}</div>
+          <div
+            style={{
+              border: '1px solid',
+              borderRadius: 2,
+              fontSize: 12,
+              fontWeight: 400,
+              lineHeight: '20px',
+              padding: '1px 8px',
+              marginLeft: 8,
+              background: '#f7f8fa',
+              borderColor: '#ced2de',
+              color: '#38415c',
+            }}
+          >
+            <span>不支持</span>
+            <Tooltip title={record?.notSupportReason} placement="right">
+              <QuestionCircleFilled
+                style={{ color: '#aaaaaa', paddingLeft: '4px' }}
+              />
+            </Tooltip>
+          </div>
+        </div>
+      );
+    } else {
+      return dom;
+    }
+  };
+
   const schema配置 = {
     listProps: {
       header: leftHeader,
@@ -211,6 +277,7 @@ const App = () => {
           showSearch: {
             placeholder: '请输入schema',
           },
+          titleRender: renderErrorTitle,
         },
       ],
     },
@@ -255,6 +322,7 @@ const App = () => {
             placeholder: '请输入schema',
           },
           checkFirst: true,
+          titleRender: renderErrorTitle,
         },
         {
           fetchData: mockFetchTable,

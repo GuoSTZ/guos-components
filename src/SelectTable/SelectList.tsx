@@ -13,6 +13,7 @@ import React, {
   useMemo,
 } from 'react';
 import { useDebounce } from '@/_utils/useDebounce';
+import { formatNumberToChinese } from '@/_utils';
 
 import styles from './SelectList.module.less';
 
@@ -36,7 +37,16 @@ export interface SelectListProps {
         placeholder?: string;
         onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
       };
+  /** 请求完成后，是否默认选中第一项 */
   checkFirst?: boolean;
+  /** 头部渲染处理 */
+  titleRender?: (record: any, handledDom: React.ReactNode) => React.ReactNode;
+  /** 自定义渲染子级数量 */
+  fieldNames?: {
+    key?: string;
+    title?: string;
+    childCount?: number;
+  };
   /** 当前选中的值 */
   value?: string;
   /** 选择变化时的回调函数 */
@@ -62,6 +72,8 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
     checkable,
     showSearch = true,
     checkFirst = false,
+    titleRender,
+    fieldNames,
   } = props;
   const [checkRowKeys, setCheckRowKeys] = useState<Set<Key>>(new Set());
   const [checkRows, setCheckRows] = useState(new Map());
@@ -73,6 +85,10 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
     pageSize: 10,
     total: 0,
   });
+
+  const rowKey = fieldNames?.key || 'key';
+  const rowTitle = fieldNames?.title || 'name';
+  const rowChildCount = fieldNames?.childCount || 'childCount';
 
   useEffect(() => {
     if (value) {
@@ -247,6 +263,27 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
     [deleteOne, deleteAll, clearSelected, clearDataSource],
   );
 
+  const renderTitle = useCallback(
+    (record: any) => {
+      let dom: React.ReactNode = <span>{record?.[rowTitle]}</span>;
+      if (typeof record?.[rowChildCount] === 'number') {
+        dom = (
+          <>
+            <span>{record?.[rowTitle]}</span>
+            <span>（{formatNumberToChinese(record?.[rowChildCount])}）</span>
+          </>
+        );
+      }
+
+      if (!!titleRender) {
+        return titleRender(record, dom);
+      } else {
+        return dom;
+      }
+    },
+    [titleRender, rowChildCount],
+  );
+
   const renderListItem = useCallback(
     (item: any) => {
       let checkboxNode = null;
@@ -270,14 +307,22 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
                 ? `${styles['select-list-item']} ${styles['select-list-item-selected']}`
                 : styles['select-list-item']
             }
-            title={item.name}
+            title={item[rowTitle]}
           >
-            {item.name}
+            {renderTitle(item)}
           </List.Item>
         </div>
       );
     },
-    [checkRowKeys, onCheck, onSelect, selectedItem.key, checkable],
+    [
+      checkRowKeys,
+      onCheck,
+      onSelect,
+      selectedItem.key,
+      checkable,
+      renderTitle,
+      rowTitle,
+    ],
   );
 
   const renderSearch = useMemo(() => {
@@ -311,8 +356,10 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
         selectedKeys={Array.from(checkRowKeys)}
         checkedKeys={Array.from(checkRowKeys)}
         fieldNames={{
-          title: 'name',
+          key: rowKey,
+          title: rowTitle,
         }}
+        titleRender={renderTitle}
         onSelect={treeOnSelect}
         // @ts-ignore
         onCheck={treeOnCheck}

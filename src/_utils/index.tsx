@@ -11,3 +11,26 @@ export const getLabel = (
   }
   return dicts[dict].find((item) => item.value === text)?.label || '';
 };
+
+export const formatNumberToChinese = (num: number): string => {
+  if (num < 10000) {
+    return num.toString();
+  }
+
+  const units = [
+    { value: 1e8, label: '亿' },
+    { value: 1e4, label: '万' },
+  ];
+
+  for (const unit of units) {
+    if (num >= unit.value) {
+      console.log(num, '=====num');
+
+      const value = num / unit.value;
+      const formattedValue = Math.floor(value * 100) / 100;
+      return `${formattedValue}${unit.label}`;
+    }
+  }
+
+  return num.toString();
+};

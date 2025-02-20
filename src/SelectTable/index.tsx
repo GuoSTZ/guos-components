@@ -19,6 +19,8 @@ export interface SelectTableProps {
     config: Array<SelectListProps>;
     /** 头部自定义 */
     header?: React.ReactNode;
+    /** 渲染异常情况 */
+    titleRender?: (record: any) => React.ReactNode;
   };
   /** 右侧表格props */
   tableProps: TableProps<any> & {
