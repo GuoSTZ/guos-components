@@ -197,9 +197,6 @@ const App = () => {
   const leftHeader = '待选项';
   const rightHeader = '已选项';
 
-  const tableRowKey = (record: any) =>
-    `${record.schema}-${record.table}-${record.column}`;
-
   const commonConfig = {
     statusConfig: [
       {
@@ -243,7 +240,7 @@ const App = () => {
     tableProps: {
       header: rightHeader,
       columns: [{ title: 'schema', dataIndex: 'schema', key: 'schema' }],
-      rowKey: tableRowKey,
+      rowKey: 'schema',
     },
   };
 
@@ -272,7 +269,7 @@ const App = () => {
       columns: [
         { title: '表空间', dataIndex: 'tableSpace', key: 'tableSpace' },
       ],
-      rowKey: tableRowKey,
+      rowKey: 'tableSpace',
     },
   };
 
@@ -317,7 +314,7 @@ const App = () => {
         { title: 'schema', dataIndex: 'schema', key: 'schema', width: 80 },
         { title: '表', dataIndex: 'table', key: 'table', width: 80 },
       ],
-      rowKey: tableRowKey,
+      rowKey: (record: any) => `${record.schema}-${record.table}`,
     },
   };
 
@@ -378,7 +375,8 @@ const App = () => {
         { title: '表', dataIndex: 'table', key: 'table', width: 80 },
         { title: '列', dataIndex: 'column', key: 'column', width: 80 },
       ],
-      rowKey: tableRowKey,
+      rowKey: (record: any) =>
+        `${record.schema}-${record.table}-${record.column}`,
     },
   };
 
