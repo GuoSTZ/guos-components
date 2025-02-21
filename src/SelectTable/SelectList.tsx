@@ -126,7 +126,6 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
 
   const getData = useCallback(
     (params: Record<string, any> = {}) => {
-      console.log(rowKey, needFetchParam, fetchParams, '========000');
       if (needFetchParam && !fetchParams) {
         return;
       }
@@ -297,7 +296,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
       const dom: React.ReactNode[] = [<span>{record?.[rowName]}</span>];
       if (typeof record?.[rowChildCount] === 'number') {
         dom.push(
-          <span>（{formatNumberToChinese(record?.[rowChildCount])}）</span>,
+          <span>({formatNumberToChinese(record?.[rowChildCount])})</span>,
         );
       }
 
