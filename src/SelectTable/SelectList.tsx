@@ -327,7 +327,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
         return dom;
       }
     },
-    [titleRender, rowChildCount, statusConfig],
+    [titleRender, rowChildCount, statusConfig, rowName, rowStatus],
   );
 
   const renderListItem = useCallback(
