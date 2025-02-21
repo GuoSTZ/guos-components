@@ -21,7 +21,6 @@ const App = () => {
         },
         placeholder: '请输入',
         checkAllText: '全选',
-        alignCheckbox: true,
       }}
       tableProps={{
         dataSource: [],

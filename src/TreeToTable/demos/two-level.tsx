@@ -22,7 +22,6 @@ const App = () => {
         },
         placeholder: '请输入',
         checkAllText: '全选',
-        alignCheckbox: true,
         fieldNames: {
           key: 'id',
           title: 'name',
