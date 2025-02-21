@@ -201,7 +201,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       } else if (!!treeProps?.className) {
         setTreeMergedClassName(treeProps?.className);
       }
-    }, [treeProps.className, treeData, rowChildren]);
+    }, [treeProps.className, treeData, rowChildren, alignCheckbox]);
 
     // 将Set转换为Array
     const transferData = (params?: {
