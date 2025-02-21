@@ -12,8 +12,9 @@ export const data = {
   assetSetId: 0,
   nullable: null,
   fromDb: 1,
-  encryptStatus: 0,
+  encryptStatus: 1,
   dataOrigin: null,
   columnType: null,
-  notSupportReason: null,
+  count: 123456,
+  notSupportReason: '测试一下提示信息',
 };

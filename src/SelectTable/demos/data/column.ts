@@ -15,5 +15,5 @@ export const data = {
   encryptStatus: 1,
   dataOrigin: 2,
   columnType: 'VARCHAR',
-  notSupportReason: null,
+  notSupportReason: 'laalallalalalalaalal',
 };

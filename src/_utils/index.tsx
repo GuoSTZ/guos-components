@@ -24,8 +24,6 @@ export const formatNumberToChinese = (num: number): string => {
 
   for (const unit of units) {
     if (num >= unit.value) {
-      console.log(num, '=====num');
-
       const value = num / unit.value;
       const formattedValue = Math.floor(value * 100) / 100;
       return `${formattedValue}${unit.label}`;

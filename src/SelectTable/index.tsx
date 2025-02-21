@@ -153,16 +153,23 @@ const SelectTable = (props: SelectTableProps) => {
       setDataSource(value);
       setFilterDataSource(value);
       const slValue: any[] = [];
-      relationKeys?.forEach((key) => {
-        const set = new Set();
-        value?.forEach((item: any) => {
-          set.add(item[key]);
-        });
-        slValue.push(Array.from(set));
+      relationKeys?.forEach((key, index) => {
+        if (
+          config[index].checkable === true ||
+          index === relationKeys.length - 1
+        ) {
+          const set = new Set();
+          value?.forEach((item: any) => {
+            set.add(item[key]);
+          });
+          slValue.push(Array.from(set));
+        } else {
+          slValue.push(null);
+        }
       });
       setSelectListValue(slValue);
     }
-  }, [value, relationKeys]);
+  }, [value, relationKeys, config]);
 
   return (
     <div className={styles['select-table']}>

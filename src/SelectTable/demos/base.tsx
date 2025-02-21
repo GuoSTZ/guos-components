@@ -1,18 +1,14 @@
-import { QuestionCircleFilled } from '@ant-design/icons';
+import { Button, Form, Radio } from 'antd';
 import React, { useMemo, useState } from 'react';
 import { SelectTable } from 'guos-components';
 import { data as mockSchemaData } from './data/schema';
 import { data as mockTableData } from './data/table';
 import { data as mockColumnData } from './data/column';
-import { Button, Form, Radio, Tooltip } from 'antd';
 
 const schemaData = new Array(50).fill(0).map((item, index) => {
   return {
     ...mockSchemaData,
-    encryptStatus: 1,
-    notSupportReason: '测试一下提示信息',
-    childCount: 12300,
-    schema: `schemaschemaschemaschema${index}`,
+    schema: `schema${index}`,
   };
 });
 
@@ -35,9 +31,7 @@ const mockFetchSchema = (params: any) => {
   let result: any[] = pageData.map((item) => {
     return {
       ...item,
-      status: item.encryptStatus,
-      key: item.schema,
-      name: item.schema,
+      disabled: item.encryptStatus === 2, // 置灰处理
     };
   });
 
@@ -101,8 +95,7 @@ const tableData = new Array(2500).fill(0).map((item, index) => {
   const schemaIndex = Math.floor(index / 50);
   return {
     ...mockTableData,
-    childCount: 123,
-    table: `tabletabletabletabletable${index}`,
+    table: `table${index}`,
     schema: schemaData[schemaIndex].schema,
   };
 });
@@ -130,9 +123,7 @@ const mockFetchTable = (params: any) => {
   let result: any[] = pageData.map((item) => {
     return {
       ...item,
-      status: item.encryptStatus,
-      key: item.table,
-      name: item.table,
+      disabled: item.encryptStatus === 2, // 置灰处理
     };
   });
 
@@ -184,9 +175,7 @@ const mockFetchColumn = (params: any) => {
   let result: any[] = pageData.map((item) => {
     return {
       ...item,
-      status: item.encryptStatus,
-      key: item.column,
-      name: item.column,
+      disabled: item.encryptStatus === 2, // 置灰处理
     };
   });
 
@@ -211,60 +200,24 @@ const App = () => {
   const tableRowKey = (record: any) =>
     `${record.schema}-${record.table}-${record.column}`;
 
-  const renderErrorTitle = (record: any, dom: React.ReactNode) => {
-    console.log();
-    if (record.encryStatus === 1) {
-      return (
-        <div style={{ display: 'flex' }}>
-          <div>{record.name}</div>
-          <div
-            style={{
-              border: '1px solid',
-              borderRadius: 2,
-              fontSize: 12,
-              fontWeight: 400,
-              lineHeight: '20px',
-              padding: '1px 8px',
-              marginLeft: 8,
-              background: '#ebfff5',
-              borderColor: '#99ffd3',
-              color: '#1ad999',
-            }}
-          >
-            已加密
-          </div>
-        </div>
-      );
-    } else if (record.encryptStatus === 2) {
-      return (
-        <div style={{ display: 'flex' }}>
-          <div>{record.name}</div>
-          <div
-            style={{
-              border: '1px solid',
-              borderRadius: 2,
-              fontSize: 12,
-              fontWeight: 400,
-              lineHeight: '20px',
-              padding: '1px 8px',
-              marginLeft: 8,
-              background: '#f7f8fa',
-              borderColor: '#ced2de',
-              color: '#38415c',
-            }}
-          >
-            <span>不支持</span>
-            <Tooltip title={record?.notSupportReason} placement="right">
-              <QuestionCircleFilled
-                style={{ color: '#aaaaaa', paddingLeft: '4px' }}
-              />
-            </Tooltip>
-          </div>
-        </div>
-      );
-    } else {
-      return dom;
-    }
+  const commonConfig = {
+    statusConfig: [
+      {
+        label: '已加密',
+        value: 1,
+        color: '#1ad999',
+        background: '#ebfff5',
+        borderColor: '#99ffd3',
+      },
+      {
+        label: '不支持',
+        value: 2,
+        color: '#38415c',
+        background: '#f7f8fa',
+        borderColor: '#ced2de',
+        showTip: true,
+      },
+    ],
   };
 
   const schema配置 = {
@@ -277,7 +230,13 @@ const App = () => {
           showSearch: {
             placeholder: '请输入schema',
           },
-          titleRender: renderErrorTitle,
+          fieldNames: {
+            name: 'schema',
+            key: 'schema',
+            childCount: 'count',
+            status: 'encryptStatus',
+          },
+          ...commonConfig,
         },
       ],
     },
@@ -298,6 +257,13 @@ const App = () => {
           showSearch: {
             placeholder: '请输入表空间',
           },
+          fieldNames: {
+            name: 'tableSpace',
+            key: 'tableSpace',
+            childCount: 'count',
+            status: 'encryptStatus',
+          },
+          ...commonConfig,
         },
       ],
     },
@@ -322,13 +288,26 @@ const App = () => {
             placeholder: '请输入schema',
           },
           checkFirst: true,
-          titleRender: renderErrorTitle,
+          fieldNames: {
+            name: 'schema',
+            key: 'schema',
+            childCount: 'count',
+            status: 'encryptStatus',
+          },
+          ...commonConfig,
         },
         {
           fetchData: mockFetchTable,
           showSearch: {
             placeholder: '请输入表',
           },
+          fieldNames: {
+            name: 'table',
+            key: 'table',
+            childCount: 'count',
+            status: 'encryptStatus',
+          },
+          ...commonConfig,
         },
       ],
     },
@@ -354,6 +333,13 @@ const App = () => {
             placeholder: '请输入schema',
           },
           checkFirst: true,
+          fieldNames: {
+            name: 'schema',
+            key: 'schema',
+            childCount: 'count',
+            status: 'encryptStatus',
+          },
+          ...commonConfig,
         },
         {
           fetchData: mockFetchTable,
@@ -362,12 +348,26 @@ const App = () => {
             placeholder: '请输入表',
           },
           checkFirst: true,
+          fieldNames: {
+            name: 'table',
+            key: 'table',
+            childCount: 'count',
+            status: 'encryptStatus',
+          },
+          ...commonConfig,
         },
         {
           fetchData: mockFetchColumn,
           showSearch: {
             placeholder: '请输入列',
           },
+          fieldNames: {
+            name: 'column',
+            key: 'column',
+            childCount: 'count',
+            status: 'encryptStatus',
+          },
+          ...commonConfig,
         },
       ],
     },

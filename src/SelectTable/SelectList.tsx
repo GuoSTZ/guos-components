@@ -1,4 +1,5 @@
-import { Checkbox, Input, List } from 'antd';
+import { QuestionCircleFilled } from '@ant-design/icons';
+import { Checkbox, Input, List, Tooltip } from 'antd';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 import { WrapTree } from 'guos-components';
 import React, {
@@ -44,9 +45,18 @@ export interface SelectListProps {
   /** 自定义渲染子级数量 */
   fieldNames?: {
     key?: string;
-    title?: string;
-    childCount?: number;
+    name?: string;
+    childCount?: string;
+    status?: string;
   };
+  /** 状态配置 */
+  statusConfig?: Array<{
+    label: string;
+    value: string;
+    color?: string;
+    background?: string;
+    [key: string]: any;
+  }>;
   /** 当前选中的值 */
   value?: string;
   /** 选择变化时的回调函数 */
@@ -60,7 +70,7 @@ export interface SelectListRef {
   clearDataSource: () => void;
 }
 
-const BOX_WIDTH = 188;
+const BOX_WIDTH = 220;
 const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
   const {
     fetchData,
@@ -74,6 +84,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
     checkFirst = false,
     titleRender,
     fieldNames,
+    statusConfig,
   } = props;
   const [checkRowKeys, setCheckRowKeys] = useState<Set<Key>>(new Set());
   const [checkRows, setCheckRows] = useState(new Map());
@@ -87,19 +98,20 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
   });
 
   const rowKey = fieldNames?.key || 'key';
-  const rowTitle = fieldNames?.title || 'name';
+  const rowName = fieldNames?.name || 'name';
   const rowChildCount = fieldNames?.childCount || 'childCount';
+  const rowStatus = fieldNames?.status || 'status';
 
   useEffect(() => {
     if (value) {
       setCheckRowKeys(new Set(value || []));
     }
-  }, [value]);
+  }, [value, selectedItem]);
 
   /** 清除选中数据 */
   const clearSelected = useCallback(() => {
     setSelectedItem({});
-  }, [setSelectedItem]);
+  }, [setSelectedItem, rowKey]);
 
   /** 清空数据及分页 */
   const clearDataSource = useCallback(() => {
@@ -122,7 +134,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
           (data: any) => {
             setDataSource(data?.items);
             dataSourceMap.current = data.items.reduce((pre: any, cur: any) => {
-              pre[cur.key] = cur;
+              pre[cur?.[rowKey]] = cur;
               return pre;
             }, {});
             setPage({
@@ -131,11 +143,15 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
               total: data.total,
             });
 
-            if (checkFirst && data?.items?.length) {
+            if (
+              checkFirst &&
+              data?.items?.length &&
+              !data?.items?.[0]?.disabled
+            ) {
               const firstItem = data?.items?.[0];
-              const newCheckRowKeys = new Set([firstItem.key]);
+              const newCheckRowKeys = new Set([firstItem?.[rowKey]]);
               const newCheckRows = new Map();
-              newCheckRows.set(firstItem.key, firstItem);
+              newCheckRows.set(firstItem?.[rowKey], firstItem);
               setCheckRowKeys(newCheckRowKeys);
               setCheckRows(newCheckRows);
               onChange?.(
@@ -152,7 +168,14 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
         clearDataSource();
       }
     },
-    [virtual, needFetchParam, fetchParams, clearDataSource, setSelectedItem],
+    [
+      virtual,
+      needFetchParam,
+      fetchParams,
+      clearDataSource,
+      setSelectedItem,
+      rowKey,
+    ],
   );
 
   useEffect(() => {
@@ -165,11 +188,11 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
       const newCheckRowKeys = new Set(checkRowKeys);
       const newCheckRows = new Map(checkRows);
       if (e.target.checked) {
-        newCheckRowKeys.add(item?.key);
-        newCheckRows.set(item?.key, item);
+        newCheckRowKeys.add(item?.[rowKey]);
+        newCheckRows.set(item?.[rowKey], item);
       } else {
-        newCheckRowKeys.delete(item?.key);
-        newCheckRows.delete(item?.key);
+        newCheckRowKeys.delete(item?.[rowKey]);
+        newCheckRows.delete(item?.[rowKey]);
       }
 
       setCheckRowKeys(newCheckRowKeys);
@@ -180,7 +203,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
         Array.from(newCheckRows.values()),
       );
     },
-    [checkRowKeys, checkRows, onChange],
+    [checkRowKeys, checkRows, onChange, rowKey],
   );
 
   /** 输入框搜索 */
@@ -197,18 +220,21 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
   /** list组件，点击item */
   const onSelect = useCallback(
     (e: React.MouseEvent<HTMLDivElement, MouseEvent>, item: any) => {
+      if (!!item.disabled) {
+        return;
+      }
       setSelectedItem(item);
 
       if (checkable) {
         onCheck(
-          { ...e, target: { checked: !checkRowKeys.has(item.key) } },
+          { ...e, target: { checked: !checkRowKeys.has(item?.[rowKey]) } },
           item,
         );
       } else {
-        onChange?.([item.key], [item]);
+        onChange?.([item?.[rowKey]], [item]);
       }
     },
-    [onCheck, checkRowKeys, checkable],
+    [onCheck, checkRowKeys, checkable, rowKey],
   );
 
   /** 分页回调 */
@@ -223,6 +249,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
   const treeOnSelect = useCallback(
     (keys: Key[], info: any) => {
       setCheckRowKeys(new Set(keys));
+      setSelectedItem(info.selectedNodes);
       onChange?.(keys, info.selectedNodes);
     },
     [onChange],
@@ -232,6 +259,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
   const treeOnCheck = useCallback(
     (keys: Key[], info: any) => {
       setCheckRowKeys(new Set(keys));
+      setSelectedItem(info.checkedNodes);
       onChange?.(keys, info.checkedNodes);
     },
     [onChange],
@@ -240,9 +268,9 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
   const deleteOne = useCallback(
     (key: Key) => {
       // @ts-ignore
-      onCheck({ target: { checked: false } }, { key });
+      onCheck({ target: { checked: false } }, { [rowKey]: key });
     },
-    [onCheck],
+    [onCheck, rowKey],
   );
 
   const deleteAll = useCallback(() => {
@@ -265,13 +293,31 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
 
   const renderTitle = useCallback(
     (record: any) => {
-      let dom: React.ReactNode = <span>{record?.[rowTitle]}</span>;
+      const dom: React.ReactNode[] = [<span>{record?.[rowName]}</span>];
       if (typeof record?.[rowChildCount] === 'number') {
-        dom = (
-          <>
-            <span>{record?.[rowTitle]}</span>
-            <span>（{formatNumberToChinese(record?.[rowChildCount])}）</span>
-          </>
+        dom.push(
+          <span>（{formatNumberToChinese(record?.[rowChildCount])}）</span>,
+        );
+      }
+
+      if (!!statusConfig && record?.[rowStatus] !== void 0) {
+        const status: Record<string, unknown> =
+          statusConfig.find(
+            (item: any) => item.value === record?.[rowStatus],
+          ) || {};
+        const { label, showTip, ...rest } = status;
+        dom.push(
+          <span className={styles['select-list-status-box']} style={rest}>
+            {label}
+            {/* 这里暂时写死不支持原因的属性字段 */}
+            {showTip ? (
+              <Tooltip title={record?.notSupportReason}>
+                <QuestionCircleFilled
+                  style={{ color: '#aaaaaa', paddingLeft: '4px' }}
+                />
+              </Tooltip>
+            ) : null}
+          </span>,
         );
       }
 
@@ -281,7 +327,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
         return dom;
       }
     },
-    [titleRender, rowChildCount],
+    [titleRender, rowChildCount, statusConfig],
   );
 
   const renderListItem = useCallback(
@@ -292,22 +338,27 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
         checkboxNode = (
           <Checkbox
             className={styles['list-item-checkbox']}
-            checked={checkRowKeys.has(item.key)}
+            checked={checkRowKeys.has(item?.[rowKey])}
             onChange={(e) => onCheck(e, item)}
+            disabled={item.disabled}
           />
         );
+      }
+
+      let mergedClassName = styles['select-list-item'];
+      if (selectedItem?.[rowKey] === item?.[rowKey] && !checkable) {
+        mergedClassName = `${mergedClassName} ${styles['select-list-item-selected']}`;
+      }
+      if (!!item.disabled) {
+        mergedClassName = `${mergedClassName} ${styles['select-list-item-disabled']}`;
       }
       return (
         <div className={styles['select-list-item-wrap']}>
           {checkboxNode}
           <List.Item
             onClick={(e) => onSelect(e, item)}
-            className={
-              selectedItem.key === item.key && !checkable
-                ? `${styles['select-list-item']} ${styles['select-list-item-selected']}`
-                : styles['select-list-item']
-            }
-            title={item[rowTitle]}
+            className={mergedClassName}
+            title={item[rowName]}
           >
             {renderTitle(item)}
           </List.Item>
@@ -318,10 +369,11 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
       checkRowKeys,
       onCheck,
       onSelect,
-      selectedItem.key,
+      selectedItem,
       checkable,
       renderTitle,
-      rowTitle,
+      rowName,
+      rowKey,
     ],
   );
 
@@ -357,7 +409,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
         checkedKeys={Array.from(checkRowKeys)}
         fieldNames={{
           key: rowKey,
-          title: rowTitle,
+          title: rowName,
         }}
         titleRender={renderTitle}
         onSelect={treeOnSelect}
