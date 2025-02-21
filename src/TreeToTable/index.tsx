@@ -54,6 +54,8 @@ export interface TreeToTableProps<T> {
     checkAllText?: string;
     /** 避免children字段的存在，移动数据时，右侧表格出现children数据展开 */
     aliasChildren?: string;
+    /** 当只有一层数据时，勾选框进行对准处理，做成类List样式，如果数据为多层结构，该属性自动失效 */
+    alignCheckbox?: boolean;
   };
   /** 表格数据 */
   tableProps: TableProps<T> & {
@@ -114,6 +116,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
       checkAll,
       checkAllText = 'Check All',
       aliasChildren = 'childrenStored',
+      alignCheckbox = true,
       ...restTreeProps
     } = treeProps;
     const {
@@ -189,7 +192,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
         (item) => item?.[rowChildren] && item?.[rowChildren]?.length > 1,
       );
 
-      if (isOneLevel) {
+      if (isOneLevel && !!alignCheckbox) {
         setTreeMergedClassName(
           treeProps?.className
             ? `${treeProps?.className} ${styles['tree-to-table-left-tree-align-checkbox']}`

@@ -68,17 +68,18 @@ toc: content
 
 ### treeProps
 
-| 参数          | 说明                                                                 | 类型                                                                                    | 默认值                              | 是否必填 |
-| ------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ----------------------------------- | -------- |
-| treeData      | 树源数据                                                             | [TreeToTableDataNode](#TreeToTableDataNode)                                             | -                                   | 是       |
-| header        | 树头部自定义                                                         | string \| React.ReactNode[] \| ((info: { tableKeySet: Set<React.Key> }) => ReactNode[]) | -                                   | 否       |
-| showSearch    | 树是否可搜索                                                         | boolean                                                                                 | -                                   | 否       |
-| filterSearch  | 树自定义搜索回调                                                     | (filterValue: string, data: any) => boolean                                             | [默认值](#tree-filtersearch-默认值) | 否       |
-| placeholder   | 树搜索框底部文字                                                     | string                                                                                  | -                                   | 否       |
-| showCheckAll  | 树组件是否显示全选组件                                               | boolean                                                                                 | true                                | 否       |
-| checkAll      | 树组件全选组件受控值                                                 | boolean                                                                                 | true                                | 否       |
-| checkAllText  | 树组件全选组件文案                                                   | string                                                                                  | `Check All`                         | 否       |
-| aliasChildren | 避免 children 字段的存在，移动数据时，右侧表格出现 children 数据展开 | string                                                                                  | `childrenStored`                    | 否       |
+| 参数          | 说明                                                                                       | 类型                                                                                    | 默认值                              | 是否必填 |
+| ------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- | ----------------------------------- | -------- |
+| treeData      | 树源数据                                                                                   | [TreeToTableDataNode](#TreeToTableDataNode)                                             | -                                   | 是       |
+| header        | 树头部自定义                                                                               | string \| React.ReactNode[] \| ((info: { tableKeySet: Set<React.Key> }) => ReactNode[]) | -                                   | 否       |
+| showSearch    | 树是否可搜索                                                                               | boolean                                                                                 | -                                   | 否       |
+| filterSearch  | 树自定义搜索回调                                                                           | (filterValue: string, data: any) => boolean                                             | [默认值](#tree-filtersearch-默认值) | 否       |
+| placeholder   | 树搜索框底部文字                                                                           | string                                                                                  | -                                   | 否       |
+| showCheckAll  | 树组件是否显示全选组件                                                                     | boolean                                                                                 | true                                | 否       |
+| checkAll      | 树组件全选组件受控值                                                                       | boolean                                                                                 | true                                | 否       |
+| checkAllText  | 树组件全选组件文案                                                                         | string                                                                                  | `Check All`                         | 否       |
+| aliasChildren | 避免 children 字段的存在，移动数据时，右侧表格出现 children 数据展开                       | string                                                                                  | `childrenStored`                    | 否       |
+| alignCheckbox | 当只有一层数据时，勾选框进行对准处理，做成类 List 样式，如果数据为多层结构，该属性自动失效 | boolean                                                                                 | false                               | 否       |
 
 #### tree filterSearch 默认值
 
