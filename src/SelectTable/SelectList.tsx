@@ -51,10 +51,16 @@ export interface SelectListProps {
   };
   /** 状态配置 */
   statusConfig?: Array<{
+    /** 显示内容 */
     label: string;
+    /** 映射值 */
     value: string;
+    /** 文字颜色 */
     color?: string;
+    /** 背景色 */
     background?: string;
+    /** 是否需要展示提示图标 */
+    showTip?: boolean;
     [key: string]: any;
   }>;
   /** 当前选中的值 */
