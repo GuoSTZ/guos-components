@@ -99,7 +99,12 @@ const SelectTable = (props: SelectTableProps) => {
   }, [restTableProps, selectListRefs.current, relationKeys, filterDataSource]);
 
   const handleOnChange = useCallback(
-    (keys: Key[], rows: any[], idx: number, nextFetchParam?: string) => {
+    (
+      keys: Key[],
+      rows: any[],
+      idx: number,
+      nextFetchParam?: string | string[],
+    ) => {
       selectListRefs.current?.forEach((item, key) => {
         if (key > idx) {
           item.clearSelected();
@@ -110,12 +115,32 @@ const SelectTable = (props: SelectTableProps) => {
         }
       });
       if (nextFetchParam) {
+        let nextFetchParams = {};
+
+        if (Array.isArray(nextFetchParam)) {
+          if (config[idx]?.checkable) {
+            nextFetchParams = nextFetchParam.reduce((acc, curr) => {
+              acc[curr] = rows.find((item) => item[curr] === curr);
+              return acc;
+            }, {} as Record<string, any>);
+          } else {
+            nextFetchParams = nextFetchParam.reduce((acc, curr) => {
+              acc[curr] = rows[0][curr];
+              return acc;
+            }, {} as Record<string, any>);
+          }
+        } else {
+          nextFetchParams = {
+            [nextFetchParam]: config[idx]?.checkable ? keys : keys?.[0],
+          };
+        }
+
         setFetchParams((origin) => {
           return {
             ...origin,
             [idx + 1]: {
               ...(origin[idx] || {}),
-              [nextFetchParam]: config[idx]?.checkable ? keys : keys?.[0],
+              ...nextFetchParams,
             },
           };
         });

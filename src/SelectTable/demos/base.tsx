@@ -288,7 +288,7 @@ const App = () => {
         {
           fetchData: mockFetchSchema,
           virtual: true,
-          nextFetchParam: 'schema',
+          nextFetchParam: ['schema'],
           showSearch: {
             placeholder: '请输入schema',
           },

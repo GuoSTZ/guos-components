@@ -23,8 +23,11 @@ export interface SelectListProps {
   fetchParams?: Record<string, any>;
   /** 数据请求接口 */
   fetchData: (params: Record<string, unknown>) => Promise<any>;
-  /** 下一个list组件的请求，依赖当前list数据，根据该字段传递响应数据作为下一个list请求的参数 */
-  nextFetchParam?: string;
+  /** 下一个组件的请求，依赖当前组件数据，根据该字段传递响应数据作为下一个组件请求的参数
+   * 如果为字符串，则字符串作为参数名，值为选中数据对应的值
+   * 如果为数组，则每个字符串分别为参数名，需要在整条数据中找到对应的值
+   */
+  nextFetchParam?: string[] | string;
   /** 当前请求，是否依赖上一个list组件的数据，如果是，则在上一个list传递参数后，才会发起请求 */
   needFetchParam?: boolean;
   /** 开启可选模式 */
