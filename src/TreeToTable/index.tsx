@@ -189,7 +189,7 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
         return;
       }
       const isOneLevel = !treeData.some(
-        (item) => item?.[rowChildren] && item?.[rowChildren]?.length > 1,
+        (item) => item?.[rowChildren] && item?.[rowChildren]?.length > 0,
       );
 
       if (isOneLevel && !!alignCheckbox) {
