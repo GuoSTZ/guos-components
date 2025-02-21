@@ -4,6 +4,7 @@ export { default as CollapseTree } from './CollapseTree';
 export { default as DataBlock } from './DataBlock';
 export { default as DirectoryInput } from './DirectoryInput';
 export { default as EditTable } from './EditTable';
+export { default as FetchLink } from './FetchLink';
 export { default as FormRender } from './FormRender';
 export { default as InFlow } from './InFlow';
 export { default as LabelTag } from './LabelTag';
