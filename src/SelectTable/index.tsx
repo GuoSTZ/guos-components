@@ -171,6 +171,27 @@ const SelectTable = (props: SelectTableProps) => {
     }
   }, [value, relationKeys, config]);
 
+  useEffect(() => {
+    config?.forEach((item, idx) => {
+      const noEmptyFetchParams = Object.fromEntries(
+        Object.entries(item?.fetchParams || {}).filter(
+          (entry) =>
+            entry[1] !== null && entry[1] !== '' && entry[1] !== undefined,
+        ),
+      );
+      const defaultFetchParams =
+        Object.keys(noEmptyFetchParams).length > 0
+          ? noEmptyFetchParams
+          : void 0;
+      setFetchParams((origin) => {
+        return {
+          ...origin,
+          [idx]: defaultFetchParams,
+        };
+      });
+    });
+  }, [config]);
+
   return (
     <div className={styles['select-table']}>
       <div className={styles['select-table-left']}>
@@ -178,7 +199,10 @@ const SelectTable = (props: SelectTableProps) => {
         <div className={styles['select-table-left-lists']}>
           {config.map((item, idx) => {
             const { nextFetchParam, needFetchParam, checkable, ...rest } = item;
-            const defaultNeedFetchParam = idx === 0 ? false : needFetchParam;
+            // 默认第一个list组件不需要参数即可发送请求，其他项需要参数才可发送请求，也可以通过配置来决定
+            const defaultNeedFetchParam =
+              typeof needFetchParam === 'boolean' ? needFetchParam : idx !== 0;
+            // 默认最后一个list组件是checkable，其他组件不是checkable，也可通过配置来决定
             const defaultCheckable =
               idx === config.length - 1
                 ? true && checkable !== false

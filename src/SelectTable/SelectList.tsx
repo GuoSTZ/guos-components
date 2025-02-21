@@ -126,6 +126,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
 
   const getData = useCallback(
     (params: Record<string, any> = {}) => {
+      console.log(rowKey, needFetchParam, fetchParams, '========000');
       if (needFetchParam && !fetchParams) {
         return;
       }

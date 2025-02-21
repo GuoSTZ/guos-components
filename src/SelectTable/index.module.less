@@ -2,11 +2,14 @@
   display: flex;
 
   &-left {
+    display: flex;
+    flex-direction: column;
     border: 1px solid #ced2de;
     border-right: none;
 
     &-lists {
       display: flex;
+      flex: 1;
 
       > div:not(:last-child) {
         border-right: 1px solid #ced2de;
@@ -33,6 +36,12 @@
       padding: 8px 12px;
       column-gap: 16px;
       border-bottom: 1px solid #ced2de;
+    }
+
+    :global {
+      .@{ant-prefix}-table-wrapper {
+        width: calc(100% - 1px);
+      }
     }
   }
 }

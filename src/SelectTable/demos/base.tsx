@@ -1,4 +1,4 @@
-import { Button, Form, Radio } from 'antd';
+import { Button, Form, Radio, Select } from 'antd';
 import React, { useMemo, useState } from 'react';
 import { SelectTable } from 'guos-components';
 import { data as mockSchemaData } from './data/schema';
@@ -193,6 +193,10 @@ const mockFetchColumn = (params: any) => {
 
 const App = () => {
   const [aaa, setAaa] = useState(4);
+  const [needCatalog, setNeedCatalog] = useState(0);
+  const [catalog, setCatalog] = useState();
+
+  const [form] = Form.useForm();
 
   const leftHeader = '待选项';
   const rightHeader = '已选项';
@@ -233,6 +237,8 @@ const App = () => {
             childCount: 'count',
             status: 'encryptStatus',
           },
+          needFetchParam: !!needCatalog,
+          fetchParams: needCatalog ? { catalog } : void 0,
           ...commonConfig,
         },
       ],
@@ -260,6 +266,8 @@ const App = () => {
             childCount: 'count',
             status: 'encryptStatus',
           },
+          needFetchParam: !!needCatalog,
+          fetchParams: needCatalog ? { catalog } : void 0,
           ...commonConfig,
         },
       ],
@@ -291,6 +299,8 @@ const App = () => {
             childCount: 'count',
             status: 'encryptStatus',
           },
+          needFetchParam: !!needCatalog,
+          fetchParams: needCatalog ? { catalog } : void 0,
           ...commonConfig,
         },
         {
@@ -336,6 +346,8 @@ const App = () => {
             childCount: 'count',
             status: 'encryptStatus',
           },
+          needFetchParam: !!needCatalog,
+          fetchParams: needCatalog ? { catalog } : void 0,
           ...commonConfig,
         },
         {
@@ -388,10 +400,10 @@ const App = () => {
       4: 表配置,
       5: 列配置,
     };
-  }, []);
+  }, [schema配置, 表空间配置, 表配置, 列配置]);
 
   return (
-    <Form onFinish={console.log}>
+    <Form onFinish={console.log} form={form}>
       <Form.Item label="aaa" name={'aaa'} initialValue={4}>
         <Radio.Group
           options={[
@@ -401,12 +413,49 @@ const App = () => {
             { label: '表', value: 4 },
             { label: '列', value: 5 },
           ]}
-          onChange={(e) => setAaa(e.target.value)}
+          onChange={(e) => {
+            setAaa(e.target.value);
+            // 需要手动重置bbb的值，避免切换后，上一次的数据残留
+            form.resetFields(['bbb']);
+          }}
         />
       </Form.Item>
+
+      <Form.Item
+        label="模拟是否存在catalog"
+        name="needCatalog"
+        initialValue={0}
+      >
+        <Radio.Group
+          options={[
+            { label: '是', value: 1 },
+            { label: '否', value: 0 },
+          ]}
+          onChange={(e) => {
+            setNeedCatalog(e.target.value);
+            // 需要手动重置bbb的值，避免切换后，上一次的数据残留
+            form.resetFields(['bbb']);
+          }}
+        />
+      </Form.Item>
+
+      {needCatalog === 1 && (
+        <Form.Item label="catalog">
+          <Select
+            placeholder="请选择"
+            options={[
+              { label: 'catalog1', value: 'catalog1' },
+              { label: 'catalog2', value: 'catalog2' },
+            ]}
+            onChange={(value) => setCatalog(value)}
+          />
+        </Form.Item>
+      )}
+
       {aaa !== 1 ? (
         <Form.Item label="bbb" name="bbb">
-          <SelectTable key={aaa} {...listConfig[aaa]} />
+          {/* 这里的key值实际只需要aaa，但是模拟了needCatalog的效果，因此也加上了 */}
+          <SelectTable key={`${needCatalog}-${aaa}`} {...listConfig[aaa]} />
         </Form.Item>
       ) : null}
 
