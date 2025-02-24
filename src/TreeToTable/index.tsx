@@ -391,7 +391,9 @@ const TreeToTable = forwardRef<TreeToTableRef, TreeToTableProps<any>>(
           checkedKeySet.current?.delete(childKey);
         });
       }
-      transferData();
+      transferData({
+        needReverse: false,
+      });
     };
 
     /** 表格全部删除 */

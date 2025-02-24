@@ -34,7 +34,7 @@ const App = () => {
             title: '操作',
             render: (_, record) => (
               <Typography.Link
-                onClick={() => treeToTableRef.current?.tableDelete(record?.id)}
+                onClick={() => treeToTableRef.current?.tableDelete(record?.key)}
               >
                 删除
               </Typography.Link>
