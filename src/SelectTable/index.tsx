@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import SelectList, { SelectListRef, SelectListProps } from './SelectList';
+import SelectTree, { SelectTreeRef, SelectTreeProps } from './SelectTree';
 import VirtualTable from '../VirtualTable';
 
 import styles from './index.module.less';
@@ -16,7 +16,7 @@ import styles from './index.module.less';
 export interface SelectTableProps {
   /** 左侧列表props */
   listProps: {
-    config: Array<SelectListProps>;
+    config: Array<SelectTreeProps>;
     /** 头部自定义 */
     header?: React.ReactNode;
     /** 渲染异常情况 */
@@ -45,9 +45,9 @@ const SelectTable = (props: SelectTableProps) => {
   const [fetchParams, setFetchParams] = useState<Record<number, any>>({});
   const [dataSource, setDataSource] = useState<any[]>([]);
   const [filterDataSource, setFilterDataSource] = useState<any[]>([]);
-  const [selectListValue, setSelectListValue] = useState<any[]>([]);
+  const [selectTreeValue, setSelectTreeValue] = useState<any[]>([]);
 
-  const selectListRefs = useRef(new Map<number, SelectListRef>());
+  const selectTreeRefs = useRef(new Map<number, SelectTreeRef>());
 
   const relationKeys = useMemo(() => {
     if (props.relationKeys) {
@@ -84,7 +84,7 @@ const SelectTable = (props: SelectTableProps) => {
             return (
               <Typography.Link
                 onClick={() =>
-                  [...selectListRefs.current?.values()]
+                  [...selectTreeRefs.current?.values()]
                     .at(-1)
                     ?.deleteOne(record?.[relationKey])
                 }
@@ -96,7 +96,7 @@ const SelectTable = (props: SelectTableProps) => {
         },
       ].map((item) => ({ ...item, ellipsis: true })),
     };
-  }, [restTableProps, selectListRefs.current, relationKeys, filterDataSource]);
+  }, [restTableProps, selectTreeRefs.current, relationKeys, filterDataSource]);
 
   const handleOnChange = useCallback(
     (
@@ -105,7 +105,7 @@ const SelectTable = (props: SelectTableProps) => {
       idx: number,
       nextFetchParam?: string | string[],
     ) => {
-      selectListRefs.current?.forEach((item, key) => {
+      selectTreeRefs.current?.forEach((item, key) => {
         if (key > idx) {
           item.clearSelected();
           // 实际情况下，clearDataSource也可以在 key > idx 中执行，但是会出现数据为空再填入的闪烁情况，所以做了一些小措施
@@ -192,7 +192,7 @@ const SelectTable = (props: SelectTableProps) => {
           slValue.push(null);
         }
       });
-      setSelectListValue(slValue);
+      setSelectTreeValue(slValue);
     }
   }, [value, relationKeys, config]);
 
@@ -233,10 +233,10 @@ const SelectTable = (props: SelectTableProps) => {
                 ? true && checkable !== false
                 : checkable;
             return (
-              <SelectList
+              <SelectTree
                 key={idx}
                 {...rest}
-                value={selectListValue?.[idx]}
+                value={selectTreeValue?.[idx]}
                 onChange={(keys: Key[], rows: any[]) =>
                   handleOnChange(keys, rows, idx, nextFetchParam)
                 }
@@ -245,7 +245,7 @@ const SelectTable = (props: SelectTableProps) => {
                 fetchParams={fetchParams[idx] ? fetchParams[idx] : void 0}
                 ref={(el) => {
                   if (el) {
-                    selectListRefs.current.set(idx, el);
+                    selectTreeRefs.current.set(idx, el);
                   }
                 }}
               />
@@ -260,7 +260,7 @@ const SelectTable = (props: SelectTableProps) => {
             tableHeader,
             <Typography.Link
               onClick={() =>
-                [...selectListRefs.current?.values()].at(-1)?.deleteAll()
+                [...selectTreeRefs.current?.values()].at(-1)?.deleteAll()
               }
             >
               清空

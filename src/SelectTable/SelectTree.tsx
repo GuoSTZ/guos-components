@@ -1,6 +1,5 @@
 import { QuestionCircleFilled } from '@ant-design/icons';
-import { Checkbox, Input, List, Tooltip } from 'antd';
-import { CheckboxChangeEvent } from 'antd/lib/checkbox';
+import { Pagination, Tooltip } from 'antd';
 import { WrapTree } from 'guos-components';
 import React, {
   Key,
@@ -11,14 +10,12 @@ import React, {
   useState,
   useImperativeHandle,
   forwardRef,
-  useMemo,
 } from 'react';
-import { useDebounce } from '@/_utils/useDebounce';
 import { formatNumberToChinese } from '@/_utils';
 
-import styles from './SelectList.module.less';
+import styles from './SelectTree.module.less';
 
-export interface SelectListProps {
+export interface SelectTreeProps {
   /** 传递给fetchData的参数 */
   fetchParams?: Record<string, any>;
   /** 数据请求接口 */
@@ -72,7 +69,7 @@ export interface SelectListProps {
   onChange?: (value: Array<Key>, items: Array<any>) => void;
 }
 
-export interface SelectListRef {
+export interface SelectTreeRef {
   deleteOne: (key: Key) => void;
   deleteAll: () => void;
   clearSelected: () => void;
@@ -80,7 +77,7 @@ export interface SelectListRef {
 }
 
 const BOX_WIDTH = 220;
-const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
+const SelectTree = forwardRef<SelectTreeRef, SelectTreeProps>((props, ref) => {
   const {
     fetchData,
     needFetchParam = true,
@@ -97,7 +94,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
   } = props;
   const [checkRowKeys, setCheckRowKeys] = useState<Set<Key>>(new Set());
   const [checkRows, setCheckRows] = useState(new Map());
-  const [selectedItem, setSelectedItem] = useState<Record<string, string>>({});
+  // const [selectedItem, setSelectedItem] = useState<Record<string, string>>({});
   const [dataSource, setDataSource] = useState<any[]>([]);
   const dataSourceMap = useRef(null);
   const [page, setPage] = useState({
@@ -115,12 +112,12 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
     if (value) {
       setCheckRowKeys(new Set(value || []));
     }
-  }, [value, selectedItem]);
+  }, [value]);
 
   /** 清除选中数据 */
   const clearSelected = useCallback(() => {
-    setSelectedItem({});
-  }, [setSelectedItem, rowKey]);
+    // setSelectedItem({});
+  }, []);
 
   /** 清空数据及分页 */
   const clearDataSource = useCallback(() => {
@@ -163,11 +160,18 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
               newCheckRows.set(firstItem?.[rowKey], firstItem);
               setCheckRowKeys(newCheckRowKeys);
               setCheckRows(newCheckRows);
+              console.log(
+                newCheckRowKeys,
+                newCheckRows,
+                Array.from(newCheckRowKeys),
+                Array.from(newCheckRows.values()),
+                '==========getData',
+              );
               onChange?.(
                 Array.from(newCheckRowKeys),
                 Array.from(newCheckRows.values()),
               );
-              setSelectedItem(firstItem);
+              // setSelectedItem(firstItem);
             }
           },
         );
@@ -182,7 +186,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
       needFetchParam,
       fetchParams,
       clearDataSource,
-      setSelectedItem,
+      // setSelectedItem,
       rowKey,
     ],
   );
@@ -190,61 +194,6 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
   useEffect(() => {
     getData({ current: 1, pageSize: 10 });
   }, [getData]);
-
-  /** list组件，勾选checkbox */
-  const onCheck = useCallback(
-    (e: CheckboxChangeEvent, item: any) => {
-      const newCheckRowKeys = new Set(checkRowKeys);
-      const newCheckRows = new Map(checkRows);
-      if (e.target.checked) {
-        newCheckRowKeys.add(item?.[rowKey]);
-        newCheckRows.set(item?.[rowKey], item);
-      } else {
-        newCheckRowKeys.delete(item?.[rowKey]);
-        newCheckRows.delete(item?.[rowKey]);
-      }
-
-      setCheckRowKeys(newCheckRowKeys);
-      setCheckRows(newCheckRows);
-
-      onChange?.(
-        Array.from(newCheckRowKeys),
-        Array.from(newCheckRows.values()),
-      );
-    },
-    [checkRowKeys, checkRows, onChange, rowKey],
-  );
-
-  /** 输入框搜索 */
-  const onSearch = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      getData({ keyword: e.target.value, current: 1, pageSize: 10 });
-      typeof showSearch === 'object' && showSearch.onChange?.(e);
-    },
-    [getData, showSearch],
-  );
-
-  const debounceSearch = useDebounce(onSearch);
-
-  /** list组件，点击item */
-  const onSelect = useCallback(
-    (e: React.MouseEvent<HTMLDivElement, MouseEvent>, item: any) => {
-      if (!!item.disabled) {
-        return;
-      }
-      setSelectedItem(item);
-
-      if (checkable) {
-        onCheck(
-          { ...e, target: { checked: !checkRowKeys.has(item?.[rowKey]) } },
-          item,
-        );
-      } else {
-        onChange?.([item?.[rowKey]], [item]);
-      }
-    },
-    [onCheck, checkRowKeys, checkable, rowKey],
-  );
 
   /** 分页回调 */
   const paginationOnChange = useCallback(
@@ -254,32 +203,64 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
     [getData],
   );
 
-  /** 树组件点击 */
+  /** 树组件点击 - 仅在单选模式下会触发 */
   const treeOnSelect = useCallback(
     (keys: Key[], info: any) => {
-      setCheckRowKeys(new Set(keys));
-      setSelectedItem(info.selectedNodes);
+      const newCheckRowKeys = new Set(keys);
+
+      setCheckRowKeys(newCheckRowKeys);
       onChange?.(keys, info.selectedNodes);
     },
     [onChange],
   );
 
-  /** 树组件勾选 */
+  /** 树组件勾选 - 仅在多选模式下会触发 */
   const treeOnCheck = useCallback(
     (keys: Key[], info: any) => {
-      setCheckRowKeys(new Set(keys));
-      setSelectedItem(info.checkedNodes);
-      onChange?.(keys, info.checkedNodes);
+      const newCheckRows = new Map(checkRows);
+      const newCheckRowKeys = new Set(checkRowKeys);
+
+      info.checkedNodes.forEach((item: any) => {
+        newCheckRows.set(item?.[rowKey], item);
+        newCheckRowKeys.add(item?.[rowKey]);
+      });
+
+      setCheckRowKeys(newCheckRowKeys);
+      setCheckRows(newCheckRows);
+      onChange?.(
+        Array.from(newCheckRowKeys),
+        Array.from(newCheckRows.values()),
+      );
     },
     [onChange],
   );
 
   const deleteOne = useCallback(
     (key: Key) => {
-      // @ts-ignore
-      onCheck({ target: { checked: false } }, { [rowKey]: key });
+      const newCheckRowKeys = new Set(checkRowKeys);
+      const newCheckRows = new Map(checkRows);
+
+      if (checkRowKeys.has(key)) {
+        newCheckRowKeys.delete(key);
+        newCheckRows.delete(key);
+      }
+      setCheckRowKeys(newCheckRowKeys);
+      setCheckRows(newCheckRows);
+
+      console.log(
+        newCheckRowKeys,
+        newCheckRows,
+        checkRows,
+        Array.from(newCheckRowKeys),
+        Array.from(newCheckRows.values()),
+        '==========deleteOne',
+      );
+      onChange?.(
+        Array.from(newCheckRowKeys),
+        Array.from(newCheckRows.values()),
+      );
     },
-    [onCheck, rowKey],
+    [rowKey, checkRowKeys, checkRows, onChange],
   );
 
   const deleteAll = useCallback(() => {
@@ -316,7 +297,7 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
           ) || {};
         const { label, showTip, ...rest } = status;
         dom.push(
-          <span className={styles['select-list-status-box']} style={rest}>
+          <span className={styles['select-tree-status-box']} style={rest}>
             {label}
             {/* 这里暂时写死不支持原因的属性字段 */}
             {showTip ? (
@@ -339,75 +320,10 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
     [titleRender, rowChildCount, statusConfig, rowName, rowStatus],
   );
 
-  const renderListItem = useCallback(
-    (item: any) => {
-      let checkboxNode = null;
-
-      if (checkable) {
-        checkboxNode = (
-          <Checkbox
-            className={styles['list-item-checkbox']}
-            checked={checkRowKeys.has(item?.[rowKey])}
-            onChange={(e) => onCheck(e, item)}
-            disabled={item.disabled}
-          />
-        );
-      }
-
-      let mergedClassName = styles['select-list-item'];
-      if (selectedItem?.[rowKey] === item?.[rowKey] && !checkable) {
-        mergedClassName = `${mergedClassName} ${styles['select-list-item-selected']}`;
-      }
-      if (!!item.disabled) {
-        mergedClassName = `${mergedClassName} ${styles['select-list-item-disabled']}`;
-      }
-      return (
-        <div className={styles['select-list-item-wrap']}>
-          {checkboxNode}
-          <List.Item
-            onClick={(e) => onSelect(e, item)}
-            className={mergedClassName}
-            title={item[rowName]}
-          >
-            {renderTitle(item)}
-          </List.Item>
-        </div>
-      );
-    },
-    [
-      checkRowKeys,
-      onCheck,
-      onSelect,
-      selectedItem,
-      checkable,
-      renderTitle,
-      rowName,
-      rowKey,
-    ],
-  );
-
-  const renderSearch = useMemo(() => {
-    if (showSearch === true) {
-      return (
-        <div className={styles['select-list-input']}>
-          <Input placeholder="请输入" onChange={debounceSearch} />
-        </div>
-      );
-    } else if (typeof showSearch === 'object') {
-      return (
-        <div className={styles['select-list-input']}>
-          <Input {...showSearch} onChange={debounceSearch} />
-        </div>
-      );
-    } else {
-      return null;
-    }
-  }, [showSearch, debounceSearch]);
-
-  if (virtual) {
-    return (
+  return (
+    <div className={styles['select-tree']} style={{ width: BOX_WIDTH }}>
       <WrapTree
-        wrapClassName={styles['select-list-tree']}
+        wrapClassName={styles['select-tree-tree']}
         wrapStyle={{ width: BOX_WIDTH }}
         showSearch={showSearch}
         height={309}
@@ -425,30 +341,18 @@ const SelectList = forwardRef<SelectListRef, SelectListProps>((props, ref) => {
         // @ts-ignore
         onCheck={treeOnCheck}
       />
-    );
-  }
-
-  return (
-    <div className={styles['select-list']} style={{ width: BOX_WIDTH }}>
-      {renderSearch}
-      <List
-        size="small"
-        dataSource={dataSource || []}
-        renderItem={renderListItem}
-        pagination={
-          page?.total
-            ? {
-                simple: true,
-                onChange: paginationOnChange,
-                total: page?.total || 0,
-                current: page?.current || 1,
-                pageSize: page?.pageSize || 10,
-              }
-            : false
-        }
-      />
+      {page?.total && !virtual ? (
+        <Pagination
+          className={styles['select-tree-pagination']}
+          size="small"
+          current={page.current}
+          pageSize={page.pageSize}
+          total={page.total}
+          onChange={paginationOnChange}
+        />
+      ) : null}
     </div>
   );
 });
 
-export default memo(SelectList);
+export default memo(SelectTree);
