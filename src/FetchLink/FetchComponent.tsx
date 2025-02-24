@@ -1,4 +1,11 @@
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, {
+  forwardRef,
+  memo,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from 'react';
 
 export interface FetchComponentProps {
   /** 数据请求接口 */
@@ -25,86 +32,122 @@ export interface FetchComponentProps {
   value?: any;
   /** 值变化回调 */
   onChange?: (...args: any[]) => void;
+  /** 清空数据回调 */
+  clearFn?: () => void;
 }
 
-const FetchComponent = (props: FetchComponentProps) => {
-  const {
-    fetchData,
-    component: Comp,
-    componentProps,
-    needFetchParam,
-    fetchParams,
-    checkFirst,
-    fieldNames,
-    onChange,
-  } = props;
+export interface FetchComponentRef {
+  clearDataSource: () => void;
+  clearValue: () => void;
+}
 
-  const [dataSource, setDataSource] = useState([]);
-
-  const rowKey = fieldNames?.key || 'key';
-  const fieldDataSource = fieldNames?.dataSource || 'dataSource';
-
-  /** 清空数据及分页 */
-  const clearDataSource = useCallback(() => {
-    setDataSource([]);
-  }, [setDataSource]);
-
-  const getData = useCallback(
-    (params: Record<string, any> = {}) => {
-      if (needFetchParam && !fetchParams) {
-        return;
-      }
-      try {
-        fetchData({ ...(fetchParams || {}), ...params }).then((data: any) => {
-          setDataSource(data);
-
-          if (
-            checkFirst &&
-            data?.items?.length &&
-            !data?.items?.[0]?.disabled
-          ) {
-            const firstItem = data?.items?.[0];
-            onChange?.(firstItem?.[rowKey], firstItem);
-          }
-        });
-      } catch (error) {
-        console.log(error);
-        // 请求失败的话，执行一遍清除操作，避免脏数据
-        clearDataSource();
-      }
-    },
-    [
-      rowKey,
+const FetchComponent = forwardRef<FetchComponentRef, FetchComponentProps>(
+  (props, ref) => {
+    const {
+      fetchData,
+      component: Comp,
+      componentProps,
       needFetchParam,
       fetchParams,
-      clearDataSource,
       checkFirst,
-      fetchData,
-    ],
-  );
+      fieldNames,
+      onChange,
+      value,
+      clearFn,
+      ...rest
+    } = props;
 
-  useEffect(() => {
-    getData();
-  }, [getData]);
+    const [dataSource, setDataSource] = useState([]);
+    const [innerValue, setInnerValue] = useState();
 
-  const handleOnChange = useCallback(
-    (...args: any[]) => {
-      onChange?.(...args);
-    },
-    [onChange],
-  );
+    const rowKey = fieldNames?.key || 'key';
+    const fieldDataSource = fieldNames?.dataSource || 'dataSource';
 
-  if (!Comp) {
-    return null;
-  }
+    useEffect(() => {
+      setInnerValue(value);
+    }, [value]);
 
-  return (
-    <Comp
-      {...componentProps}
-      {...{ [fieldDataSource]: dataSource }}
-      onChange={handleOnChange}
-    />
-  );
-};
+    /** 清空数据及分页 */
+    const clearDataSource = useCallback(() => {
+      setDataSource([]);
+    }, [setDataSource]);
+
+    const getData = useCallback(
+      (params: Record<string, any> = {}) => {
+        if (needFetchParam && !fetchParams) {
+          return;
+        }
+        try {
+          fetchData({ ...(fetchParams || {}), ...params }).then((data: any) => {
+            setDataSource(data);
+
+            if (
+              checkFirst &&
+              data?.items?.length &&
+              !data?.items?.[0]?.disabled
+            ) {
+              const firstItem = data?.items?.[0];
+              onChange?.(firstItem?.[rowKey], firstItem);
+            }
+          });
+        } catch (error) {
+          console.log(error);
+          // 请求失败的话，执行一遍清除操作，避免脏数据
+          clearDataSource();
+        }
+      },
+      [
+        rowKey,
+        needFetchParam,
+        fetchParams,
+        clearDataSource,
+        checkFirst,
+        fetchData,
+      ],
+    );
+
+    useEffect(() => {
+      getData();
+    }, [getData]);
+
+    const handleOnChange = useCallback(
+      (...args: any[]) => {
+        onChange?.(...args);
+      },
+      [onChange],
+    );
+
+    const clearValue = useCallback(() => {
+      if (clearFn) {
+        clearFn();
+      } else {
+        setInnerValue(void 0);
+      }
+    }, [clearFn, setInnerValue]);
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        clearDataSource,
+        clearValue,
+      }),
+      [clearDataSource, clearValue],
+    );
+
+    if (!Comp) {
+      return null;
+    }
+
+    return (
+      <Comp
+        {...rest}
+        {...componentProps}
+        {...{ [fieldDataSource]: dataSource }}
+        onChange={handleOnChange}
+        value={innerValue}
+      />
+    );
+  },
+);
 
 export default memo(FetchComponent);
