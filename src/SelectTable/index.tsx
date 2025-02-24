@@ -106,12 +106,8 @@ const SelectTable = (props: SelectTableProps) => {
       nextFetchParam?: string | string[],
     ) => {
       selectTreeRefs.current?.forEach((item, key) => {
-        if (key > idx) {
-          item.clearSelected();
-          // 实际情况下，clearDataSource也可以在 key > idx 中执行，但是会出现数据为空再填入的闪烁情况，所以做了一些小措施
-          if (key > idx + 1) {
-            item.clearDataSource();
-          }
+        if (key > idx + 1) {
+          item.clearDataSource();
         }
       });
       if (nextFetchParam) {

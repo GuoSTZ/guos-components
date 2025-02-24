@@ -72,7 +72,6 @@ export interface SelectTreeProps {
 export interface SelectTreeRef {
   deleteOne: (key: Key) => void;
   deleteAll: () => void;
-  clearSelected: () => void;
   clearDataSource: () => void;
 }
 
@@ -94,7 +93,6 @@ const SelectTree = forwardRef<SelectTreeRef, SelectTreeProps>((props, ref) => {
   } = props;
   const [checkRowKeys, setCheckRowKeys] = useState<Set<Key>>(new Set());
   const [checkRows, setCheckRows] = useState(new Map());
-  // const [selectedItem, setSelectedItem] = useState<Record<string, string>>({});
   const [dataSource, setDataSource] = useState<any[]>([]);
   const dataSourceMap = useRef(null);
   const [page, setPage] = useState({
@@ -113,11 +111,6 @@ const SelectTree = forwardRef<SelectTreeRef, SelectTreeProps>((props, ref) => {
       setCheckRowKeys(new Set(value || []));
     }
   }, [value]);
-
-  /** 清除选中数据 */
-  const clearSelected = useCallback(() => {
-    // setSelectedItem({});
-  }, []);
 
   /** 清空数据及分页 */
   const clearDataSource = useCallback(() => {
@@ -275,10 +268,9 @@ const SelectTree = forwardRef<SelectTreeRef, SelectTreeProps>((props, ref) => {
     () => ({
       deleteOne,
       deleteAll,
-      clearSelected,
       clearDataSource,
     }),
-    [deleteOne, deleteAll, clearSelected, clearDataSource],
+    [deleteOne, deleteAll, clearDataSource],
   );
 
   const renderTitle = useCallback(
