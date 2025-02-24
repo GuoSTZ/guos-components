@@ -1,6 +1,16 @@
-import React, { memo, useCallback, useState, ElementType } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useState,
+  ElementType,
+  useRef,
+  useEffect,
+} from 'react';
 
-import FetchComponent, { FetchComponentProps } from './FetchComponent';
+import FetchComponent, {
+  FetchComponentProps,
+  FetchComponentRef,
+} from './FetchComponent';
 
 type ConventHandle = (...args: any[]) => any[];
 
@@ -23,8 +33,48 @@ export interface FetchLinkProps {
 
 const FetchLink = (props: FetchLinkProps) => {
   const { config } = props;
-
+  const [innerConfig, setInnerConfig] = useState<
+    Array<FetchComponentProps & FetchLinkExtraProps>
+  >(props.config);
   const [fetchParams, setFetchParams] = useState<Record<number, any>>({});
+  const fetchComponentRefs = useRef(new Map<number, FetchComponentRef>());
+
+  useEffect(() => {
+    fetchComponentRefs.current = new Map<number, FetchComponentRef>();
+    setFetchParams({});
+  }, [config.length]);
+
+  const addConfig = useCallback(
+    (idx: number, config: FetchComponentProps & FetchLinkExtraProps) => {
+      setInnerConfig((origin) => {
+        const newConfig = [...origin];
+        newConfig.splice(idx, 0, config);
+        return newConfig;
+      });
+      setFetchParams((origin) => {
+        const newFetchParams: Record<number, any> = {};
+        for (let i = 1; i < idx + 1; i++) {
+          newFetchParams[i] = origin[i];
+        }
+        return newFetchParams;
+      });
+    },
+    [innerConfig],
+  );
+
+  const removeConfig = useCallback(
+    (idx: number, configIndex: number) => {
+      setInnerConfig(innerConfig.filter((_, i) => i !== configIndex));
+      setFetchParams((origin) => {
+        const newFetchParams: Record<number, any> = {};
+        for (let i = 1; i < idx + 2; i++) {
+          newFetchParams[i] = origin[i];
+        }
+        return newFetchParams;
+      });
+    },
+    [innerConfig],
+  );
 
   const renderComponent = useCallback(
     (config: FetchComponentProps & FetchLinkExtraProps, idx: number) => {
@@ -37,56 +87,70 @@ const FetchLink = (props: FetchLinkProps) => {
         ...rest
       } = config;
 
+      const childComponent = (
+        <FetchComponent
+          {...rest}
+          ref={(ref) => {
+            if (ref) {
+              fetchComponentRefs.current.set(idx, ref);
+            }
+          }}
+          fetchParams={fetchParams[idx] ? fetchParams[idx] : void 0}
+          onChange={(...args: any[]) => {
+            fetchComponentRefs.current.forEach((item, key) => {
+              if (key > idx) {
+                item.clearDataSource();
+                item.clearValue();
+              }
+            });
+            const conventedArgs = handleOnChangeValue
+              ? handleOnChangeValue(...args)
+              : args;
+            const [value = '', record = {}] = conventedArgs;
+
+            if (nextFetchParam) {
+              let nextFetchParams = {};
+              if (Array.isArray(nextFetchParam)) {
+                nextFetchParams = nextFetchParam.reduce((acc, curr) => {
+                  acc[curr] = record[curr];
+                  return acc;
+                }, {} as Record<string, any>);
+              } else {
+                nextFetchParams = {
+                  [nextFetchParam]: value,
+                };
+              }
+              setFetchParams((origin) => {
+                return {
+                  ...origin,
+                  [idx + 1]: {
+                    ...(origin[idx] || {}),
+                    ...nextFetchParams,
+                  },
+                };
+              });
+            }
+
+            onChange?.(value, record, addConfig, (configIndex: number) =>
+              removeConfig(idx, configIndex),
+            );
+          }}
+        />
+      );
+
       if (decorator) {
         const Decorator = decorator;
-        return (
-          <Decorator {...decoratorProps}>
-            <FetchComponent
-              {...rest}
-              fetchParams={fetchParams[idx] ? fetchParams[idx] : void 0}
-              onChange={(...args: any[]) => {
-                const conventedArgs = handleOnChangeValue
-                  ? handleOnChangeValue(...args)
-                  : args;
-                const [value = '', record = {}] = conventedArgs;
 
-                if (nextFetchParam) {
-                  let nextFetchParams = {};
-                  if (Array.isArray(nextFetchParam)) {
-                    nextFetchParams = nextFetchParam.reduce((acc, curr) => {
-                      acc[curr] = record[curr];
-                      return acc;
-                    }, {} as Record<string, any>);
-                  } else {
-                    nextFetchParams = {
-                      [nextFetchParam]: value,
-                    };
-                  }
-                  setFetchParams((origin) => {
-                    return {
-                      ...origin,
-                      [idx + 1]: {
-                        ...(origin[idx] || {}),
-                        ...nextFetchParams,
-                      },
-                    };
-                  });
-                }
-
-                onChange?.(...args);
-              }}
-            />
-          </Decorator>
-        );
+        return <Decorator {...decoratorProps}>{childComponent}</Decorator>;
       }
-      return <FetchComponent {...rest} />;
+      return childComponent;
     },
-    [fetchParams],
+    [fetchParams, addConfig, removeConfig],
   );
 
   return (
     <>
-      {config.map((item, idx) => {
+      {innerConfig.map((item, idx) => {
         return renderComponent(item, idx);
       })}
     </>

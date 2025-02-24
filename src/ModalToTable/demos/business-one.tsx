@@ -3,6 +3,7 @@ import { FetchLink, ModalToTable } from 'guos-components';
 import React, { memo, useRef } from 'react';
 import { getLabel } from '@/_utils';
 import { dicts } from '@/data/editTable';
+import { FormInstance } from 'antd/es/form/Form';
 
 const formLayout = {
   labelCol: { span: 4 },
@@ -22,7 +23,13 @@ const schemaData = [
   { label: 'schema1', value: 'schema1', dbId: 1, schema: 'schema1' },
   { label: 'schema2', value: 'schema2', dbId: 1, schema: 'schema2' },
   { label: 'schema3', value: 'schema3', dbId: 1, schema: 'schema3' },
-  { label: 'schema4', value: 'schema4', dbId: 2, schema: 'schema4' },
+  {
+    label: 'schema4',
+    value: 'schema4',
+    dbId: 2,
+    schema: 'schema4',
+    hasCatalog: true,
+  },
   { label: 'schema5', value: 'schema5', dbId: 2, schema: 'schema5' },
   { label: 'schema6', value: 'schema6', dbId: 2, schema: 'schema6' },
   { label: 'schema7', value: 'schema7', dbId: 3, schema: 'schema7' },
@@ -317,10 +324,11 @@ const mockFetchDbData = () => {
 
 const mockFetchCatalogData = (params: any) => {
   const { dbId } = params;
-  console.log('=========请求catalog数据', params);
+  const data = catalogData.filter((item) => item.dbId === dbId);
+  console.log('=========请求catalog数据', params, '=======得到数据', data);
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(catalogData.filter((item) => item.dbId === dbId));
+      resolve(data);
     }, 200);
   });
 };
@@ -417,102 +425,142 @@ const App = () => {
     decoratorProps: {
       label: 'catalog',
       name: 'catalog',
+      rules: [{ required: true, message: '请选择' }],
+    },
+    clearFn: () => {
+      form.setFieldsValue({
+        catalog: void 0,
+      });
     },
   };
 
-  const config = [
-    {
-      fetchData: mockFetchDbData,
-      component: Select,
-      componentProps: {
-        placeholder: '请选择，可搜索',
-        showSearch: true,
+  const getConfig = (form: FormInstance) => {
+    const config = [
+      {
+        fetchData: mockFetchDbData,
+        component: Select,
+        componentProps: {
+          placeholder: '请选择，可搜索',
+          showSearch: true,
+        },
+        fieldNames: {
+          key: 'value',
+          name: 'label',
+          dataSource: 'options',
+        },
+        nextFetchParam: ['dbId'],
+        onChange: (
+          value: any,
+          record: any,
+          add: (idx: number, config: any) => void,
+          remove: (idx: number) => void,
+        ) => {
+          if (record.hasCatalog && !hasCatalog.current) {
+            hasCatalog.current = true;
+            add?.(3, catalogConfig);
+          }
+          if (!record.hasCatalog && hasCatalog.current) {
+            hasCatalog.current = false;
+            remove?.(3);
+          }
+        },
+        decorator: Form.Item,
+        decoratorProps: {
+          label: '数据库',
+          name: 'database',
+          rules: [{ required: true, message: '请选择' }],
+        },
+        clearFn: () => {
+          form.setFieldsValue({
+            database: void 0,
+          });
+        },
       },
-      fieldNames: {
-        key: 'value',
-        name: 'label',
-        dataSource: 'options',
+      {
+        fetchData: mockFetchSchemaData,
+        component: Select,
+        componentProps: {
+          placeholder: '请选择，可搜索',
+          showSearch: true,
+        },
+        fieldNames: {
+          key: 'value',
+          name: 'label',
+          dataSource: 'options',
+        },
+        needFetchParam: true,
+        nextFetchParam: ['schema'],
+        decorator: Form.Item,
+        decoratorProps: {
+          label: 'schema',
+          name: 'schema',
+          rules: [{ required: true, message: '请选择' }],
+        },
+        clearFn: () => {
+          console.log('=========清空schema');
+          form.setFieldsValue({
+            schema: void 0,
+          });
+        },
       },
-      nextFetchParam: ['dbId'],
-      onChange: (value: any, record: any) => {
-        if (record.hasCatalog && !hasCatalog.current) {
-          hasCatalog.current = true;
-          config.splice(1, 0, catalogConfig);
-        }
-        if (!record.hasCatalog && hasCatalog.current) {
-          hasCatalog.current = false;
-          config.splice(1, 1);
-        }
+      {
+        fetchData: mockFetchTableData,
+        component: Select,
+        componentProps: {
+          placeholder: '请选择，可搜索',
+          showSearch: true,
+        },
+        fieldNames: {
+          key: 'value',
+          name: 'label',
+          dataSource: 'options',
+        },
+        needFetchParam: true,
+        nextFetchParam: 'table',
+        decorator: Form.Item,
+        decoratorProps: {
+          label: '表',
+          name: 'table',
+          rules: [{ required: true, message: '请选择' }],
+        },
+        clearFn: () => {
+          form.setFieldsValue({
+            table: void 0,
+          });
+        },
       },
-      decorator: Form.Item,
-      decoratorProps: {
-        label: '数据库',
-        name: 'database',
+      {
+        fetchData: mockFetchColumnData,
+        component: Select,
+        componentProps: {
+          placeholder: '请选择，可搜索，可多选',
+          showSearch: true,
+          mode: 'multiple',
+        },
+        fieldNames: {
+          key: 'value',
+          name: 'label',
+          dataSource: 'options',
+        },
+        needFetchParam: true,
+        decorator: Form.Item,
+        decoratorProps: {
+          label: '列',
+          name: 'column',
+          rules: [{ required: true, message: '请选择' }],
+        },
+        clearFn: () => {
+          form.setFieldsValue({
+            column: void 0,
+          });
+        },
       },
-    },
-    {
-      fetchData: mockFetchSchemaData,
-      component: Select,
-      componentProps: {
-        placeholder: '请选择，可搜索',
-        showSearch: true,
-      },
-      fieldNames: {
-        key: 'value',
-        name: 'label',
-        dataSource: 'options',
-      },
-      needFetchParam: true,
-      nextFetchParam: ['schema'],
-      decorator: Form.Item,
-      decoratorProps: {
-        label: 'schema',
-        name: 'schema',
-      },
-    },
-    {
-      fetchData: mockFetchTableData,
-      component: Select,
-      componentProps: {
-        placeholder: '请选择，可搜索',
-        showSearch: true,
-      },
-      fieldNames: {
-        key: 'value',
-        name: 'label',
-        dataSource: 'options',
-      },
-      needFetchParam: true,
-      nextFetchParam: 'table',
-      decorator: Form.Item,
-      decoratorProps: {
-        label: '表',
-        name: 'table',
-      },
-    },
-    {
-      fetchData: mockFetchColumnData,
-      component: Select,
-      componentProps: {
-        placeholder: '请选择，可搜索，可多选',
-        showSearch: true,
-        mode: 'multiple',
-      },
-      fieldNames: {
-        key: 'value',
-        name: 'label',
-        dataSource: 'options',
-      },
-      needFetchParam: true,
-      decorator: Form.Item,
-      decoratorProps: {
-        label: '列',
-        name: 'column',
-      },
-    },
-  ];
+    ];
+    return config;
+  };
 
-  const renderFormItem = () => {
+  const renderFormItem = (form: FormInstance) => {
+    const config = getConfig(form);
     return <FetchLink config={config} />;
   };
 
@@ -525,6 +573,9 @@ const App = () => {
             renderFormItem,
             okText: '确定',
             cancelText: '取消',
+            afterClose: () => {
+              hasCatalog.current = false;
+            },
           }}
         />
       </Form.Item>
