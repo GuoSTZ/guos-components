@@ -8,7 +8,7 @@ const App = () => {
     <Form form={form} labelCol={{ span: 4 }}>
       <Form.Item
         name="aaa"
-        label="全选树下拉框"
+        label="单层数据"
         rules={[{ required: true, message: '请选择aaa' }]}
         // initialValue={[]}
       >
@@ -21,18 +21,10 @@ const App = () => {
             {
               title: '1',
               value: '1',
-              children: [
-                { title: '1-1', value: '1-1' },
-                { title: '1-2', value: '1-2' },
-              ],
             },
             {
               title: '2',
               value: '2',
-              children: [
-                { title: '2-1', value: '2-1' },
-                { title: '2-2', value: '2-2' },
-              ],
             },
           ]}
         />

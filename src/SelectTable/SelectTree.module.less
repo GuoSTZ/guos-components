@@ -1,3 +1,6 @@
+@root-entry-name: 'default';
+@import (reference) '~antd/es/style/themes/index.less';
+
 .select-tree {
   .select-tree-item-wrap {
     display: flex;
@@ -5,8 +8,14 @@
     padding-bottom: 4px;
   }
 
+  &-input {
+    margin-bottom: 4px;
+    padding-right: 8px;
+  }
+
   &-tree {
-    padding: 12px;
+    height: calc(100% - 41px);
+    padding: 12px 4px 12px 12px;
 
     :global {
       .@{ant-prefix}-tree-list {
@@ -44,6 +53,10 @@
             width: calc(100% - 16px);
           }
         }
+
+        .@{ant-prefix}-tree-treenode-selected {
+          color: #3385ff;
+        }
       }
     }
   }
@@ -57,11 +70,11 @@
     border-radius: 2px;
     margin-left: 4px;
   }
+}
 
-  &-pagination {
-    margin-top: 0;
-    padding: 8px 0;
-    border-top: 1px solid #ced2de;
-    text-align: right;
-  }
+ul.select-tree-pagination {
+  margin-top: 0;
+  padding: 8px 0;
+  border-top: 1px solid #ced2de;
+  text-align: right;
 }

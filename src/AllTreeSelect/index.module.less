@@ -1,3 +1,6 @@
+@root-entry-name: 'default';
+@import (reference) '~antd/es/style/themes/index.less';
+
 .all-tree-select-all {
   width: 100%;
   margin-bottom: 4px;
@@ -11,6 +14,19 @@
         top: unset;
         margin: 4px;
         margin-left: 8px;
+      }
+    }
+  }
+}
+
+.all-tree-select-one-level {
+  :global {
+    .@{ant-prefix}-select-tree {
+      .@{ant-prefix}-select-tree-treenode {
+        padding-left: 8px;
+        .@{ant-prefix}-select-tree-switcher {
+          display: none;
+        }
       }
     }
   }

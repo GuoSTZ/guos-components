@@ -10,6 +10,7 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     'react/jsx-key': 'off',
     '@typescript-eslint/no-unused-expressions': 'off',
+    'react/no-children-prop': 'off',
   },
   settings: {
     'import/resolvers': {

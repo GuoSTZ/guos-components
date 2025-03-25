@@ -12,7 +12,7 @@ export const data = {
   assetSetId: 0,
   nullable: null,
   fromDb: 1,
-  encryptStatus: 1,
+  encryptStatus: -1,
   dataOrigin: null,
   columnType: null,
   count: 123456,

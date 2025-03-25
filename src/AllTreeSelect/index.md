@@ -12,6 +12,8 @@ demo:
 
 <code src='./demos/base.tsx' title='基于antd4 TreeSelect组件，添加全选功能' description='基础使用'></code>
 
+<code src='./demos/oneLevel.tsx' title='单层数据' description='单层数据时，默认进行对齐，目前仅对传递treeData时生效'></code>
+
 ## API
 
 | 参数           | 类型                                        | 默认值 | 描述               |

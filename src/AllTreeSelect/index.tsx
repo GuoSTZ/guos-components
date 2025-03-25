@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import {
   TreeSelect,
   TreeSelectProps,
@@ -76,14 +76,14 @@ const AllTreeSelect: CompoundedComponent = (props) => {
 
   const handleTreeNode = (data: any = {}, checked: boolean): any => {
     const newData = Array.isArray(data) ? data : [data];
-    return newData?.map((child: any) =>
-      React.cloneElement(child, {
+    return newData?.map((child: any) => {
+      return React.cloneElement(child, {
         disabled: checked,
         children: child.props.children
           ? handleTreeNode(child.props.children, checked)
           : undefined,
-      }),
-    );
+      });
+    });
   };
 
   const handleTree = (checked: boolean) => {
@@ -107,7 +107,15 @@ const AllTreeSelect: CompoundedComponent = (props) => {
       setSelectedAll(false);
       setTreeValue(value);
     }
-  }, [value, selectAllValue, selectAll, isMultiple, treeData, children]);
+  }, [
+    value,
+    selectAllValue,
+    selectAll,
+    isMultiple,
+    treeData,
+    children,
+    handleTree,
+  ]);
 
   const selectAllOnChange = (e: CheckboxChangeEvent) => {
     const checked = e?.target?.checked;
@@ -157,7 +165,7 @@ const AllTreeSelect: CompoundedComponent = (props) => {
   const renderDropdown = (originNode: ReactNode) => {
     const menu = (
       <React.Fragment>
-        {isMultiple && selectAll && (
+        {isMultiple && selectAll && !!treeData?.length && (
           <div
             className={styles['all-tree-select-all']}
             style={{ height: ITEM_HEIGHT }}
@@ -177,6 +185,19 @@ const AllTreeSelect: CompoundedComponent = (props) => {
     return dropdownRender ? dropdownRender(menu) : menu;
   };
 
+  const mergedPopupClassName = useMemo(() => {
+    const isOneLevel = !treeData?.some((item) => !!item?.children?.length);
+    if (isOneLevel) {
+      if (props.popupClassName) {
+        return `${styles['all-tree-select-one-level']} ${props.popupClassName}`;
+      } else {
+        return styles['all-tree-select-one-level'];
+      }
+    } else {
+      return props.popupClassName;
+    }
+  }, [props.popupClassName, treeData]);
+
   return (
     <ConfigProvider prefixCls={treePrefixCls} iconPrefixCls={treeIconPrefixCls}>
       <TreeSelect
@@ -184,8 +205,8 @@ const AllTreeSelect: CompoundedComponent = (props) => {
         multiple={multiple}
         treeCheckable={treeCheckable}
         {...restProps}
+        popupClassName={mergedPopupClassName}
         treeData={props.treeData}
-        // eslint-disable-next-line
         children={treeChildren ?? props.children}
         value={selectedAll ? [selectAllText] : treeValue}
         onChange={treeOnChange}

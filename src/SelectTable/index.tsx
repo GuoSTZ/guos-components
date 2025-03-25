@@ -16,18 +16,23 @@ import styles from './index.module.less';
 export interface SelectTableProps {
   /** 左侧列表props */
   listProps: {
-    config: Array<SelectTreeProps>;
+    config: Array<
+      Omit<SelectTreeProps, 'prevFetchParam'> & {
+        nextFetchParam?: string[] | string;
+      }
+    >;
     /** 头部自定义 */
     header?: React.ReactNode;
-    /** 渲染异常情况 */
     titleRender?: (record: any) => React.ReactNode;
   };
   /** 右侧表格props */
   tableProps: TableProps<any> & {
     /** 头部自定义 */
     header?: React.ReactNode;
+    /** 表格高度 */
+    height?: number;
   };
-  /** 关系keys数据，默认收集tableProps下columns中的dataIndex || key
+  /** 关系keys数据，默认收集config中fieldNames中的key，key默认为 `key`
    * 如果listProps中的config和tableProps中的columns顺序及关系无法对应，需要针对config来自定义该属性
    * */
   relationKeys?: string[];
@@ -37,8 +42,12 @@ export interface SelectTableProps {
 
 const SelectTable = (props: SelectTableProps) => {
   const {
-    listProps: { config = [], header: listHeader },
-    tableProps: { header: tableHeader, ...restTableProps },
+    listProps: { config = [], header: listHeader } = {},
+    tableProps: {
+      header: tableHeader,
+      height: tableHeight = 269,
+      ...restTableProps
+    } = {},
     value,
     onChange,
   } = props;
@@ -50,26 +59,23 @@ const SelectTable = (props: SelectTableProps) => {
   const selectTreeRefs = useRef(new Map<number, SelectTreeRef>());
 
   const relationKeys = useMemo(() => {
-    if (props.relationKeys) {
+    if (Array.isArray(props.relationKeys)) {
       return props.relationKeys;
+    } else if (Array.isArray(config)) {
+      return config?.map((item) => item?.fieldNames?.key || 'key');
     } else {
-      return (
-        restTableProps.columns?.map((column) =>
-          'dataIndex' in column
-            ? (column.dataIndex as string)
-            : (column.key as string),
-        ) || []
-      );
+      return [];
     }
-  }, [restTableProps.columns, props.relationKeys]);
+  }, [config, props.relationKeys]);
 
   const tableConfig = useMemo(() => {
     const relationKey = relationKeys?.at(-1) || '';
     return {
+      style: { height: tableHeight + 40 },
       size: 'small' as TableProps<any>['size'],
       bordered: true,
       ...restTableProps,
-      scroll: { y: 269, ...(restTableProps.scroll || {}) },
+      scroll: { y: tableHeight, ...(restTableProps.scroll || {}) },
       dataSource: filterDataSource,
       columns: [
         ...(restTableProps.columns || [])?.map((item) => ({
@@ -96,7 +102,13 @@ const SelectTable = (props: SelectTableProps) => {
         },
       ].map((item) => ({ ...item, ellipsis: true })),
     };
-  }, [restTableProps, selectTreeRefs.current, relationKeys, filterDataSource]);
+  }, [
+    restTableProps,
+    selectTreeRefs.current,
+    relationKeys,
+    filterDataSource,
+    tableHeight,
+  ]);
 
   const handleOnChange = useCallback(
     (
@@ -127,20 +139,29 @@ const SelectTable = (props: SelectTableProps) => {
           }
         } else {
           nextFetchParams = {
-            [nextFetchParam]: config[idx]?.checkable ? keys : keys?.[0],
+            [nextFetchParam]: config[idx]?.checkable
+              ? rows.map((item) => item[nextFetchParam])
+              : rows[0][nextFetchParam],
           };
         }
 
         setFetchParams((origin) => {
+          const handledCurrentFetchParams = { ...(origin[idx] || {}) };
+          // 删除分页相关参数
+          delete handledCurrentFetchParams?.current;
+          delete handledCurrentFetchParams?.pageSize;
+          delete handledCurrentFetchParams?.total;
+
           return {
             ...origin,
             [idx + 1]: {
-              ...(origin[idx] || {}),
+              ...handledCurrentFetchParams,
               ...nextFetchParams,
             },
           };
         });
       }
+      // 最后一列组件数据的选中，展示到右侧
       if (idx === config.length - 1) {
         const reverseRows = rows.reverse();
         // 数据备份，供搜索时使用
@@ -168,6 +189,29 @@ const SelectTable = (props: SelectTableProps) => {
     [dataSource],
   );
 
+  const handleListOnSearch = useCallback(
+    (value: string, size: number | undefined, idx: number) => {
+      // 搜索引起的数据源为空，清除下一个组件的请求参数和数据源
+      if (!!value && size === 0) {
+        selectTreeRefs.current?.forEach((item, key) => {
+          if (key > idx) {
+            item.clearDataSource();
+          }
+        });
+        setFetchParams((origin) => {
+          const handledNextFetchParams = { ...origin };
+          for (const key in handledNextFetchParams) {
+            if (Number(key) > idx) {
+              delete handledNextFetchParams[key];
+            }
+          }
+          return handledNextFetchParams;
+        });
+      }
+    },
+    [],
+  );
+
   useEffect(() => {
     if (value) {
       // 数据备份，供搜索时使用
@@ -185,12 +229,30 @@ const SelectTable = (props: SelectTableProps) => {
           });
           slValue.push(Array.from(set));
         } else {
-          slValue.push(null);
+          slValue.push(void 0);
         }
       });
       setSelectTreeValue(slValue);
     }
   }, [value, relationKeys, config]);
+
+  /** 将config中的fetchParams拼接成字符串，判断是否会被动态改变 */
+  const handleConfigFetchParams = useMemo(() => {
+    return config
+      .map((item) => {
+        const noEmptyFetchParams = Object.fromEntries(
+          Object.entries(item?.fetchParams || {}).filter(
+            (entry) =>
+              entry[1] !== null && entry[1] !== '' && entry[1] !== undefined,
+          ),
+        );
+        const keys = Object.keys(noEmptyFetchParams).sort((a, b) =>
+          a.localeCompare(b),
+        );
+        return keys.map((key) => noEmptyFetchParams[key]).join('&');
+      })
+      .join('&');
+  }, [config]);
 
   useEffect(() => {
     config?.forEach((item, idx) => {
@@ -204,6 +266,7 @@ const SelectTable = (props: SelectTableProps) => {
         Object.keys(noEmptyFetchParams).length > 0
           ? noEmptyFetchParams
           : void 0;
+
       setFetchParams((origin) => {
         return {
           ...origin,
@@ -211,7 +274,7 @@ const SelectTable = (props: SelectTableProps) => {
         };
       });
     });
-  }, [config]);
+  }, [handleConfigFetchParams]);
 
   return (
     <div className={styles['select-table']}>
@@ -219,24 +282,24 @@ const SelectTable = (props: SelectTableProps) => {
         <header>{listHeader}</header>
         <div className={styles['select-table-left-lists']}>
           {config.map((item, idx) => {
-            const { nextFetchParam, needFetchParam, checkable, ...rest } = item;
-            // 默认第一个list组件不需要参数即可发送请求，其他项需要参数才可发送请求，也可以通过配置来决定
-            const defaultNeedFetchParam =
-              typeof needFetchParam === 'boolean' ? needFetchParam : idx !== 0;
+            const { nextFetchParam, checkable, ...rest } = item;
             // 默认最后一个list组件是checkable，其他组件不是checkable，也可通过配置来决定
             const defaultCheckable =
               idx === config.length - 1
                 ? true && checkable !== false
                 : checkable;
+
             return (
               <SelectTree
                 key={idx}
                 {...rest}
+                prevFetchParam={
+                  idx > 0 ? config[idx - 1]?.nextFetchParam : void 0
+                }
                 value={selectTreeValue?.[idx]}
                 onChange={(keys: Key[], rows: any[]) =>
                   handleOnChange(keys, rows, idx, nextFetchParam)
                 }
-                needFetchParam={defaultNeedFetchParam}
                 checkable={defaultCheckable}
                 fetchParams={fetchParams[idx] ? fetchParams[idx] : void 0}
                 ref={(el) => {
@@ -244,6 +307,9 @@ const SelectTable = (props: SelectTableProps) => {
                     selectTreeRefs.current.set(idx, el);
                   }
                 }}
+                handleSearch={(value, size) =>
+                  handleListOnSearch(value, size, idx)
+                }
               />
             );
           })}
@@ -279,7 +345,7 @@ const SelectTable = (props: SelectTableProps) => {
                 marginRight: 0,
               }}
             >
-              <Input placeholder={`请输入${col.title}`} />
+              <Input placeholder={`${col.title}`} />
             </Form.Item>
           ))}
         </Form>

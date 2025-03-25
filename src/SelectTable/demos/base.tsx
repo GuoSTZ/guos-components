@@ -1,6 +1,6 @@
 import { Button, Form, Radio, Select } from 'antd';
 import React, { useMemo, useState } from 'react';
-import { SelectTable } from 'guos-components';
+import { SelectTable } from '@meichuang/mc-components';
 import { data as mockSchemaData } from './data/schema';
 import { data as mockTableData } from './data/table';
 import { data as mockColumnData } from './data/column';
@@ -43,11 +43,11 @@ const mockFetchSchema = (params: any) => {
         total: data.length,
         items: result,
       });
-    }, 100);
+    }, 1000);
   });
 };
 
-const tableSpaceData = new Array(50).fill(0).map((item, index) => {
+const tableSpaceData = new Array(3).fill(0).map((item, index) => {
   return {
     encryptStatus: 1,
     tableSpace: `tableSpace${index}`,
@@ -87,7 +87,7 @@ const mockFetchTableSpace = (params: any) => {
         total: data.length,
         items: result,
       });
-    }, 100);
+    }, 1000);
   });
 };
 
@@ -135,7 +135,7 @@ const mockFetchTable = (params: any) => {
         total: data.length,
         items: result,
       });
-    }, 100);
+    }, 1000);
   });
 };
 
@@ -151,7 +151,7 @@ const columnData = new Array(125000).fill(0).map((item, index) => {
 });
 
 const mockFetchColumn = (params: any) => {
-  const { pageSize, current, keyword, isPage, schema, table } = params;
+  const { pageSize, current, column, isPage, schema, table } = params;
   console.log('mockFetchColumn=========', params);
   // 模拟后端检索
   let data = columnData;
@@ -161,9 +161,9 @@ const mockFetchColumn = (params: any) => {
       (item) => item.table === table && item.schema === schema,
     );
   }
-  if (keyword) {
+  if (column) {
     data = data.filter((item) =>
-      item.column?.toLowerCase().includes(keyword?.toLowerCase()),
+      item.column?.toLowerCase().includes(column?.toLowerCase()),
     );
   }
   // 模拟后端分页
@@ -187,7 +187,7 @@ const mockFetchColumn = (params: any) => {
         total: data.length,
         items: result,
       });
-    }, 100);
+    }, 1000);
   });
 };
 
@@ -314,6 +314,7 @@ const App = () => {
             childCount: 'count',
             status: 'encryptStatus',
           },
+          showCheckAll: true,
           ...commonConfig,
         },
       ],
@@ -369,6 +370,7 @@ const App = () => {
           fetchData: mockFetchColumn,
           showSearch: {
             placeholder: '请输入列',
+            field: 'column',
           },
           fieldNames: {
             name: 'column',
