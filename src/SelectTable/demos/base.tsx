@@ -1,6 +1,6 @@
 import { Button, Form, Radio, Select } from 'antd';
 import React, { useMemo, useState } from 'react';
-import { SelectTable } from '@meichuang/mc-components';
+import { SelectTable } from 'guos-components';
 import { data as mockSchemaData } from './data/schema';
 import { data as mockTableData } from './data/table';
 import { data as mockColumnData } from './data/column';

@@ -1,5 +1,5 @@
 import { Form, Button } from 'antd';
-import { AllTreeSelect } from '@meichuang/mc-components';
+import { AllTreeSelect } from 'guos-components';
 import React from 'react';
 const App = () => {
   const [form] = Form.useForm();

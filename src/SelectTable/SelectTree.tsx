@@ -12,10 +12,9 @@ import React, {
   forwardRef,
   useMemo,
 } from 'react';
-import { formatNumberToChinese } from '../utils';
+import { formatNumberToChinese } from '@/_utils';
 
 import styles from './SelectTree.module.less';
-import debounce from 'lodash/debounce';
 
 export interface SelectTreeProps extends Omit<WrapTreeProps, 'titleRender'> {
   /** 传递给fetchData的参数 */
@@ -72,6 +71,21 @@ export interface SelectTreeRef {
   deleteAll: () => void;
   clearDataSource: () => void;
 }
+
+const debounce = <T extends (...args: any[]) => any>(
+  fn: T,
+  delay: number,
+): ((...args: Parameters<T>) => void) => {
+  let timeoutId: NodeJS.Timeout;
+
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeoutId);
+
+    timeoutId = setTimeout(() => {
+      fn(...args);
+    }, delay);
+  };
+};
 
 const SelectTree = forwardRef<SelectTreeRef, SelectTreeProps>((props, ref) => {
   const {
