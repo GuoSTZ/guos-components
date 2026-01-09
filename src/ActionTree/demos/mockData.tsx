@@ -38,7 +38,6 @@ export const mockData = [
                     type: 'assetSet',
                     default: true,
                     badge: {
-                      // 这里如果后续有类似角标需求可扩展，当前原结构无严格对应，先保留结构示例，若不需要可删除此属性
                       count: 3,
                     },
                   },
@@ -56,7 +55,7 @@ export const mockData = [
                     key: '0-0-0-2-2',
                     type: 'assetSet',
                     badge: {
-                      count: 0, // 这里未分级资产原图无角标数字，假设为0，可根据实际情况修改
+                      count: 0,
                     },
                   },
                 ],
@@ -142,7 +141,6 @@ export const mockData = [
                     type: 'assetSet',
                     default: true,
                     badge: {
-                      // 这里如果后续有类似角标需求可扩展，当前原结构无严格对应，先保留结构示例，若不需要可删除此属性
                       count: 3,
                     },
                   },
@@ -160,7 +158,7 @@ export const mockData = [
                     key: '0-1-0-2-2',
                     type: 'assetSet',
                     badge: {
-                      count: 0, // 这里未分级资产原图无角标数字，假设为0，可根据实际情况修改
+                      count: 0,
                     },
                   },
                 ],
@@ -237,4 +235,35 @@ export const mockData = [
       },
     ],
   },
-];
+].map((item: any) => {
+  // 递归处理树节点，给 type 为 assetSet 的节点增加随机 ruleType 和 tag
+  const processNode = (node: any) => {
+    if (node.type === 'assetSet') {
+      const ruleType = Math.random() > 0.5 ? 1 : 2;
+      let assetTag = null;
+
+      // ruleType 为 1 时，tag 在 1-5 和 null 之间随机
+      if (ruleType === 1) {
+        // 1-5 加上 null 共 6 种情况
+        const rand = Math.floor(Math.random() * 6); // 0-5
+        assetTag = rand === 0 ? null : rand; // 0 为 null, 1-5 为值
+      }
+      // ruleType 为 2 时，tag 在 1-3 和 null 之间随机
+      else {
+        // 1-3 加上 null 共 4 种情况
+        const rand = Math.floor(Math.random() * 4); // 0-3
+        assetTag = rand === 0 ? null : rand; // 0 为 null, 1-3 为值
+      }
+
+      node.ruleType = ruleType;
+      node.assetTag = assetTag;
+    }
+
+    if (node.children) {
+      node.children.forEach(processNode);
+    }
+    return node;
+  };
+
+  return processNode(item);
+});

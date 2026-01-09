@@ -6,7 +6,7 @@ import {
 import { ActionTree } from 'guos-components';
 import React, { useEffect, useState, useMemo } from 'react';
 import { mockData } from './mockData';
-import { Input } from 'antd';
+import { Input, Tag } from 'antd';
 
 type TreeNode = {
   title: React.ReactNode;
@@ -15,6 +15,8 @@ type TreeNode = {
   default?: boolean;
   children?: TreeNode[];
   actions?: Action[];
+  ruleType?: number;
+  tag?: React.ReactNode; // 修改为 ReactNode 以支持 JSX 元素
 };
 
 type Action = {
@@ -24,6 +26,36 @@ type Action = {
     node: TreeNode,
   ) => void;
 };
+
+// 假定是取自字典
+const dicts = {
+  SENSITIVE_LEVEL_ASSET_TAG_DICT: [
+    { label: '公开', value: 1 },
+    { label: '内部', value: 2 },
+    { label: '核心', value: 3 },
+    { label: '重要', value: 4 },
+    { label: '机密', value: 5 },
+  ],
+  SENSITIVE_COUNT_ASSET_TAG_DICT: [
+    { label: 'A类', value: 1 },
+    { label: 'B类', value: 2 },
+    { label: 'C类', value: 3 },
+  ],
+};
+
+const SENSITIVE_LEVEL_ASSET_TAG_COLOR = [
+  { color: '#4EDFA6', background: '#DAF8EB', value: 1 },
+  { color: '#3285FF', background: '#D8E6FF', value: 2 },
+  { color: '#FE9C00', background: '#FFEBD4', value: 3 },
+  { color: '#FF5B5B', background: '#FFE0DE', value: 4 },
+  { color: '#F52F3E', background: '#FFD8D9', value: 5 },
+];
+
+const SENSITIVE_COUNT_ASSET_TAG_COLOR = [
+  { color: '#FF5B5B', background: '#FFE0DE', value: 1 },
+  { color: '#FE9C00', background: '#FFEBD4', value: 2 },
+  { color: '#3285FF', background: '#D8E6FF', value: 3 },
+];
 
 const handleIcon = (Icon: string | ((props: any) => React.ReactNode)) => {
   if (typeof Icon === 'string') {
@@ -56,6 +88,13 @@ const App = () => {
   //     },
   //   },
   // ]
+
+  // 资产标签格式
+  // {
+  //   "title": "资产标签",
+  //   "key": "assetTag",
+  //   "type": "assetTag",
+  // }
 
   /**
    * 不同的层级节点有各自的操作，需要手动添加业务进去
@@ -138,6 +177,40 @@ const App = () => {
     return actions;
   };
 
+  const buildTag = (
+    node: TreeNode & { assetTag?: number; ruleType?: number },
+  ) => {
+    if (node.assetTag) {
+      const dict =
+        node.ruleType === 1
+          ? dicts.SENSITIVE_LEVEL_ASSET_TAG_DICT
+          : dicts.SENSITIVE_COUNT_ASSET_TAG_DICT;
+      const color_dict =
+        node.ruleType === 1
+          ? SENSITIVE_LEVEL_ASSET_TAG_COLOR
+          : SENSITIVE_COUNT_ASSET_TAG_COLOR;
+      const label = dict.find((item) => item.value === node.assetTag)?.label;
+      const color_item = color_dict.find(
+        (item) => item.value === node.assetTag,
+      );
+
+      return (
+        <Tag
+          key={node.assetTag}
+          style={{
+            background: color_item?.background,
+            color: color_item?.color,
+            borderColor: color_item?.color,
+            borderRadius: 2,
+          }}
+        >
+          {label}
+        </Tag>
+      );
+    }
+    return null;
+  };
+
   /**
    * 给每个树节点，添加actions操作
    * 同时收集所有的 key，用于默认展开
@@ -150,7 +223,12 @@ const App = () => {
       // 收集 Key
       keysCollection.push(node.key);
 
-      const newNode = { ...node, actions: buildActions(node) };
+      const newNode: TreeNode = {
+        ...node,
+        actions: buildActions(node),
+        tag: node.type === 'assetSet' ? buildTag(node) : null,
+      };
+
       if (newNode.children && newNode.children.length > 0) {
         newNode.children = processTreeData(newNode.children, keysCollection);
       }
@@ -242,7 +320,7 @@ const App = () => {
         onExpand={onExpand}
         expandedKeys={expandedKeys}
         autoExpandParent={autoExpandParent}
-        height={400}
+        height={600}
       />
     </div>
   );

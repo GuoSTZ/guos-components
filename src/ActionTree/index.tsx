@@ -24,7 +24,9 @@ const ActionTree = (props: TreeProps) => {
     <Tree
       blockNode
       showIcon
-      titleRender={(node: DataNode & { actions?: any[] }) => {
+      titleRender={(
+        node: DataNode & { actions?: any[]; tag?: React.ReactNode },
+      ) => {
         let actions = null;
         if (!!node.actions?.length) {
           actions = node.actions.map((item) => {
@@ -46,6 +48,7 @@ const ActionTree = (props: TreeProps) => {
         return (
           <div className={styles['action-tree-custom-title']}>
             <div className={styles['action-tree-custom-title-content']}>
+              {node.tag ? node.tag : null}
               {node.title}
             </div>
             {actions ? (
