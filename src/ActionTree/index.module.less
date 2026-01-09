@@ -25,6 +25,16 @@
         }
       }
     }
+
+    .@{ant-prefix}-tree-list-scrollbar {
+      width: 6px !important;
+      height: 6px;
+      background-color: transparent;
+
+      &-thumb {
+        background: #ced2de !important;
+      }
+    }
   }
 
   &-custom-title {
@@ -33,6 +43,7 @@
     justify-content: space-between;
     overflow: hidden;
     text-overflow: ellipsis;
+    padding-right: 8px;
 
     &-content {
       overflow: hidden;

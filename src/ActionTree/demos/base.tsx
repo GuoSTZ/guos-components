@@ -242,6 +242,7 @@ const App = () => {
         onExpand={onExpand}
         expandedKeys={expandedKeys}
         autoExpandParent={autoExpandParent}
+        height={400}
       />
     </div>
   );
