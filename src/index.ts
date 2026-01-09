@@ -1,3 +1,4 @@
+export { default as ActionTree } from './ActionTree';
 export { default as AllSelect } from './AllSelect';
 export { default as AllTreeSelect } from './AllTreeSelect';
 export { default as CollapseTree } from './CollapseTree';
