@@ -49,7 +49,7 @@ const ActionTree = (props: TreeProps) => {
           <div className={styles['action-tree-custom-title']}>
             <div className={styles['action-tree-custom-title-content']}>
               {node.tag ? node.tag : null}
-              {node.title}
+              {typeof node.title === 'function' ? node.title(node) : node.title}
             </div>
             {actions ? (
               <div className={styles['action-tree-custom-title-actions']}>
