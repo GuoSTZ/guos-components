@@ -11,11 +11,11 @@ interface BaseTreeProps extends TreeProps {
 
 const BaseTree = (props: BaseTreeProps) => {
   const { containerRef, height: autoHeight } = useAutoHeight<HTMLDivElement>();
-  const { height, ...restProps } = props;
+  const { height, style, ...restProps } = props;
   const treeHeight = height ?? (autoHeight > 0 ? autoHeight : undefined);
 
   return (
-    <div ref={containerRef} style={{ width: '100%', height: '100%' }}>
+    <div ref={containerRef} style={{ ...style }}>
       <Tree {...restProps} height={treeHeight} />
     </div>
   );

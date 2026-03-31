@@ -308,7 +308,7 @@ const App = () => {
   }, []);
 
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', height: 400 }}>
       <Input
         style={{ marginBottom: 8 }}
         placeholder="搜索"
@@ -320,7 +320,8 @@ const App = () => {
         onExpand={onExpand}
         expandedKeys={expandedKeys}
         autoExpandParent={autoExpandParent}
-        height={600}
+        // style={{ height: 'calc(100% - 40px)' }}
+        style={{ flex: 1, minHeight: 0 }}
       />
     </div>
   );

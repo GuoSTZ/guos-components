@@ -31,7 +31,6 @@ const useAutoHeight = <T extends HTMLElement>() => {
       return undefined;
     }
 
-    // 始终通过同一套测量方式读取高度，避免首次值与后续值不一致
     const measureHeight = () => {
       updateHeight(element.getBoundingClientRect().height);
     };

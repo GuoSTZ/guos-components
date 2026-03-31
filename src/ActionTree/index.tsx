@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
-import { Tree, TreeProps, Empty, Typography } from 'antd';
+import { TreeProps, Empty, Typography } from 'antd';
 import { DataNode } from 'antd/lib/tree';
+import BaseTree from '@/BaseTree';
 import setIcon from './assets/set.svg';
 import assetSetIcon from './assets/assetSet.svg';
 
@@ -21,7 +22,7 @@ const ActionTree = (props: TreeProps) => {
   }
 
   return (
-    <Tree
+    <BaseTree
       blockNode
       showIcon
       titleRender={(
