@@ -1,6 +1,7 @@
 import { Tree, TreeProps } from 'antd';
 import React, { memo } from 'react';
 import useAutoHeight from '@/_utils/useAutoHeight';
+import styles from './index.module.less';
 
 interface BaseTreeProps extends TreeProps {
   /**
@@ -11,12 +12,15 @@ interface BaseTreeProps extends TreeProps {
 
 const BaseTree = (props: BaseTreeProps) => {
   const { containerRef, height: autoHeight } = useAutoHeight<HTMLDivElement>();
-  const { height, style, ...restProps } = props;
+  const { className, height, style, ...restProps } = props;
   const treeHeight = height ?? (autoHeight > 0 ? autoHeight : undefined);
+  const mergedClassName = className
+    ? `${styles['base-tree']} ${className}`
+    : styles['base-tree'];
 
   return (
     <div ref={containerRef} style={{ ...style }}>
-      <Tree {...restProps} height={treeHeight} />
+      <Tree {...restProps} height={treeHeight} className={mergedClassName} />
     </div>
   );
 };
