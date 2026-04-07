@@ -28,6 +28,9 @@ jobs:
     - name: Build Docs Site
       run: pnpm run docs:build
 
+    - name: Check Build Output
+      run: test -f g-components/index.html
+
     - name: Sync Github Repos To Gitee  # 名字随便起
       uses: Yikun/hub-mirror-action@v1.4  # 使用Yikun/hub-mirror-action
       with:
@@ -42,17 +45,6 @@ jobs:
         static_list: "guos-components"  # 静态同步列表，在此填写需要同步的仓库名称，可填写多个
         timeout: '600s'  # git超时设置，超时后会自动重试git操作
 
-    - name: Ensure Target Directory On Cloud Server
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        port: ${{ secrets.SERVER_PORT }}
-        script: |
-          rm -rf /usr/share/nginx/html/g-components
-          mkdir -p /usr/share/nginx/html/g-components
-
     - name: Upload g-components Package
       uses: appleboy/scp-action@v0.1.7
       with:
@@ -60,6 +52,16 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT }}
-        source: "g-components/*"
-        target: "/usr/share/nginx/html/g-components"
+        source: "g-components"
+        target: "/usr/share/nginx/html"
         overwrite: true
+
+    - name: Verify Deployed Index
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: ${{ secrets.SERVER_PORT }}
+        script: |
+          test -f /usr/share/nginx/html/g-components/index.html
