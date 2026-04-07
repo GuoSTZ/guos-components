@@ -9,6 +9,32 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: npm
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Build Docs Site
+      run: npm run docs:build
+
+    - name: Prepare Package Directory
+      run: |
+        rm -rf g-components
+        if [ -d "dist" ]; then
+          mv dist g-components
+        elif [ -d "docs-dist" ]; then
+          mv docs-dist g-components
+        else
+          echo "No build output directory found."
+          exit 1
+        fi
 
     - name: Sync Github Repos To Gitee  # 名字随便起
       uses: Yikun/hub-mirror-action@v1.4  # 使用Yikun/hub-mirror-action
@@ -23,3 +49,25 @@ jobs:
         force_update: true  # 启用后，强制同步，即强制覆盖目的端仓库
         static_list: "guos-components"  # 静态同步列表，在此填写需要同步的仓库名称，可填写多个
         timeout: '600s'  # git超时设置，超时后会自动重试git操作
+
+    - name: Ensure Target Directory On Cloud Server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: ${{ secrets.SERVER_PORT }}
+        script: |
+          rm -rf /usr/share/nginx/html/g-components
+          mkdir -p /usr/share/nginx/html/g-components
+
+    - name: Upload g-components Package
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: ${{ secrets.SERVER_PORT }}
+        source: "g-components/*"
+        target: "/usr/share/nginx/html/g-components"
+        overwrite: true
