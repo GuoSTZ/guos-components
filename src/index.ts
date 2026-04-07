@@ -10,6 +10,13 @@ export { default as FormRender } from './FormRender';
 export { default as InFlow } from './InFlow';
 export { default as LabelTag } from './LabelTag';
 export { default as LinkageTreeSelect } from './LinkageTreeSelect';
+export { default as List, type ListProps, type ListRef } from './List';
+export {
+  default as List2,
+  type List2Props,
+  type List2Ref,
+  type List2VisibleRange,
+} from './List2';
 export { default as Loading } from './Loading';
 export { default as ModalToTable } from './ModalToTable';
 export { default as OutFlow } from './OutFlow';
