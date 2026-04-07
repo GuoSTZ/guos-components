@@ -28,18 +28,6 @@ jobs:
     - name: Build Docs Site
       run: pnpm run docs:build
 
-    - name: Prepare Package Directory
-      run: |
-        rm -rf g-components
-        if [ -d "dist" ]; then
-          mv dist g-components
-        elif [ -d "docs-dist" ]; then
-          mv docs-dist g-components
-        else
-          echo "No build output directory found."
-          exit 1
-        fi
-
     - name: Sync Github Repos To Gitee  # 名字随便起
       uses: Yikun/hub-mirror-action@v1.4  # 使用Yikun/hub-mirror-action
       with:
