@@ -1,5 +1,5 @@
 import { Typography } from 'antd';
-import { ListVirtualTable } from 'guos-components';
+import ListVirtualTable from '../ListVirtualTable';
 import React, { useMemo } from 'react';
 import { buildDemoDataSource } from './_shared';
 
