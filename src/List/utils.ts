@@ -28,6 +28,14 @@ export interface ScrollTopByIndexOptions {
   align?: ScrollAlign;
 }
 
+export interface AdaptiveOverscanOptions {
+  baseOverscan: number;
+  scrollTop: number;
+  previousScrollTop: number;
+  viewportHeight: number;
+  itemHeight: number;
+}
+
 /** 将数值限定在区间内，避免滚动位置越界 */
 const clamp = (value: number, min: number, max: number) => {
   return Math.min(Math.max(value, min), max);
@@ -129,6 +137,33 @@ export const getVisibleRange = ({
     visibleEnd,
     totalHeight,
   };
+};
+
+/** 根据滚动跨度动态放大 overscan，降低快速滚动时的空白概率 */
+export const getAdaptiveOverscan = ({
+  baseOverscan,
+  scrollTop,
+  previousScrollTop,
+  viewportHeight,
+  itemHeight,
+}: AdaptiveOverscanOptions) => {
+  const safeBaseOverscan = Math.max(baseOverscan, 0);
+  const safeViewportHeight = Math.max(viewportHeight, 0);
+  const safeItemHeight = Math.max(itemHeight, 1);
+
+  if (safeViewportHeight === 0) {
+    return safeBaseOverscan;
+  }
+
+  const visibleCount = Math.max(
+    Math.ceil(safeViewportHeight / safeItemHeight),
+    safeBaseOverscan || 1,
+  );
+  const scrollDistance = Math.abs(scrollTop - previousScrollTop);
+  const crossedViewportCount = Math.ceil(scrollDistance / safeViewportHeight);
+  const extraOverscan = Math.min(crossedViewportCount * 3, visibleCount * 2);
+
+  return safeBaseOverscan + extraOverscan;
 };
 
 /** 根据对齐方式把目标索引换算成最终应该滚到的 scrollTop */

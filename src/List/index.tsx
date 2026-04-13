@@ -17,6 +17,7 @@ import styles from './index.module.less';
 import {
   ScrollAlign,
   createVirtualMeasurements,
+  getAdaptiveOverscan,
   getScrollTopByIndex,
   getVisibleRange,
 } from './utils';
@@ -83,6 +84,9 @@ const ListComponent = <T extends Record<string, any>>(
   });
   const [measurementVersion, setMeasurementVersion] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
+  const [activeOverscan, setActiveOverscan] = useState(overscan);
+  const latestScrollTopRef = useRef(0);
+  const committedScrollTopRef = useRef(0);
 
   /** 根据已测量高度重新生成每一项的 top / bottom 区间 */
   const measurements = useMemo(() => {
@@ -99,9 +103,9 @@ const ListComponent = <T extends Record<string, any>>(
       measurements,
       viewportHeight: height,
       scrollTop,
-      overscan,
+      overscan: activeOverscan,
     });
-  }, [height, measurements, overscan, scrollTop]);
+  }, [activeOverscan, height, measurements, scrollTop]);
 
   /** 给 scrollToKey 建立索引，避免每次滚动时都线性查找 */
   const keyIndexMap = useMemo(() => {
@@ -122,6 +126,10 @@ const ListComponent = <T extends Record<string, any>>(
   useEffect(() => {
     visibleRangeRef.current = range;
   }, [range]);
+
+  useEffect(() => {
+    setActiveOverscan(overscan);
+  }, [overscan]);
 
   /** 数据缩短时清理失效高度缓存，避免旧索引污染新的布局 */
   useEffect(() => {
@@ -148,17 +156,23 @@ const ListComponent = <T extends Record<string, any>>(
   }, [dataSource.length, scrollTop]);
 
   /** 统一维护 DOM scrollTop 与 React 状态，供内部和外部滚动 API 复用 */
-  const syncScrollTop = useCallback((nextScrollTop: number) => {
-    if (!containerRef.current) {
-      return;
-    }
+  const syncScrollTop = useCallback(
+    (nextScrollTop: number) => {
+      if (!containerRef.current) {
+        return;
+      }
 
-    if (containerRef.current.scrollTop !== nextScrollTop) {
-      containerRef.current.scrollTop = nextScrollTop;
-    }
+      if (containerRef.current.scrollTop !== nextScrollTop) {
+        containerRef.current.scrollTop = nextScrollTop;
+      }
 
-    setScrollTop(containerRef.current.scrollTop);
-  }, []);
+      latestScrollTopRef.current = containerRef.current.scrollTop;
+      committedScrollTopRef.current = containerRef.current.scrollTop;
+      setActiveOverscan(overscan);
+      setScrollTop(containerRef.current.scrollTop);
+    },
+    [overscan],
+  );
 
   /** 将当前滚动结果透出给业务侧，返回真实可视区而不是 overscan 区间 */
   const emitScrollInfo = useCallback(
@@ -171,7 +185,7 @@ const ListComponent = <T extends Record<string, any>>(
         measurements,
         viewportHeight: height,
         scrollTop: nextScrollTop,
-        overscan,
+        overscan: activeOverscan,
       });
 
       onScroll?.({
@@ -182,7 +196,7 @@ const ListComponent = <T extends Record<string, any>>(
         end: nextRange.visibleEnd,
       });
     },
-    [height, measurements, onScroll, overscan],
+    [activeOverscan, height, measurements, onScroll],
   );
 
   /** 按指定 scrollTop 进行滚动，作为对外暴露的基础能力 */
@@ -238,11 +252,21 @@ const ListComponent = <T extends Record<string, any>>(
   const handleScroll = useCallback(
     (event: React.UIEvent<HTMLDivElement>) => {
       const nextScrollTop = event.currentTarget.scrollTop;
+      const nextOverscan = getAdaptiveOverscan({
+        baseOverscan: overscan,
+        itemHeight,
+        previousScrollTop: committedScrollTopRef.current,
+        scrollTop: nextScrollTop,
+        viewportHeight: height,
+      });
 
+      latestScrollTopRef.current = nextScrollTop;
+      committedScrollTopRef.current = nextScrollTop;
+      setActiveOverscan(nextOverscan);
       setScrollTop(nextScrollTop);
       emitScrollInfo(nextScrollTop);
     },
-    [emitScrollInfo],
+    [emitScrollInfo, height, itemHeight, overscan],
   );
 
   /** 首次渲染或内容变化后回填真实高度，并在必要时修正滚动位置避免跳动 */
@@ -271,6 +295,8 @@ const ListComponent = <T extends Record<string, any>>(
 
         if (heightDelta !== 0) {
           containerRef.current.scrollTop += heightDelta;
+          latestScrollTopRef.current = containerRef.current.scrollTop;
+          committedScrollTopRef.current = containerRef.current.scrollTop;
           setScrollTop(containerRef.current.scrollTop);
         }
       }

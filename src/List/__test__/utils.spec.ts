@@ -1,5 +1,6 @@
 import {
   createVirtualMeasurements,
+  getAdaptiveOverscan,
   getScrollTopByIndex,
   getVisibleRange,
 } from '../utils';
@@ -48,6 +49,30 @@ describe('List virtualization helpers', () => {
       visibleEnd: 3,
       totalHeight: 244,
     });
+  });
+
+  it('should increase overscan when scroll delta is much larger than item height', () => {
+    expect(
+      getAdaptiveOverscan({
+        baseOverscan: 4,
+        itemHeight: 40,
+        previousScrollTop: 120,
+        scrollTop: 680,
+        viewportHeight: 240,
+      }),
+    ).toBe(13);
+  });
+
+  it('should reserve at least two extra viewports for very fast scroll', () => {
+    expect(
+      getAdaptiveOverscan({
+        baseOverscan: 4,
+        itemHeight: 40,
+        previousScrollTop: 0,
+        scrollTop: 1200,
+        viewportHeight: 240,
+      }),
+    ).toBe(16);
   });
 
   it('should compute scroll offset for index alignment', () => {
