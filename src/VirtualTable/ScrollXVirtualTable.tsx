@@ -1,27 +1,25 @@
-import { Table, Empty } from 'antd';
+import { Empty, Table } from 'antd';
 import type { TableProps } from 'antd';
 import ResizeObserver from 'rc-resize-observer';
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { VariableSizeGrid as Grid } from 'react-window';
 import styles from './index.module.less';
 
-type ColumnWidth = string | number | undefined;
-
 const percentageRegex = /^(100|[1-9]?\d(\.\d+)?)%$/;
+
+type ColumnWidth = string | number | undefined;
 
 const parseColumnWidth = (width: ColumnWidth, baseWidth: number) => {
   if (!width) {
     return 0;
   }
-  // 如果是百分比宽度，则根据表格宽度转换为数字
   if (typeof width === 'string' && percentageRegex.test(width)) {
     return (parseFloat(width) * baseWidth) / 100;
   }
-  // 如果传入的是'100'或者'120px'这种字符串格式，也能将其转换为数字
   return parseFloat(`${width}`);
 };
 
-const VirtualTable = <RecordType extends object>(
+const ScrollXVirtualTable = <RecordType extends object>(
   props: TableProps<RecordType>,
 ) => {
   const { columns = [], scroll } = props;
@@ -52,7 +50,7 @@ const VirtualTable = <RecordType extends object>(
   /** 处理后的columns数组，因为Grid组件需要每个列都有宽度，且仅接受数字类型的宽度 */
   const mergedColumns = useMemo(() => {
     return columns.map((column) => {
-      // 当所有列都设置了宽度，但总宽度小于等于表格时，均分剩余宽度
+      // 当所有列都设置了宽度，但总宽度小于等于基准宽度时，均分剩余宽度
       if (noWidthColumnCount === 0 && fixedWidth <= baseWidth) {
         const remainingWidth = parseFloat(
           ((baseWidth - fixedWidth) / columns.length).toFixed(2),
@@ -62,27 +60,26 @@ const VirtualTable = <RecordType extends object>(
           ...column,
           width: width + remainingWidth,
         };
-      } else if (column.width) {
-        // 当该列有设置宽度时，根据传入的值进行转换处理
-        return { ...column, width: parseColumnWidth(column.width, baseWidth) };
-      } else {
-        /**
-         * 对于未设置宽度的列，根据fixedWidth（定宽）和baseWidth（宽度预算），以下述方案进行宽度计算并设置
-         * 1. 如果定宽没有超出宽度预算，则列宽度为【（宽度预算-定宽）/未设置宽度列数】
-         * 2. 如果定宽已经超出宽度预算，则列宽度为【表格宽度/未设置宽度列数】
-         * 第二种场景，在antd中，给出的宽度将会是0，这会影响查看，理论上是需要用户手动增加scroll.x的值或者给列设置固定宽度
-         * 所以我这边是将表格宽度均分给未设置宽度的列，避免列宽为0，但也是建议手动设置宽度，或者增加scroll.x的值
-         */
-        return {
-          ...column,
-          width:
-            fixedWidth < baseWidth
-              ? Math.floor((baseWidth - fixedWidth) / noWidthColumnCount)
-              : Math.floor(tableWidth / noWidthColumnCount),
-        };
       }
+      // 当该列有设置宽度时，根据传入的值进行转换处理
+      if (column.width) {
+        return { ...column, width: parseColumnWidth(column.width, baseWidth) };
+      }
+      /**
+       * 对于未设置宽度的列，根据fixedWidth（定宽）和baseWidth（宽度预算），以下述方案进行宽度计算并设置
+       * 1. 如果定宽没有超出宽度预算，则列宽度为【（宽度预算-定宽）/未设置宽度列数】
+       * 2. 如果定宽已经超出宽度预算，则列宽度为【宽度预算/未设置宽度列数】
+       */
+      const fallbackWidth =
+        fixedWidth < baseWidth
+          ? Math.floor((baseWidth - fixedWidth) / noWidthColumnCount)
+          : 0;
+      return {
+        ...column,
+        width: fallbackWidth,
+      };
     });
-  }, [columns, fixedWidth, baseWidth, tableWidth, noWidthColumnCount]);
+  }, [columns, fixedWidth, baseWidth, noWidthColumnCount]);
 
   const gridRef = useRef<any>();
   const [connectObject] = useState<any>(() => {
@@ -100,7 +97,6 @@ const VirtualTable = <RecordType extends object>(
         }
       },
     });
-
     return obj;
   });
 
@@ -111,6 +107,7 @@ const VirtualTable = <RecordType extends object>(
     });
   };
 
+  // 基准宽度或容器宽度变化后，重置Grid缓存，避免列宽错位
   useEffect(() => resetVirtualGrid, [baseWidth]);
 
   const renderVirtualList = (
@@ -197,4 +194,4 @@ const VirtualTable = <RecordType extends object>(
   );
 };
 
-export default memo(VirtualTable);
+export default memo(ScrollXVirtualTable);
