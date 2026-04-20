@@ -1,38 +1,65 @@
+/** 滚动到目标项时的对齐策略 */
 export type ScrollAlign = 'auto' | 'start' | 'center' | 'end';
 
+/** 单条列表项在虚拟布局中的几何信息 */
 export interface VirtualMeasurement {
+  /** 列表项索引 */
   index: number;
+  /** 列表项顶部距离容器顶部的偏移 */
   top: number;
+  /** 列表项高度（真实测量值或估算值） */
   height: number;
+  /** 列表项底部偏移，等于 top + height */
   bottom: number;
 }
 
+/** 生成虚拟测量数据时所需的输入参数 */
 export interface CreateVirtualMeasurementsOptions {
+  /** 列表总条数 */
   count: number;
+  /** 未测量项的默认估算高度 */
   estimatedItemHeight: number;
+  /** 已测量项高度缓存，key 为索引，value 为高度 */
   measuredHeights: Map<number, number>;
 }
 
+/** 计算当前可视区间时的输入参数 */
 export interface VisibleRangeOptions {
+  /** 列表项测量结果 */
   measurements: VirtualMeasurement[];
+  /** 视口高度 */
   viewportHeight: number;
+  /** 当前滚动位置 */
   scrollTop: number;
+  /** 额外预渲染项数量 */
   overscan: number;
 }
 
+/** 根据索引换算 scrollTop 时所需参数 */
 export interface ScrollTopByIndexOptions {
+  /** 列表项测量结果 */
   measurements: VirtualMeasurement[];
+  /** 目标索引 */
   index: number;
+  /** 容器可视高度 */
   containerHeight: number;
+  /** 当前滚动位置 */
   currentScrollTop: number;
+  /** 目标对齐方式 */
   align?: ScrollAlign;
 }
 
+/** 计算动态 overscan 时所需参数 */
 export interface AdaptiveOverscanOptions {
+  /** 最小 overscan */
   baseOverscan: number;
+  /** 当前滚动位置 */
   scrollTop: number;
+  /** 上一次提交的滚动位置 */
   previousScrollTop: number;
+  /** 当前视口高度 */
   viewportHeight: number;
+  /** 列表项参考高度 */
   itemHeight: number;
 }
 

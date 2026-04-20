@@ -24,31 +24,52 @@ import {
 
 type ItemKeyGetter<T> = keyof T | ((item: T, index: number) => Key);
 
+/** 对外暴露的列表实例方法 */
 export interface ListRef {
+  /** 滚动到指定 scrollTop */
   scrollTo: (scrollTop: number) => void;
+  /** 按索引滚动到目标项 */
   scrollToIndex: (index: number, align?: ScrollAlign) => void;
+  /** 按业务主键滚动到目标项 */
   scrollToKey: (key: Key, align?: ScrollAlign) => void;
+  /** 获取当前 scrollTop */
   getScrollTop: () => number;
 }
 
+/** 滚动事件回调给业务侧的可视信息 */
 export interface ListScrollInfo {
+  /** 当前滚动位置 */
   scrollTop: number;
+  /** 容器总滚动高度 */
   scrollHeight: number;
+  /** 容器可视高度 */
   clientHeight: number;
+  /** 当前真实可视区起始索引 */
   start: number;
+  /** 当前真实可视区结束索引 */
   end: number;
 }
 
+/** 虚拟列表组件参数 */
 export interface ListProps<T>
   extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'onScroll'> {
+  /** 列表数据源 */
   dataSource: T[];
+  /** 容器高度，单位 px */
   height: number;
+  /** 列表项估算高度，未测量项用它参与布局 */
   itemHeight?: number;
+  /** 可视区前后额外渲染项数量 */
   overscan?: number;
+  /** 列表项主键字段或主键计算函数 */
   itemKey?: ItemKeyGetter<T>;
+  /** 每一项的渲染函数 */
   renderItem: (item: T, index: number) => ReactNode;
+  /** 空状态内容 */
   empty?: ReactNode;
+  /** 列表项样式或样式计算函数 */
   itemStyle?: CSSProperties | ((item: T, index: number) => CSSProperties);
+  /** 滚动回调，返回真实可视区间 */
   onScroll?: (info: ListScrollInfo) => void;
 }
 
@@ -85,7 +106,9 @@ const ListComponent = <T extends Record<string, any>>(
   const [measurementVersion, setMeasurementVersion] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
   const [activeOverscan, setActiveOverscan] = useState(overscan);
+  /** 记录最近一次滚动事件位置，供渲染和计算使用 */
   const latestScrollTopRef = useRef(0);
+  /** 记录已提交用于动态 overscan 计算的滚动位置 */
   const committedScrollTopRef = useRef(0);
 
   /** 根据已测量高度重新生成每一项的 top / bottom 区间 */
@@ -123,10 +146,12 @@ const ListComponent = <T extends Record<string, any>>(
     return map;
   }, [dataSource, itemKey]);
 
+  /** 保存最近一次计算出的区间，供 registerItem 修正滚动锚点 */
   useEffect(() => {
     visibleRangeRef.current = range;
   }, [range]);
 
+  /** 外部 overscan 变更时同步内部基线值 */
   useEffect(() => {
     setActiveOverscan(overscan);
   }, [overscan]);
@@ -347,6 +372,7 @@ const ListComponent = <T extends Record<string, any>>(
     renderItem,
   ]);
 
+  /** 空数据状态 */
   if (!dataSource.length) {
     return (
       <div
