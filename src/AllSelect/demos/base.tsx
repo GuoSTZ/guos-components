@@ -15,7 +15,7 @@ const App = () => {
         <AllSelect
           style={{ width: 300 }}
           placeholder={'请选择'}
-          options={[]}
+          options={[{ label: '选项1', value: '1' }]}
           optionFilterProp="label"
           showSearch
           // selectAllValue={['1', 2, 3]}
