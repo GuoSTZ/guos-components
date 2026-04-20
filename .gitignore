@@ -30,3 +30,5 @@
 .dumi/tmp-production
 
 g-components
+.env
+.npmrc
