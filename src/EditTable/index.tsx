@@ -401,7 +401,7 @@ const EditTable = forwardRef<any, EditTableProps<any>>((props, ref) => {
           },
         }}
         bordered
-        dataSource={data}
+        dataSource={data as Item[]}
         // @ts-ignore
         columns={mergedColumns}
         rowClassName={styles['edit-table-row']}
