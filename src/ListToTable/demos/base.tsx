@@ -11,7 +11,7 @@ const createOneLevelTreeData = (count: number) =>
     };
   });
 
-const treeData = createOneLevelTreeData(200000);
+const treeData = createOneLevelTreeData(200);
 
 const App = () => {
   const listToTableRef = useRef<ListToTableRef<any>>(null);
