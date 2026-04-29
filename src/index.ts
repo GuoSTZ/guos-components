@@ -24,6 +24,13 @@ export {
   type List2Ref,
   type List2VisibleRange,
 } from './List2';
+export {
+  default as ListToTable,
+  type ListToTableProps,
+  type ListToTableRef,
+  type ListToTableDataRow,
+} from './ListToTable';
+export { default as LoadMore, type LoadMoreProps } from './LoadMore';
 export { default as Loading } from './Loading';
 export { default as ModalToTable } from './ModalToTable';
 export { default as OutFlow } from './OutFlow';
