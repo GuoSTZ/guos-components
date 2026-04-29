@@ -21,9 +21,7 @@ const parseColumnWidth = (width: ColumnWidth, baseWidth: number) => {
   return parseFloat(`${width}`);
 };
 
-const VirtualTable = <RecordType extends object>(
-  props: TableProps<RecordType>,
-) => {
+const VirtualTable = <T extends Record<string, any>>(props: TableProps<T>) => {
   const { columns = [], scroll } = props;
   const [tableWidth, setTableWidth] = useState(0);
 
