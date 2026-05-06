@@ -7,23 +7,31 @@ import React, {
   useState,
   useMemo,
   useEffect,
-  useRef,
   useImperativeHandle,
 } from 'react';
 import { Checkbox, TableProps, Input, Empty } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import VirtualTable from '../VirtualTable';
-import VirtualList, { VirtualListProps } from '../List/test/2';
+import VirtualList, { VirtualListProps } from '../VirtualList';
 import styles from './index.module.less';
 
 export type ListToTableDataRow = {
-  key: Key;
-  name: React.ReactNode | string;
+  /** 数据唯一标识，未配置 fieldNames.key 时默认取 key */
+  key?: Key;
+  /** 默认展示字段，未配置 fieldNames.name 时默认取 name */
+  name?: React.ReactNode | string;
   [key: string]: any;
 };
 
+export type ListToTableFieldNames = {
+  /** 主键字段，默认 key */
+  key?: string;
+  /** 默认展示字段，默认 name */
+  name?: string;
+};
+
 export interface ListToTableProps<T extends ListToTableDataRow> {
-  /** 列表属性 */
+  /** 左侧列表相关属性 */
   listProps: Omit<
     VirtualListProps<T>,
     'height' | 'itemHeight' | 'itemKey' | 'renderItem'
@@ -32,12 +40,12 @@ export interface ListToTableProps<T extends ListToTableDataRow> {
     height?: number;
     /** 列表项高度 */
     itemHeight?: number;
-    /** 列表项key */
-    itemKey?: Key;
     /** 列表项渲染定义 */
     renderItem?: (item: T, index: number) => ReactNode;
     /** 列表源数据 */
     dataSource: T[];
+    /** 自定义字段映射 */
+    fieldNames?: ListToTableFieldNames;
     /** 列表头部自定义 */
     header?:
       | string
@@ -57,7 +65,7 @@ export interface ListToTableProps<T extends ListToTableDataRow> {
     checkAllText?: string;
   };
   /** 表格数据 */
-  tableProps: TableProps<Record<string, any>> & {
+  tableProps: Omit<TableProps<Record<string, any>>, 'dataSource'> & {
     /** 表格头部自定义 */
     header?:
       | string
@@ -72,34 +80,21 @@ export interface ListToTableProps<T extends ListToTableDataRow> {
     /** 表格是否需要反转数据 */
     needReverse?: boolean;
   };
-  /** 回填用的数据 */
+  /** 当前选中的数据，传入后组件进入受控模式 */
   value?: T[];
-  /** 数据变化时的回调 */
+  /** 数据变化时的回调，受控模式下由外部接管最终结果 */
   onChange?: (value: T[]) => void;
 }
 
 export type ListToTableRef<T extends ListToTableDataRow> = {
+  /** 触发左侧全选逻辑 */
   listCheckAll: (e: CheckboxChangeEvent) => void;
+  /** 删除右侧表格中的单条数据 */
   tableDelete: (id: Key) => void;
+  /** 清空右侧表格中的全部数据 */
   tableDeleteAll: () => void;
+  /** 当前右侧表格数据 */
   tableData: T[];
-};
-
-/** 列表默认搜索回调函数 */
-const defaultListFilterSearch = <T extends ListToTableDataRow>(
-  value: string,
-  record: T,
-) => {
-  if (typeof record.name !== 'string') return false;
-  return record.name.toLowerCase().includes(value.toLowerCase());
-};
-/** 表格默认搜索回调函数  */
-const defaultTableFilterSearch = <T extends ListToTableDataRow>(
-  value: string,
-  record: T,
-) => {
-  if (typeof record.name !== 'string') return false;
-  return record.name.toLowerCase().includes(value.toLowerCase());
 };
 
 type DebouncedFn<T extends (...args: any[]) => any> = ((
@@ -123,6 +118,9 @@ const debounce = <T extends (...args: any[]) => any>(
   return debounced;
 };
 
+/** 大数据搜索场景下，挂载到原始数据上的内部缓存字段 */
+const INTERNAL_SEARCH_TEXT_FIELD = '__list_to_table_search_text__';
+
 const ListToTable = forwardRef(
   <T extends ListToTableDataRow>(
     props: ListToTableProps<T>,
@@ -132,9 +130,9 @@ const ListToTable = forwardRef(
     const {
       height: leftHeight = 356,
       itemHeight: leftItemHeight = 28,
-      itemKey: leftItemKey = 'key',
       renderItem: leftRenderItem,
       dataSource,
+      fieldNames: listFieldNames,
       header: leftHeader,
       showSearch: leftShowSearch,
       filterSearch: leftFilterSearch,
@@ -155,85 +153,170 @@ const ListToTable = forwardRef(
       ...restTableProps
     } = tableProps;
 
+    /** 统一的数据唯一标识字段 */
+    const rowKey = listFieldNames?.key || 'key';
+    /** 默认展示字段，同时也是默认搜索预处理来源字段 */
+    const rowName = listFieldNames?.name || 'name';
+
     const [listSearchValue, setListSearchValue] = useState('');
     const [tableSearchValue, setTableSearchValue] = useState('');
-    const [checkedRows, setCheckedRows] = useState<Map<Key, T>>(new Map());
-    const [isCheckAllChecked, setIsCheckAllChecked] = useState(false);
-    /** 首次加载完成后，避免触发onChange */
-    const hasMountedRef = useRef(false);
-    /** 回填数据时，避免触发onChange */
-    const syncingFromValueRef = useRef(false);
+    const [innerCheckedRows, setInnerCheckedRows] = useState<Map<Key, T>>(
+      new Map(),
+    );
+    const isControlled = value !== undefined;
 
-    const dataSourceMap = useRef<Map<Key, T>>(new Map());
-
-    useEffect(() => {
-      dataSourceMap.current.clear();
-
+    const dataSourceMap = useMemo(() => {
+      const nextDataSourceMap = new Map<Key, T>();
       const len = dataSource.length;
+
       for (let i = 0; i < len; i++) {
-        const item = { ...dataSource[i] };
-        dataSourceMap.current.set(item.key, item);
+        const item = dataSource[i];
+        const key = item?.[rowKey] as Key | undefined;
+
+        if (key === undefined || key === null) {
+          continue;
+        }
+
+        const rawSearchText = item?.[rowName];
+        const normalizedSearchText =
+          typeof rawSearchText === 'string'
+            ? rawSearchText.trim().toLowerCase()
+            : '';
+
+        // 允许侵入原对象时，将默认搜索文本缓存到私有字段，避免重复字符串处理。
+        (item as any)[INTERNAL_SEARCH_TEXT_FIELD] = normalizedSearchText;
+        nextDataSourceMap.set(key, item);
       }
 
-      if (value === undefined) {
-        setCheckedRows(new Map());
-        return;
+      return nextDataSourceMap;
+    }, [dataSource, rowKey, rowName]);
+
+    const normalizedListSearchValue = useMemo(
+      () => listSearchValue.trim().toLowerCase(),
+      [listSearchValue],
+    );
+    const normalizedTableSearchValue = useMemo(
+      () => tableSearchValue.trim().toLowerCase(),
+      [tableSearchValue],
+    );
+
+    const mergedListFilterSearch = useMemo(() => {
+      if (leftFilterSearch) {
+        return leftFilterSearch;
+      }
+
+      return (filterValue: string, record: T) => {
+        const cachedSearchText = record?.[INTERNAL_SEARCH_TEXT_FIELD];
+        return (
+          typeof cachedSearchText === 'string' &&
+          cachedSearchText.includes(filterValue)
+        );
+      };
+    }, [leftFilterSearch]);
+
+    const mergedTableFilterSearch = useMemo(() => {
+      if (rightFilterSearch) {
+        return rightFilterSearch;
+      }
+
+      return (filterValue: string, record: T) => {
+        const cachedSearchText = record?.[INTERNAL_SEARCH_TEXT_FIELD];
+        return (
+          typeof cachedSearchText === 'string' &&
+          cachedSearchText.includes(filterValue)
+        );
+      };
+    }, [rightFilterSearch]);
+
+    /** 控制模式下的选中项，value数据回填 */
+    const controlledCheckedRows = useMemo(() => {
+      if (!isControlled || !value?.length) {
+        return new Map<Key, T>();
       }
 
       const nextCheckedRows = new Map<Key, T>();
 
       for (let i = 0; i < value.length; i++) {
-        const key = value[i].key;
-        const row = dataSourceMap.current.get(key);
+        const key = value[i]?.[rowKey] as Key | undefined;
+
+        if (key === undefined || key === null) {
+          continue;
+        }
+
+        const row = dataSourceMap.get(key);
+
         if (!row) continue;
+
         nextCheckedRows.set(key, row);
       }
 
-      syncingFromValueRef.current = true;
-      setCheckedRows(nextCheckedRows);
-    }, [dataSource, value]);
+      return nextCheckedRows;
+    }, [dataSourceMap, isControlled, rowKey, value]);
+
+    useEffect(() => {
+      if (isControlled) {
+        return;
+      }
+
+      setInnerCheckedRows((origin) => {
+        if (origin.size === 0) {
+          return origin;
+        }
+
+        let changed = false;
+        const next = new Map<Key, T>();
+
+        origin.forEach((currentRow, key) => {
+          const latestRow = dataSourceMap.get(key);
+
+          if (!latestRow) {
+            changed = true;
+            return;
+          }
+
+          next.set(key, latestRow);
+
+          if (latestRow !== currentRow) {
+            changed = true;
+          }
+        });
+
+        return changed ? next : origin;
+      });
+    }, [dataSourceMap, isControlled]);
+
+    /** 统一的当前选中数据源，受控模式取 value，非受控模式取内部状态 */
+    const checkedRows = isControlled ? controlledCheckedRows : innerCheckedRows;
+    /** 非受控模式下，needReverse 只影响右侧表格展示顺序 */
+    const shouldReverseTableData = !isControlled && needReverse;
+    /** 受控模式下，needReverse 只影响 onChange 输出顺序 */
+    const shouldReverseChangeValue = isControlled && needReverse;
 
     const tableData = useMemo(
       () =>
-        needReverse
+        shouldReverseTableData
           ? [...checkedRows.values()].reverse()
           : [...checkedRows.values()],
-      [checkedRows, needReverse],
+      [checkedRows, shouldReverseTableData],
     );
 
-    useEffect(() => {
-      if (!hasMountedRef.current) {
-        hasMountedRef.current = true;
-        return;
-      }
-      if (syncingFromValueRef.current) {
-        syncingFromValueRef.current = false;
-        return;
-      }
-      onChange?.(tableData);
-    }, [tableData, onChange]);
-
-    const mergedListFilterSearch = leftFilterSearch || defaultListFilterSearch;
-    const mergedTableFilterSearch =
-      rightFilterSearch || defaultTableFilterSearch;
-
     const filteredListData = useMemo(() => {
-      if (!listSearchValue) {
+      if (!normalizedListSearchValue) {
         return dataSource;
       }
       return dataSource.filter((item) =>
-        mergedListFilterSearch?.(listSearchValue, item),
+        mergedListFilterSearch(normalizedListSearchValue, item),
       );
-    }, [dataSource, listSearchValue, mergedListFilterSearch]);
+    }, [dataSource, mergedListFilterSearch, normalizedListSearchValue]);
 
     const filteredTableData = useMemo(() => {
-      if (!tableSearchValue) {
+      if (!normalizedTableSearchValue) {
         return tableData;
       }
       return tableData.filter((item) =>
-        mergedTableFilterSearch?.(tableSearchValue, item),
+        mergedTableFilterSearch(normalizedTableSearchValue, item),
       );
-    }, [tableData, tableSearchValue, mergedTableFilterSearch]);
+    }, [tableData, mergedTableFilterSearch, normalizedTableSearchValue]);
 
     const listOnSearch = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -246,6 +329,7 @@ const ListToTable = forwardRef(
       () => debounce(listOnSearch, 300),
       [listOnSearch],
     );
+
     useEffect(() => () => debouncedListSearch.cancel(), [debouncedListSearch]);
 
     const tableOnSearch = useCallback(
@@ -259,67 +343,164 @@ const ListToTable = forwardRef(
       () => (!!listSearchValue ? filteredListData : dataSource),
       [listSearchValue, filteredListData, dataSource],
     );
+
     const currentTotal = currentListData.length;
     const isSearchMode = listSearchValue.trim().length > 0;
 
-    useEffect(() => {
-      let count = 0;
-      for (let i = 0; i < currentListData.length; i++) {
-        if (checkedRows.has(currentListData[i].key)) count++;
+    const isCheckAllChecked = useMemo(() => {
+      if (currentTotal === 0) {
+        return false;
       }
-      setIsCheckAllChecked(currentTotal > 0 && count === currentTotal);
-    }, [checkedRows, currentListData, currentTotal]);
+
+      if (!isSearchMode) {
+        return checkedRows.size === dataSourceMap.size;
+      }
+
+      for (let i = 0; i < currentListData.length; i++) {
+        const key = currentListData[i]?.[rowKey] as Key | undefined;
+
+        if (key === undefined || key === null || !checkedRows.has(key)) {
+          return false;
+        }
+      }
+
+      return true;
+    }, [
+      checkedRows,
+      currentListData,
+      currentTotal,
+      dataSourceMap.size,
+      isSearchMode,
+      rowKey,
+    ]);
+
+    const triggerChange = useCallback(
+      (nextCheckedRows: Map<Key, T>) => {
+        const nextTableData = shouldReverseChangeValue
+          ? [...nextCheckedRows.values()].reverse()
+          : [...nextCheckedRows.values()];
+
+        onChange?.(nextTableData);
+      },
+      [onChange, shouldReverseChangeValue],
+    );
+
+    const updateCheckedRows = useCallback(
+      (updater: (origin: Map<Key, T>) => Map<Key, T>) => {
+        const origin = isControlled ? controlledCheckedRows : innerCheckedRows;
+        const next = updater(origin);
+
+        if (next === origin) {
+          return;
+        }
+
+        if (!isControlled) {
+          setInnerCheckedRows(next);
+        }
+
+        triggerChange(next);
+      },
+      [controlledCheckedRows, innerCheckedRows, isControlled, triggerChange],
+    );
 
     const onCheckAll = useCallback(
       (e: CheckboxChangeEvent) => {
         const isChecked = e.target.checked;
         listOnCheckAll?.(isChecked);
 
-        setCheckedRows((origin) => {
-          const next = new Map(origin);
+        updateCheckedRows((origin) => {
           if (isSearchMode) {
+            const next = new Map(origin);
+            let changed = false;
+
             if (isChecked) {
               for (let i = 0; i < currentListData.length; i++) {
                 const row = currentListData[i];
-                next.set(row.key, row);
+                const key = row?.[rowKey] as Key | undefined;
+
+                if (key === undefined || key === null) {
+                  continue;
+                }
+
+                if (next.get(key) !== row) {
+                  next.set(key, row);
+                  changed = true;
+                }
               }
             } else {
               for (let i = 0; i < currentListData.length; i++) {
-                next.delete(currentListData[i].key);
+                const key = currentListData[i]?.[rowKey] as Key | undefined;
+
+                if (key !== undefined && key !== null && next.delete(key)) {
+                  changed = true;
+                }
               }
             }
-          } else {
-            if (isChecked) {
-              return new Map(dataSourceMap.current);
-            } else {
-              return new Map();
-            }
+
+            return changed ? next : origin;
           }
+
+          if (isChecked) {
+            if (origin.size === dataSourceMap.size) {
+              let changed = false;
+
+              for (const [key, row] of dataSourceMap) {
+                if (origin.get(key) !== row) {
+                  changed = true;
+                  break;
+                }
+              }
+
+              if (!changed) {
+                return origin;
+              }
+            }
+
+            return new Map(dataSourceMap);
+          }
+
+          return origin.size === 0 ? origin : new Map();
+        });
+      },
+      [
+        currentListData,
+        dataSourceMap,
+        isSearchMode,
+        listOnCheckAll,
+        rowKey,
+        updateCheckedRows,
+      ],
+    );
+
+    const onCheck = useCallback(
+      (e: CheckboxChangeEvent) => {
+        const currentKey = e.target.value as Key;
+        const isChecked = e.target.checked;
+
+        updateCheckedRows((origin) => {
+          if (isChecked) {
+            const row = dataSourceMap.get(currentKey);
+
+            if (!row || origin.get(currentKey) === row) {
+              return origin;
+            }
+
+            const next = new Map(origin);
+            next.set(currentKey, row);
+            return next;
+          }
+
+          if (!origin.has(currentKey)) {
+            return origin;
+          }
+
+          const next = new Map(origin);
+          next.delete(currentKey);
           return next;
         });
       },
-      [listOnCheckAll, currentListData, isSearchMode],
+      [dataSourceMap, updateCheckedRows],
     );
-
-    const onCheck = useCallback((e: CheckboxChangeEvent) => {
-      const currentKey = e.target.value as Key;
-      if (e?.target?.checked) {
-        setCheckedRows((origin) => {
-          const newMap = new Map(origin);
-          const row = dataSourceMap.current.get(currentKey);
-          if (row) {
-            newMap.set(currentKey, row);
-          }
-          return newMap;
-        });
-      } else {
-        setCheckedRows((origin) => {
-          const newMap = new Map(origin);
-          newMap.delete(currentKey);
-          return newMap;
-        });
-      }
-    }, []);
 
     /** 自定义渲染组件头部 */
     const renderHeader = useCallback(
@@ -347,18 +528,45 @@ const ListToTable = forwardRef(
     );
 
     /** 表格单个删除 */
-    const tableDelete = useCallback((key: Key) => {
-      setCheckedRows((origin) => {
-        const newMap = new Map(origin);
-        newMap.delete(key);
-        return newMap;
-      });
-    }, []);
+    const tableDelete = useCallback(
+      (key: Key) => {
+        updateCheckedRows((origin) => {
+          if (!origin.has(key)) {
+            return origin;
+          }
+
+          const next = new Map(origin);
+          next.delete(key);
+          return next;
+        });
+      },
+      [updateCheckedRows],
+    );
 
     /** 表格全部删除 */
     const tableDeleteAll = useCallback(() => {
-      setCheckedRows(new Map());
-    }, []);
+      updateCheckedRows((origin) => (origin.size === 0 ? origin : new Map()));
+    }, [updateCheckedRows]);
+
+    const renderListItem = useCallback(
+      (item: T, index: number) => {
+        if (leftRenderItem) {
+          return leftRenderItem(item, index);
+        }
+
+        return (
+          <Checkbox
+            key={item?.[rowKey] as Key}
+            value={item?.[rowKey] as Key}
+            checked={checkedRows.has(item?.[rowKey] as Key)}
+            onChange={onCheck}
+          >
+            {item?.[rowName] as ReactNode}
+          </Checkbox>
+        );
+      },
+      [checkedRows, leftRenderItem, onCheck, rowKey, rowName],
+    );
 
     useImperativeHandle(
       ref,
@@ -413,23 +621,9 @@ const ListToTable = forwardRef(
                 {...restListProps}
                 height={leftHeight}
                 itemHeight={leftItemHeight}
-                itemKey={leftItemKey}
+                itemKey={rowKey}
                 dataSource={currentListData}
-                renderItem={(item, index) => {
-                  if (leftRenderItem) {
-                    return leftRenderItem(item, index);
-                  }
-                  return (
-                    <Checkbox
-                      key={item.key}
-                      value={item.key}
-                      checked={checkedRows.has(item.key)}
-                      onChange={onCheck}
-                    >
-                      {item.name}
-                    </Checkbox>
-                  );
-                }}
+                renderItem={renderListItem}
               />
             </div>
           ) : (
