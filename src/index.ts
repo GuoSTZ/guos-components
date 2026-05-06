@@ -40,6 +40,14 @@ export { default as SvgLine } from './SvgLine';
 export { default as SwitchButton } from './SwitchButton';
 export { default as TipSelect } from './TipSelect';
 export {
+  default as VirtualList,
+  VariableVirtualList,
+  type VirtualListProps,
+  type VirtualListRef,
+  type VariableVirtualListProps,
+  type VariableVirtualListRef,
+} from './VirtualList';
+export {
   default as TreeToTable,
   type TreeToTableProps,
   type TreeToTableDataNode,

@@ -20,6 +20,10 @@ export interface VirtualListProps<T extends Record<string, any>> {
   style?: CSSProperties;
 }
 
+// 当真实总高度超过安全滚动高度时，对滚动坐标做比例压缩映射，避免浏览器高度上限导致无法继续滚动。
+// 浏览器对滚动元素的高度有上限，约为 16777216 px
+const MAX_SCROLL_HEIGHT = 8_000_000;
+
 /** 这版先做定高的虚拟滚动 */
 const VirtualList = memo(
   <T extends Record<string, any>>(props: VirtualListProps<T>) => {
@@ -30,14 +34,31 @@ const VirtualList = memo(
 
     const overscan = 5;
     const len = dataSource.length;
-    const totalHeight = len * itemHeight;
-    const safeScrollTop = Math.min(
+    const realTotalHeight = len * itemHeight;
+    const virtualTotalHeight = Math.min(realTotalHeight, MAX_SCROLL_HEIGHT);
+    const maxVirtualScrollTop = Math.max(0, virtualTotalHeight - height);
+    const maxRealScrollTop = Math.max(0, realTotalHeight - height);
+    const safeVirtualScrollTop = Math.min(
       Math.max(0, scrollTop),
-      Math.max(0, totalHeight - height),
+      maxVirtualScrollTop,
+    );
+    const realScrollTop =
+      maxVirtualScrollTop === 0
+        ? 0
+        : (safeVirtualScrollTop / maxVirtualScrollTop) * maxRealScrollTop;
+    const realStartTop = Math.floor(realScrollTop / itemHeight) * itemHeight;
+    const virtualStartTop =
+      maxRealScrollTop === 0
+        ? 0
+        : (realStartTop / maxRealScrollTop) * maxVirtualScrollTop;
+
+    const safeVirtualStartTop = Math.min(
+      Math.max(0, virtualStartTop),
+      maxVirtualScrollTop,
     );
 
-    const rawStart = Math.floor(safeScrollTop / itemHeight);
-    const rawEnd = Math.ceil((safeScrollTop + height) / itemHeight) - 1;
+    const rawStart = Math.floor(realScrollTop / itemHeight);
+    const rawEnd = Math.ceil((realScrollTop + height) / itemHeight) - 1;
     const start = Math.max(rawStart - overscan, 0);
     const end = Math.min(rawEnd + overscan, len - 1);
 
@@ -91,8 +112,8 @@ const VirtualList = memo(
         style={{ ...style, height }}
         onScroll={handleScroll}
       >
-        <div style={{ height: len * itemHeight }}>
-          <div style={{ transform: `translateY(${start * itemHeight}px)` }}>
+        <div style={{ height: virtualTotalHeight }}>
+          <div style={{ transform: `translateY(${safeVirtualStartTop}px)` }}>
             {renderItems()}
           </div>
         </div>
