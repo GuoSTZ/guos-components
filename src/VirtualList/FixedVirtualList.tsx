@@ -13,7 +13,7 @@ import type { CSSProperties, Key, ReactNode } from 'react';
 import type { ListChildComponentProps, ListOnScrollProps } from 'react-window';
 import { areEqual, FixedSizeList as List } from 'react-window';
 
-import { useRefFunction } from '../hooks/useRefFunction';
+import { useRefFunction } from '../_utils/useRefFunction';
 
 type VirtualListItemKey<T> = keyof T | ((item: T, index: number) => Key);
 type VirtualListItemClassName<T> =
