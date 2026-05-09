@@ -1,6 +1,6 @@
 import React, { memo, useRef } from 'react';
 import { Typography } from 'antd';
-import { ListToTable, ListToTableRef } from '@meichuang/mc-components';
+import { ListToTable, ListToTableRef } from 'guos-components';
 
 const createOneLevelTreeData = (count: number) =>
   Array.from({ length: Math.max(0, count) }, (_, index) => {

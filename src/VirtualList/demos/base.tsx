@@ -2,8 +2,8 @@ import React, { useCallback, useMemo, useRef } from 'react';
 
 import { Button, Space } from 'antd';
 
-import { VirtualList } from '@meichuang/mc-components';
-import type { VirtualListRef } from '@meichuang/mc-components';
+import { VirtualList } from 'guos-components';
+import type { VirtualListRef } from 'guos-components';
 
 type ListItem = {
   id: number;

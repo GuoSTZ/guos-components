@@ -1,6 +1,6 @@
 import React, { memo, useMemo, useState } from 'react';
 import { Button, Space } from 'antd';
-import { ListToTable } from '@meichuang/mc-components';
+import { ListToTable } from 'guos-components';
 
 type DepartmentOption = {
   key: string;

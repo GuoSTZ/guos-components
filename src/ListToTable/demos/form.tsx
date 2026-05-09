@@ -1,6 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import { Button, Form, Space, Typography } from 'antd';
-import { ListToTable } from '@meichuang/mc-components';
+import { ListToTable } from 'guos-components';
 
 type RoleOption = {
   key: string;
