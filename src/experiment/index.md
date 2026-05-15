@@ -15,3 +15,4 @@ toc: content
 <code src="./form/demos/watch.tsx" title="表单联动"></code>
 <code src="./form/demos/fieldsLinked.tsx" title="字段间存在顺序要求" description="a下拉框选中数据后，b下拉框才会有值，以此类推，此demo中，还设置了a下拉框仅部分数据选中后，才会显示b，若选中其他数据，则a与c进行交互"></code>
 <code src="./form/demos/dynamicForm.tsx" title="动态增减表单项"></code>
+<code src="./form/demos/getValueProps.tsx" title="设置value值"></code>

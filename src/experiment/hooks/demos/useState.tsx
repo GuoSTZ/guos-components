@@ -19,7 +19,6 @@ const App = () => {
     console.log('count', count);
     console.log('items', items);
     setItems((origin) => {
-      console.log(origin, '======origin');
       return origin;
     });
   }, [count]);

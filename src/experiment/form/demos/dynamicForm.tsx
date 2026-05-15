@@ -88,7 +88,6 @@ const App: React.FC = () => {
                   }}
                 >
                   <Form.Item
-                    {...field}
                     name={[field.name, 'type']}
                     rules={[
                       {
@@ -110,7 +109,6 @@ const App: React.FC = () => {
                   </Form.Item>
 
                   <Form.Item
-                    {...field}
                     name={[field.name, 'content']}
                     rules={[
                       {
