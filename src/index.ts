@@ -8,7 +8,6 @@ export {
   type BoxSelectType,
   type BoxSelectValue,
 } from './BoxSelect';
-export { default as Card } from './Card';
 export { default as CollapseTree } from './CollapseTree';
 export { default as DataBlock } from './DataBlock';
 export { default as DirectoryInput } from './DirectoryInput';
