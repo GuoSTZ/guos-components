@@ -13,6 +13,8 @@ declare module JSX {
     g: any;
     main: any;
     path: any;
+    'data-card': import('./WebComponents/DataCard').DataCardAttributes;
+    'rice-block': import('./WebComponents/RiceBlock').RiceBlockAttributes;
   }
 }
 
