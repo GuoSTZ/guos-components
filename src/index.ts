@@ -15,6 +15,7 @@ export { default as EditTable } from './EditTable';
 export { default as FetchLink } from './FetchLink';
 export {
   default as FetchLinkV2,
+  type FetchLinkProps as FetchLinkV2Props,
   type FetchLinkConfig as FetchLinkV2Config,
 } from './FetchLinkV2';
 export { default as FormRender } from './FormRender';
