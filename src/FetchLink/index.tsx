@@ -116,8 +116,11 @@ const FetchLink = (props: FetchLinkProps) => {
                   return acc;
                 }, {} as Record<string, any>);
               } else {
+                const rowKey = rest?.fieldNames?.key || 'value';
                 nextFetchParams = {
-                  [nextFetchParam]: value,
+                  [nextFetchParam]: rest?.optionInValue
+                    ? record[rowKey]
+                    : value,
                 };
               }
               setFetchParams((origin) => {
@@ -131,7 +134,7 @@ const FetchLink = (props: FetchLinkProps) => {
               });
             }
 
-            onChange?.(value, record, addConfig, (configIndex: number) =>
+            onChange?.(record, record, addConfig, (configIndex: number) =>
               removeConfig(idx, configIndex),
             );
           }}
