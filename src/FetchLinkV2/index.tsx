@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useState, useRef, useEffect } from 'react';
+import React, { memo, useCallback, useReducer, useRef, useEffect } from 'react';
 
 import FetchComponent, {
   ParamsForNextFetch,
@@ -20,31 +20,159 @@ type FetchLinkConfigWithKey = FetchLinkConfig & {
   __configKey__: string;
 };
 
+type FetchLinkState = {
+  innerConfig: Array<FetchLinkConfigWithKey>;
+  prevInfoMap: Record<number, ParamsForNextFetch>;
+};
+
+type FetchLinkAction =
+  | {
+      type: 'init';
+      config: Array<FetchLinkConfig>;
+    }
+  | {
+      type: 'changeNextInfo';
+      idx: number;
+      nextInfo: ParamsForNextFetch;
+    }
+  | {
+      type: 'addConfig';
+      key: string;
+      config: FetchLinkConfig | FetchLinkConfig[];
+      configIndex?: number;
+    }
+  | {
+      type: 'deleteConfig';
+      key: string;
+    };
+
+/**
+ * 获取 idx 之前的所有 prevInfo
+ * @param origin 原始 prevInfoMap
+ * @param idx 目标索引
+ * @returns 目标索引之前的所有 prevInfoMap
+ */
+const getPrevInfoMapBefore = (
+  origin: Record<number, ParamsForNextFetch>,
+  idx: number,
+) => {
+  const next: Record<number, ParamsForNextFetch> = {};
+  for (let i = 1; i <= idx; i++) {
+    if (origin[i]) {
+      next[i] = origin[i];
+    }
+  }
+  return next;
+};
+
+/**
+ * 标式化配置项，添加 configKey 属性
+ * @param config 配置项数组
+ * @returns 标式化后的配置项数组
+ */
+const normalizeConfig = (config: Array<FetchLinkConfig>) => {
+  return config.map((item, idx): FetchLinkConfigWithKey => {
+    if ((item as FetchLinkConfigWithKey).__configKey__) {
+      return item as FetchLinkConfigWithKey;
+    }
+    return { ...item, __configKey__: `init${idx}` };
+  });
+};
+
+const reducer = (
+  state: FetchLinkState,
+  action: FetchLinkAction,
+): FetchLinkState => {
+  switch (action.type) {
+    case 'init':
+      return {
+        innerConfig: normalizeConfig(action.config),
+        prevInfoMap: {},
+      };
+    case 'changeNextInfo': {
+      const next = { ...state.prevInfoMap };
+
+      Object.keys(next).forEach((key) => {
+        if (Number(key) > action.idx) {
+          delete next[Number(key)];
+        }
+      });
+
+      next[action.idx + 1] = action.nextInfo;
+
+      return {
+        ...state,
+        prevInfoMap: next,
+      };
+    }
+    case 'addConfig': {
+      const configArr = (
+        Array.isArray(action.config) ? action.config : [action.config]
+      ).map((item, idx) => {
+        return {
+          ...item,
+          __configKey__: `${action.key}_add${idx}`,
+        };
+      });
+      const _idx =
+        state.innerConfig.findIndex(
+          (item) => item.__configKey__ === action.key,
+        ) + 1;
+      const idx =
+        action.configIndex ?? Math.min(_idx, state.innerConfig.length);
+      const innerConfig = state.innerConfig.filter(
+        (item) =>
+          item.__configKey__ === action.key ||
+          item.__configKey__?.split('_')[0] !== action.key,
+      );
+
+      if (configArr.length) {
+        innerConfig.splice(idx, 0, ...configArr);
+      }
+
+      return {
+        innerConfig,
+        prevInfoMap: getPrevInfoMapBefore(state.prevInfoMap, idx),
+      };
+    }
+    case 'deleteConfig': {
+      const idx =
+        state.innerConfig.findIndex(
+          (item) => item.__configKey__ === action.key,
+        ) + 1;
+
+      return {
+        innerConfig: state.innerConfig.filter(
+          (item) =>
+            item.__configKey__ === action.key ||
+            item.__configKey__?.split('_')[0] !== action.key,
+        ),
+        prevInfoMap: getPrevInfoMapBefore(state.prevInfoMap, idx),
+      };
+    }
+    default:
+      return state;
+  }
+};
+
 export interface FetchLinkProps {
   config: Array<FetchLinkConfig>;
 }
 
 const FetchLink = (props: FetchLinkProps) => {
   const { config } = props;
-  const [innerConfig, setInnerConfig] = useState<Array<FetchLinkConfigWithKey>>(
-    [],
-  );
-  const [prevInfoMap, setPrevInfoMap] = useState<
-    Record<number, ParamsForNextFetch>
-  >({});
+  const [state, dispatch] = useReducer(reducer, {
+    innerConfig: [],
+    prevInfoMap: {},
+  });
   const fetchComponentRefs = useRef(new Map<number, FetchComponentRef>());
 
   useEffect(() => {
-    setInnerConfig(
-      config.map((item, idx): FetchLinkConfigWithKey => {
-        if ((item as FetchLinkConfigWithKey).__configKey__) {
-          return item as FetchLinkConfigWithKey;
-        }
-        return { ...item, __configKey__: `init${idx}` };
-      }),
-    );
+    dispatch({
+      type: 'init',
+      config,
+    });
     fetchComponentRefs.current = new Map<number, FetchComponentRef>();
-    setPrevInfoMap({});
   }, [config.length]); // config的内部配置通常不会改变，所以这里只监听length
 
   const handleParamsForNextFetchChange = useCallback(
@@ -55,31 +183,14 @@ const FetchLink = (props: FetchLinkProps) => {
         }
       });
 
-      setPrevInfoMap((origin) => {
-        const next = { ...origin };
-
-        Object.keys(next).forEach((key) => {
-          if (Number(key) > idx) {
-            delete next[Number(key)];
-          }
-        });
-
-        next[idx + 1] = nextInfo;
-        return next;
+      dispatch({
+        type: 'changeNextInfo',
+        idx,
+        nextInfo,
       });
     },
     [],
   );
-
-  const resetPrevInfoMapBefore = useCallback((idx: number) => {
-    setPrevInfoMap((origin) => {
-      const next: Record<number, any> = {};
-      for (let i = 1; i <= idx; i++) {
-        origin[i] && (next[i] = origin[i]);
-      }
-      return next;
-    });
-  }, []);
 
   /**
    * 添加配置项
@@ -93,56 +204,30 @@ const FetchLink = (props: FetchLinkProps) => {
       config: FetchLinkConfig | FetchLinkConfig[],
       configIndex?: number,
     ) => {
-      const configArr = (Array.isArray(config) ? config : [config])?.map(
-        (item, idx) => {
-          return {
-            ...item,
-            __configKey__: `${key}_add${idx}`,
-          };
-        },
-      );
-
-      setInnerConfig((origin) => {
-        const _idx =
-          origin?.findIndex((item) => item.__configKey__ === key) + 1;
-        const idx = configIndex || Math.min(_idx, origin?.length || 0);
-        const newConfig = origin?.filter(
-          (item) =>
-            item.__configKey__ === key ||
-            item.__configKey__?.split('_')[0] !== key,
-        );
-        if (configArr.length) {
-          newConfig.splice(idx, 0, ...configArr);
-        }
-        resetPrevInfoMapBefore(idx);
-        return newConfig;
+      dispatch({
+        type: 'addConfig',
+        key,
+        config,
+        configIndex,
       });
     },
-    [resetPrevInfoMapBefore],
+    [],
   );
 
   /**
    * 删除配置项
    * @param key 配置项的唯一标识，用于删除配置项，内部参数
    */
-  const deleteConfig = useCallback(
-    (key: string) => {
-      setInnerConfig((origin) => {
-        const idx = origin?.findIndex((item) => item.__configKey__ === key) + 1;
-        resetPrevInfoMapBefore(idx);
-        return origin?.filter(
-          (item) =>
-            item.__configKey__ === key ||
-            item.__configKey__?.split('_')[0] !== key,
-        );
-      });
-    },
-    [resetPrevInfoMapBefore],
-  );
+  const deleteConfig = useCallback((key: string) => {
+    dispatch({
+      type: 'deleteConfig',
+      key,
+    });
+  }, []);
 
   return (
     <>
-      {innerConfig.map((item: FetchLinkConfigWithKey, idx) => (
+      {state.innerConfig.map((item: FetchLinkConfigWithKey, idx) => (
         <FetchComponent
           key={item.__configKey__}
           ref={(ref) => {
@@ -150,9 +235,9 @@ const FetchLink = (props: FetchLinkProps) => {
               fetchComponentRefs.current.set(idx, ref);
             }
           }}
-          needFetchParam={idx !== 0 && innerConfig.length > 1}
+          needFetchParam={idx !== 0 && state.innerConfig.length > 1}
           {...item}
-          prevInfo={prevInfoMap[idx]}
+          prevInfo={state.prevInfoMap[idx]}
           onChange={(...args) => {
             const nextInfo = args?.[args?.length - 1];
             const rest = args.slice(0, -1);
