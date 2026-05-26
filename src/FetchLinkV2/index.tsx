@@ -1,3 +1,4 @@
+import type { FormInstance } from 'antd/es/form';
 import React, { memo, useCallback, useReducer, useRef, useEffect } from 'react';
 
 import FetchComponent, {
@@ -157,10 +158,11 @@ const reducer = (
 
 export interface FetchLinkProps {
   config: Array<FetchLinkConfig>;
+  form?: FormInstance;
 }
 
 const FetchLink = (props: FetchLinkProps) => {
-  const { config } = props;
+  const { config, form } = props;
   const [state, dispatch] = useReducer(reducer, {
     innerConfig: [],
     prevInfoMap: {},
@@ -237,6 +239,7 @@ const FetchLink = (props: FetchLinkProps) => {
           }}
           needFetchParam={idx !== 0 && state.innerConfig.length > 1}
           {...item}
+          form={form}
           prevInfo={state.prevInfoMap[idx]}
           onChange={(...args) => {
             const nextInfo = args?.[args?.length - 1];

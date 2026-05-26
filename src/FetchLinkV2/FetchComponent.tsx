@@ -1,4 +1,4 @@
-import { Form } from 'antd';
+import type { FormInstance } from 'antd/es/form';
 import React, {
   ComponentType,
   useState,
@@ -57,6 +57,8 @@ export interface FetchComponentProps {
   onChange?: (...args: any[]) => void;
   /** 清空组件状态方法，如果有特殊组件需要清空，但内部实现不支持，可自定义实现 */
   clearFn?: () => void;
+  /** 外部传入的表单实例，用于同步清空字段值 */
+  form?: Pick<FormInstance, 'setFieldValue'>;
 }
 
 export interface ParamsForNextFetch {
@@ -95,8 +97,8 @@ const FetchComponent = forwardRef<FetchComponentRef, FetchComponentProps>(
       prevInfo,
       onChange,
       clearFn,
+      form,
     } = props;
-    const form = Form.useFormInstance();
     const [data, setData] = useState<any>(null);
     const [innerValue, setInnerValue] = useState<any>(void 0);
     const requestIdRef = useRef(0);
