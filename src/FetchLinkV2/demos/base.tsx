@@ -15,39 +15,91 @@ const provinceList: OptionItem[] = [
   { label: '广东省', value: 'guangdong' },
 ];
 
-const cityMap: Record<string, OptionItem[]> = {
+const provinceLabelMap = provinceList.reduce<Record<string, string>>(
+  (acc, item) => {
+    acc[item.value] = item.label;
+    return acc;
+  },
+  {},
+);
+
+const hiddenSelectLevelOneMap: Record<string, OptionItem[]> = {
   zhejiang: [
-    { label: '杭州市', value: 'hangzhou' },
-    { label: '宁波市', value: 'ningbo' },
+    {
+      label: `${provinceLabelMap.zhejiang}专属筛选一`,
+      value: 'zhejiang-hidden-1-a',
+    },
+    {
+      label: `${provinceLabelMap.zhejiang}专属筛选二`,
+      value: 'zhejiang-hidden-1-b',
+    },
   ],
-  'zhejiang-hidden-1': [{ label: '浙江隐藏项一', value: 'hangzhou' }],
-  'zhejiang-hidden-2': [{ label: '浙江隐藏项二', value: 'ningbo' }],
+};
+
+const hiddenSelectLevelTwoMap: Record<string, OptionItem[]> = {
   jiangsu: [
-    { label: '南京市', value: 'nanjing' },
-    { label: '苏州市', value: 'suzhou' },
+    {
+      label: `${provinceLabelMap.jiangsu}一级筛选一`,
+      value: 'jiangsu-hidden-2-a',
+    },
+    {
+      label: `${provinceLabelMap.jiangsu}一级筛选二`,
+      value: 'jiangsu-hidden-2-b',
+    },
   ],
-  'jiangsu-hidden-1': [{ label: '江苏隐藏项一', value: 'nanjing' }],
-  'jiangsu-hidden-2': [{ label: '江苏隐藏项二', value: 'suzhou' }],
+};
+
+const hiddenSelectLevelThreeMap: Record<string, OptionItem[]> = {
+  'jiangsu-hidden-2-a': [
+    {
+      label: `${provinceLabelMap.jiangsu}二级筛选一`,
+      value: 'jiangsu-hidden-3-a',
+    },
+    {
+      label: `${provinceLabelMap.jiangsu}二级筛选二`,
+      value: 'jiangsu-hidden-3-b',
+    },
+  ],
+  'jiangsu-hidden-2-b': [
+    {
+      label: `${provinceLabelMap.jiangsu}二级筛选三`,
+      value: 'jiangsu-hidden-3-c',
+    },
+    {
+      label: `${provinceLabelMap.jiangsu}二级筛选四`,
+      value: 'jiangsu-hidden-3-d',
+    },
+  ],
+};
+
+const cityMap: Record<string, OptionItem[]> = {
   guangdong: [
     { label: '广州市', value: 'guangzhou' },
     { label: '深圳市', value: 'shenzhen' },
   ],
-  'guangdong-hidden-1': [{ label: '广东隐藏项一', value: 'guangzhou' }],
-  'guangdong-hidden-2': [{ label: '广东隐藏项二', value: 'shenzhen' }],
-};
-
-const hiddenSelectMap: Record<string, OptionItem[]> = {
-  zhejiang: [
-    { label: '浙江隐藏项一', value: 'zhejiang-hidden-1' },
-    { label: '浙江隐藏项二', value: 'zhejiang-hidden-2' },
+  'zhejiang-hidden-1-a': [
+    { label: '杭州市', value: 'hangzhou' },
+    { label: '绍兴市', value: 'shaoxing' },
   ],
-  jiangsu: [
-    { label: '江苏隐藏项一', value: 'jiangsu-hidden-1' },
-    { label: '江苏隐藏项二', value: 'jiangsu-hidden-2' },
+  'zhejiang-hidden-1-b': [
+    { label: '宁波市', value: 'ningbo' },
+    { label: '温州市', value: 'wenzhou' },
   ],
-  guangdong: [
-    { label: '广东隐藏项一', value: 'guangdong-hidden-1' },
-    { label: '广东隐藏项二', value: 'guangdong-hidden-2' },
+  'jiangsu-hidden-3-a': [
+    { label: '南京市', value: 'nanjing' },
+    { label: '无锡市', value: 'wuxi' },
+  ],
+  'jiangsu-hidden-3-b': [
+    { label: '常州市', value: 'changzhou' },
+    { label: '苏州市', value: 'suzhou' },
+  ],
+  'jiangsu-hidden-3-c': [
+    { label: '扬州市', value: 'yangzhou' },
+    { label: '镇江市', value: 'zhenjiang' },
+  ],
+  'jiangsu-hidden-3-d': [
+    { label: '南通市', value: 'nantong' },
+    { label: '泰州市', value: 'taizhou' },
   ],
 };
 
@@ -61,13 +113,45 @@ const districtMap: Record<string, OptionItem[]> = {
     { label: '海曙区', value: 'haishu' },
     { label: '鄞州区', value: 'yinzhou' },
   ],
+  shaoxing: [
+    { label: '越城区', value: 'yuecheng' },
+    { label: '柯桥区', value: 'keqiao' },
+  ],
+  wenzhou: [
+    { label: '鹿城区', value: 'lucheng' },
+    { label: '龙湾区', value: 'longwan' },
+  ],
   nanjing: [
     { label: '玄武区', value: 'xuanwu' },
     { label: '秦淮区', value: 'qinhuai' },
   ],
+  wuxi: [
+    { label: '梁溪区', value: 'liangxi' },
+    { label: '滨湖区', value: 'binhu' },
+  ],
+  changzhou: [
+    { label: '天宁区', value: 'tianning' },
+    { label: '钟楼区', value: 'zhonglou' },
+  ],
   suzhou: [
     { label: '姑苏区', value: 'gusu' },
     { label: '吴中区', value: 'wuzhong' },
+  ],
+  yangzhou: [
+    { label: '广陵区', value: 'guangling' },
+    { label: '邗江区', value: 'hanjiang' },
+  ],
+  zhenjiang: [
+    { label: '京口区', value: 'jingkou' },
+    { label: '润州区', value: 'runzhou' },
+  ],
+  nantong: [
+    { label: '崇川区', value: 'chongchuan' },
+    { label: '通州区', value: 'tongzhou' },
+  ],
+  taizhou: [
+    { label: '海陵区', value: 'hailing' },
+    { label: '高港区', value: 'gaogang' },
   ],
   guangzhou: [
     { label: '天河区', value: 'tianhe' },
@@ -96,6 +180,22 @@ const streetMap: Record<string, OptionItem[]> = {
     { label: '首南街道', value: 'shounan' },
     { label: '中河街道', value: 'zhonghe' },
   ],
+  yuecheng: [
+    { label: '塔山街道', value: 'tashan' },
+    { label: '府山街道', value: 'fushan' },
+  ],
+  keqiao: [
+    { label: '柯桥街道', value: 'keqiaojiedao' },
+    { label: '华舍街道', value: 'huashe' },
+  ],
+  lucheng: [
+    { label: '五马街道', value: 'wuma' },
+    { label: '松台街道', value: 'songtai' },
+  ],
+  longwan: [
+    { label: '永中街道', value: 'yongzhong' },
+    { label: '蒲州街道', value: 'puzhou' },
+  ],
   xuanwu: [
     { label: '梅园新村街道', value: 'meiyuanxincun' },
     { label: '新街口街道', value: 'xinjiekou' },
@@ -108,9 +208,57 @@ const streetMap: Record<string, OptionItem[]> = {
     { label: '平江街道', value: 'pingjiang' },
     { label: '沧浪街道', value: 'canglang' },
   ],
+  liangxi: [
+    { label: '山北街道', value: 'shanbei' },
+    { label: '扬名街道', value: 'yangming' },
+  ],
+  binhu: [
+    { label: '河埒街道', value: 'helie' },
+    { label: '蠡园街道', value: 'liyuan' },
+  ],
+  tianning: [
+    { label: '兰陵街道', value: 'lanling' },
+    { label: '雕庄街道', value: 'diaozhuang' },
+  ],
+  zhonglou: [
+    { label: '五星街道', value: 'wuxing' },
+    { label: '永红街道', value: 'yonghong' },
+  ],
   wuzhong: [
     { label: '长桥街道', value: 'changqiao' },
     { label: '越溪街道', value: 'yuexi' },
+  ],
+  guangling: [
+    { label: '文峰街道', value: 'wenfeng' },
+    { label: '曲江街道', value: 'qujiang' },
+  ],
+  hanjiang: [
+    { label: '邗上街道', value: 'hanshang' },
+    { label: '蒋王街道', value: 'jiangwang' },
+  ],
+  jingkou: [
+    { label: '正东路街道', value: 'zhengdonglu' },
+    { label: '健康路街道', value: 'jiankanglu' },
+  ],
+  runzhou: [
+    { label: '七里甸街道', value: 'qilidian' },
+    { label: '金山街道', value: 'jinshan' },
+  ],
+  chongchuan: [
+    { label: '新城桥街道', value: 'xinchengqiao' },
+    { label: '学田街道', value: 'xuetian' },
+  ],
+  tongzhou: [
+    { label: '金沙街道', value: 'jinsha' },
+    { label: '兴仁镇', value: 'xingren' },
+  ],
+  hailing: [
+    { label: '城中街道', value: 'chengzhong' },
+    { label: '城东街道', value: 'chengdong' },
+  ],
+  gaogang: [
+    { label: '口岸街道', value: 'kouan' },
+    { label: '刁铺街道', value: 'diaopu' },
   ],
   tianhe: [
     { label: '天河南街道', value: 'tianhenan' },
@@ -140,15 +288,35 @@ const fetchProvinceList = (params: Record<string, any>) => {
 const fetchCityList = (params: Record<string, any>) => {
   console.log(params, '城市接口请求发送=====');
   return new Promise<OptionItem[]>((resolve) => {
-    window.setTimeout(() => resolve(cityMap[params.province] || []), 300);
+    window.setTimeout(() => resolve(cityMap[params.linkValue] || []), 300);
   });
 };
 
-const fetchHiddenSelectList = (params: Record<string, any>) => {
-  console.log(params, '隐藏下拉框接口请求发送=====');
+const fetchHiddenSelectLevelOneList = (params: Record<string, any>) => {
+  console.log(params, '一级隐藏下拉框接口请求发送=====');
   return new Promise<OptionItem[]>((resolve) => {
     window.setTimeout(
-      () => resolve(hiddenSelectMap[params.province] || []),
+      () => resolve(hiddenSelectLevelOneMap[params.province] || []),
+      300,
+    );
+  });
+};
+
+const fetchHiddenSelectLevelTwoList = (params: Record<string, any>) => {
+  console.log(params, '二级隐藏下拉框接口请求发送=====');
+  return new Promise<OptionItem[]>((resolve) => {
+    window.setTimeout(
+      () => resolve(hiddenSelectLevelTwoMap[params.province] || []),
+      300,
+    );
+  });
+};
+
+const fetchHiddenSelectLevelThreeList = (params: Record<string, any>) => {
+  console.log(params, '三级隐藏下拉框接口请求发送=====');
+  return new Promise<OptionItem[]>((resolve) => {
+    window.setTimeout(
+      () => resolve(hiddenSelectLevelThreeMap[params.hiddenSelect2] || []),
       300,
     );
   });
@@ -180,16 +348,16 @@ const App = () => {
       decorator: Form.Item,
       decoratorProps: {
         name: 'hiddenSelect',
-        label: '隐藏下拉框',
+        label: `${provinceLabelMap.zhejiang}专属筛选`,
       },
       component: Select,
       componentProps: {
         style: { width: 180 },
-        placeholder: '请选择隐藏下拉框',
+        placeholder: `请选择${provinceLabelMap.zhejiang}专属筛选`,
         allowClear: true,
         options: [],
       },
-      fetchData: fetchHiddenSelectList,
+      fetchData: fetchHiddenSelectLevelOneList,
       fetchParams: (
         prevFetchParams: Record<string, any>,
         prevOnChangeValue: string,
@@ -212,23 +380,23 @@ const App = () => {
       decorator: Form.Item,
       decoratorProps: {
         name: 'hiddenSelect2',
-        label: '第二个隐藏下拉框',
+        label: `${provinceLabelMap.jiangsu}一级筛选`,
       },
       component: Select,
       componentProps: {
         style: { width: 180 },
-        placeholder: '请选择第二个隐藏下拉框',
+        placeholder: `请选择${provinceLabelMap.jiangsu}一级筛选`,
         allowClear: true,
         options: [],
       },
-      fetchData: fetchHiddenSelectList,
+      fetchData: fetchHiddenSelectLevelTwoList,
       fetchParams: (
         prevFetchParams: Record<string, any>,
         prevOnChangeValue: string,
       ) => {
         return {
           ...prevFetchParams,
-          city: prevOnChangeValue,
+          province: prevOnChangeValue,
         };
       },
       fieldNames: {
@@ -244,23 +412,25 @@ const App = () => {
       decorator: Form.Item,
       decoratorProps: {
         name: 'hiddenSelect3',
-        label: '第三个隐藏下拉框',
+        label: `${provinceLabelMap.jiangsu}二级筛选`,
       },
       component: Select,
       componentProps: {
         style: { width: 180 },
-        placeholder: '请选择第三个隐藏下拉框',
+        placeholder: `请选择${provinceLabelMap.jiangsu}二级筛选`,
         allowClear: true,
         options: [],
       },
-      fetchData: fetchHiddenSelectList,
+      fetchData: fetchHiddenSelectLevelThreeList,
       fetchParams: (
         prevFetchParams: Record<string, any>,
         prevOnChangeValue: string,
+        prevOption: OptionItem,
       ) => {
         return {
           ...prevFetchParams,
-          city: prevOnChangeValue,
+          hiddenSelect2: prevOnChangeValue,
+          hiddenSelect2Label: prevOption?.label,
         };
       },
       fieldNames: {
@@ -330,7 +500,7 @@ const App = () => {
         ) => {
           return {
             ...prevFetchParams,
-            province: prevOnChangeValue,
+            linkValue: prevOnChangeValue,
           };
         },
         fieldNames: {
