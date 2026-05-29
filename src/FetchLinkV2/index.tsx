@@ -1,5 +1,12 @@
 import type { FormInstance } from 'antd/es/form';
-import React, { memo, useCallback, useReducer, useRef, useEffect } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useReducer,
+  useRef,
+  useEffect,
+  ComponentType,
+} from 'react';
 
 import FetchComponent, {
   ParamsForNextFetch,
@@ -13,6 +20,10 @@ export type FetchLinkConfig = Omit<
 > & {
   /** 组件name，不传递时，取decoratorProps?.name，若也不存在，则使用内部生成的字段 */
   name?: string;
+  /** 父组件 */
+  decorator?: ComponentType<any>;
+  /** 父组件属性 */
+  decoratorProps?: Record<string, any>;
   /**
    * 当组件值改变时触发
    * @param value 组件值改变时的值
@@ -241,37 +252,52 @@ const FetchLink = (props: FetchLinkProps) => {
     });
   }, []);
 
-  return (
-    <>
-      {state.innerConfig.map((item: FetchLinkConfigWithKey, idx) => (
+  const renderComponent = () => {
+    return state.innerConfig.map((configItem: FetchLinkConfigWithKey, idx) => {
+      const {
+        __configKey__,
+        name,
+        decorator: Decorator,
+        decoratorProps,
+        onChange,
+      } = configItem;
+
+      const childComponent = (
         <FetchComponent
-          key={item.__configKey__}
-          name={item?.name || item?.decoratorProps?.name || item.__configKey__}
+          key={__configKey__}
+          name={name || decoratorProps?.name || __configKey__}
           ref={(ref) => {
             if (ref) {
               fetchComponentRefs.current.set(idx, ref);
             }
           }}
           needFetchParam={idx !== 0 && state.innerConfig.length > 1}
-          {...item}
+          {...configItem}
           form={form}
           prevInfo={state.prevInfoMap[idx]}
           onChange={(value, record, nextInfo) => {
             handleParamsForNextFetchChange(idx, nextInfo);
-            item.onChange?.(
+            onChange?.(
               value,
               record,
               (
                 config: FetchLinkConfig | FetchLinkConfig[],
                 configIndex?: number,
-              ) => addConfig(item.__configKey__, config, configIndex),
-              () => deleteConfig(item.__configKey__),
+              ) => addConfig(__configKey__, config, configIndex),
+              () => deleteConfig(__configKey__),
             );
           }}
         />
-      ))}
-    </>
-  );
+      );
+
+      if (Decorator) {
+        return <Decorator {...decoratorProps}>{childComponent}</Decorator>;
+      }
+      return childComponent;
+    });
+  };
+
+  return renderComponent();
 };
 
 export default memo(FetchLink);

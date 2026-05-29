@@ -24,10 +24,6 @@ export type ParamsForNextFetch = {
 export interface FetchComponentProps {
   /** 字段名 */
   name: string;
-  /** 父组件 */
-  decorator?: ComponentType<any>;
-  /** 父组件属性 */
-  decoratorProps?: Record<string, any>;
   /** 自定义组件 */
   component: ComponentType<any>;
   /** 自定义组件属性 */
@@ -98,9 +94,7 @@ const FetchComponent = forwardRef<FetchComponentRef, FetchComponentProps>(
   (props, ref) => {
     const {
       name,
-      decorator: Decorator,
-      decoratorProps,
-      component: ChildComponent,
+      component: Comp,
       componentProps,
       needFetchParam = false,
       fetchParams,
@@ -179,9 +173,9 @@ const FetchComponent = forwardRef<FetchComponentRef, FetchComponentProps>(
       // 如果有antd form实例，就清空form实例的值
       // 这里其实不太通用，只是针对antd form的兜底处理，满足常规业务使用
       // 如果是一些特殊场景，那最好是外部传入clearFn方法
-      form?.setFieldValue(decoratorProps?.name, void 0);
+      form?.setFieldValue(name, void 0);
       clearFn?.();
-    }, [decoratorProps?.name, form, clearFn]);
+    }, [name, form, clearFn]);
 
     const getData = useCallback(() => {
       if (needFetchParam && !isValidFetchParam(mergedFetchParams)) {
@@ -234,19 +228,14 @@ const FetchComponent = forwardRef<FetchComponentRef, FetchComponentProps>(
       [clearView],
     );
 
-    const child = (
-      <ChildComponent
+    return (
+      <Comp
         {...componentProps}
         {...{ [fieldDataSource]: data }}
         onChange={handleOnChange}
         value={innerValue}
       />
     );
-
-    if (Decorator) {
-      return <Decorator {...decoratorProps}>{child}</Decorator>;
-    }
-    return child;
   },
 );
 
