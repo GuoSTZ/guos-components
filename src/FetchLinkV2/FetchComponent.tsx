@@ -12,7 +12,18 @@ import React, {
 
 import { useRefFunction } from '@/_utils/useRefFunction';
 
+export type ParamsForNextFetch = {
+  /** 上一个组件请求的参数 */
+  params: Record<string, any>;
+  /** 上一个组件的受控值 */
+  valueParams: Record<string, any>;
+  /** 上一次组件抛出的数据 */
+  onChangeData: any[];
+};
+
 export interface FetchComponentProps {
+  /** 字段名 */
+  name: string;
   /** 父组件 */
   decorator?: ComponentType<any>;
   /** 父组件属性 */
@@ -26,20 +37,17 @@ export interface FetchComponentProps {
   /**
    * 请求参数
    * @param prevFetchParams 上一个组件请求的参数
+   * @param prevValueParams 上一个组件的受控值
    * @param prevOnChangeData 上一次组件抛出的数据，与组件的onChange回调参数一致
    * */
   fetchParams?:
     | Record<string, any>
     | ((
         prevFetchParams: Record<string, any>,
+        prevValueParams: Record<string, any>,
         ...prevOnChangeData: any[]
       ) => Record<string, any>);
-  prevInfo?: {
-    /** 上一个组件请求的参数 */
-    params?: Record<string, any>;
-    /** 上一次组件抛出的数据 */
-    onChangeData?: any[];
-  };
+  prevInfo?: ParamsForNextFetch;
   /** 数据获取 */
   fetchData: (params: Record<string, any>) => Promise<any>;
   /** 数据转换 */
@@ -53,17 +61,14 @@ export interface FetchComponentProps {
   };
   /** 是否选中第一个有效项 */
   checkFirst?: boolean;
-  /** 数据变化回调 */
-  onChange?: (...args: any[]) => void;
+  /** 数据变化回调，这里不再和组件的onChange参数一致，而是只传递value和record，做一下统一 */
+  onChange?: (value: any, record: any, nextInfo: ParamsForNextFetch) => void;
+  /** 受控值 */
+  value?: any;
   /** 清空组件状态方法，如果有特殊组件需要清空，但内部实现不支持，可自定义实现 */
   clearFn?: () => void;
   /** 外部传入的表单实例，用于同步清空字段值 */
   form?: Pick<FormInstance, 'setFieldValue'>;
-}
-
-export interface ParamsForNextFetch {
-  params: Record<string, any>;
-  onChangeData: any[];
 }
 
 export interface FetchComponentRef {
@@ -81,9 +86,18 @@ const isValidFetchParam = (params: Record<string, any>) => {
   );
 };
 
+const isEmpty = (value: any) => {
+  if (Array.isArray(value)) {
+    return !value.length;
+  }
+
+  return value === undefined || value === null || value === '';
+};
+
 const FetchComponent = forwardRef<FetchComponentRef, FetchComponentProps>(
   (props, ref) => {
     const {
+      name,
       decorator: Decorator,
       decoratorProps,
       component: ChildComponent,
@@ -106,29 +120,55 @@ const FetchComponent = forwardRef<FetchComponentRef, FetchComponentProps>(
     const fieldKey = fieldNames?.key || 'key';
     const fieldDataSource = fieldNames?.dataSource || 'dataSource';
     const prevParams = prevInfo?.params;
+    const prevValueParams = prevInfo?.valueParams;
     const prevOnChangeData = prevInfo?.onChangeData;
 
     const mergedFetchParams = useMemo(() => {
       const params =
         fetchParams instanceof Function
-          ? fetchParams(prevParams || {}, ...(prevOnChangeData || []))
+          ? fetchParams(
+              prevParams || {},
+              prevValueParams || {},
+              ...(prevOnChangeData || []),
+            )
           : fetchParams;
       return params || {};
-    }, [fetchParams, prevParams, prevOnChangeData]);
+    }, [fetchParams, prevParams, prevValueParams, prevOnChangeData]);
 
-    const triggerChange = useRefFunction((...args: any[]) => {
+    /**
+     * 根据value反推record
+     */
+    const getRecordFromValue = useCallback(
+      (value: any) => {
+        if (!data || isEmpty(value)) {
+          return void 0;
+        }
+        if (Array.isArray(value)) {
+          return value?.map((item) =>
+            data?.find((i: any) => i[fieldKey] === item),
+          );
+        } else {
+          return data?.find((i: any) => i[fieldKey] === value);
+        }
+      },
+      [data, fieldKey],
+    );
+
+    const triggerChange = useRefFunction((value: any, record: any) => {
+      setInnerValue(value);
+      let nextRecord = record || getRecordFromValue(value);
       const nextInfo = {
         params: mergedFetchParams,
-        onChangeData: args,
+        valueParams: { [name]: value },
+        onChangeData: [value, nextRecord],
       };
-      const [value] = args;
-      setInnerValue(value);
-      onChange?.(...args, nextInfo);
+      onChange?.(value, nextRecord, nextInfo);
     });
 
     const handleOnChange = useCallback(
       (...args: any[]) => {
-        triggerChange(...args);
+        const [value, record] = args;
+        triggerChange(value, record);
       },
       [triggerChange],
     );

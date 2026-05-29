@@ -7,14 +7,28 @@ import FetchComponent, {
   FetchComponentRef,
 } from './FetchComponent';
 
-export type FetchLinkConfig = Omit<FetchComponentProps, 'prevInfo'> & {
+export type FetchLinkConfig = Omit<
+  FetchComponentProps,
+  'prevInfo' | 'name' | 'onChange'
+> & {
+  /** 组件name，不传递时，取decoratorProps?.name，若也不存在，则使用内部生成的字段 */
+  name?: string;
   /**
    * 当组件值改变时触发
-   * @param args 组件值改变时的参数，与组件的 onChange 参数一致
+   * @param value 组件值改变时的值
+   * @param record 组件值改变时的记录
    * @param addConfig 添加配置项，传参为[配置项|配置项数组， idx]，idx为添加位置，默认可不传，即添加到当前操作项后面
    * @param deleteConfig 删除配置项，调用后，组件会自动将当前操作项相关的新增配置都删除
    */
-  onChange?: (...args: any[]) => void;
+  onChange?: (
+    value: any,
+    record: any,
+    addConfig: (
+      config: FetchLinkConfig | FetchLinkConfig[],
+      configIndex?: number,
+    ) => void,
+    deleteConfig: () => void,
+  ) => void;
 };
 
 type FetchLinkConfigWithKey = FetchLinkConfig & {
@@ -232,6 +246,7 @@ const FetchLink = (props: FetchLinkProps) => {
       {state.innerConfig.map((item: FetchLinkConfigWithKey, idx) => (
         <FetchComponent
           key={item.__configKey__}
+          name={item?.name || item?.decoratorProps?.name || item.__configKey__}
           ref={(ref) => {
             if (ref) {
               fetchComponentRefs.current.set(idx, ref);
@@ -241,12 +256,11 @@ const FetchLink = (props: FetchLinkProps) => {
           {...item}
           form={form}
           prevInfo={state.prevInfoMap[idx]}
-          onChange={(...args) => {
-            const nextInfo = args?.[args?.length - 1];
-            const rest = args.slice(0, -1);
+          onChange={(value, record, nextInfo) => {
             handleParamsForNextFetchChange(idx, nextInfo);
             item.onChange?.(
-              ...rest,
+              value,
+              record,
               (
                 config: FetchLinkConfig | FetchLinkConfig[],
                 configIndex?: number,

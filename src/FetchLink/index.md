@@ -9,6 +9,7 @@ toc: content
 ## Demo
 
 <code src='./demos/base.tsx' title='基础联动' description='通过 FetchLink 串联三个 antd Select，实现省份、城市、区县三级异步联动'></code>
+<code src='./demos/form.tsx' title='Form 中使用' description='通过 Form.Item 包裹 FetchLink 各级组件，演示在 antd Form 中进行联动选择与提交'></code>
 
 ## API
 
