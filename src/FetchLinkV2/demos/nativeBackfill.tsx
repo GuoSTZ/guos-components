@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Alert, Button, Card, Form, Space } from 'antd';
 import { FetchLinkV2 } from 'guos-components';
+import type { FetchLinkRef } from '../index';
 import { detailRecordMap, DetailRecord } from './sharedData';
 import { formLinkConfig } from './sharedLink';
 
 const App = () => {
   const [form] = Form.useForm();
   const [currentDetail, setCurrentDetail] = useState<DetailRecord>();
+  const fetchLinkRef = useRef<FetchLinkRef>(null);
 
   const applyDetail = (detailId: string) => {
     const detail = detailRecordMap[detailId];
@@ -17,6 +19,7 @@ const App = () => {
   const clearDetail = () => {
     setCurrentDetail(void 0);
     form.resetFields();
+    fetchLinkRef.current?.reset();
   };
 
   return (
@@ -39,7 +42,7 @@ const App = () => {
         </pre>
       </Card>
       <Form form={form} labelCol={{ span: 6 }} wrapperCol={{ span: 12 }}>
-        <FetchLinkV2 form={form} config={formLinkConfig} />
+        <FetchLinkV2 ref={fetchLinkRef} form={form} config={formLinkConfig} />
         <Form.Item noStyle shouldUpdate>
           {() => (
             <Card title="表单当前值" size="small">

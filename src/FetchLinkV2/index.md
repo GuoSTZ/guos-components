@@ -8,12 +8,9 @@ toc: content
 
 ## Demo
 
-<!-- <code src='./demos/base.tsx' title='基础联动' description='基础联动示例'></code> -->
-
+<code src='./demos/base.tsx' title='基础联动' description='基础联动示例'></code>
 <code src='./demos/nativeBackfill.tsx' title='原生回填' description='通过 form.setFieldsValue 回填后，组件内部自动重放联动链路并恢复隐藏项'></code>
-
-<!-- <code src='./demos/nonForm.tsx' title='非表单场景' description='不依赖 Form.Item 和 form 实例，直接在筛选面板中使用级联请求能力'></code> -->
-<!-- <code src='./demos/complex.tsx' title='复杂场景' description='复杂场景示例，包含多个异步选择器之间的联动关系'></code> -->
+<code src='./demos/nonForm.tsx' title='非表单场景' description='不依赖 Form.Item 和 form 实例，直接在筛选面板中使用级联请求能力'></code>
 
 ## 使用场景
 

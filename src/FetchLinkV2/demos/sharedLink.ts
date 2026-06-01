@@ -207,7 +207,7 @@ export const provinceConfig: FetchLinkV2Config = {
   },
   fetchData: fetchProvinceList,
   fetchParams: {
-    native: 1,
+    test: 1,
   },
   fieldNames,
   onChange: (

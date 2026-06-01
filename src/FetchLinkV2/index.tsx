@@ -1,14 +1,18 @@
 import type { FormInstance } from 'antd/es/form';
 import React, {
+  forwardRef,
   memo,
+  useMemo,
   useCallback,
   useReducer,
   useRef,
   useEffect,
+  useImperativeHandle,
   ComponentType,
 } from 'react';
 
 import FetchComponent, {
+  ChangeSource,
   ParamsForNextFetch,
   FetchComponentProps,
   FetchComponentRef,
@@ -186,7 +190,31 @@ export interface FetchLinkProps {
   form?: FormInstance;
 }
 
-const FetchLink = (props: FetchLinkProps) => {
+export interface FetchLinkRef {
+  reset: () => void;
+}
+
+/**
+ * 获取配置项的 schemaKey，用于判断是否需要重新初始化联动链路。
+ * 这里只读取会影响常见链路结构和初始化行为的配置项，
+ * 不会覆盖 fetchData、onChange 等非常见运行时配置变更。
+ * @param config 配置项数组
+ */
+const getConfigSchemaKey = (config: FetchLinkConfig[]) => {
+  return JSON.stringify(
+    config.map((item, idx) => ({
+      idx,
+      name: item.name || item.decoratorProps?.name || `__anon_${idx}`,
+      hasDecorator: !!item.decorator,
+      needFetchParam: !!item?.needFetchParam,
+      checkFirst: !!item?.checkFirst,
+      fieldKey: item?.fieldNames?.key || 'key',
+      fieldDataSource: item?.fieldNames?.dataSource || 'dataSource',
+    })),
+  );
+};
+
+const FetchLink = forwardRef<FetchLinkRef, FetchLinkProps>((props, ref) => {
   const { config, form } = props;
   const [state, dispatch] = useReducer(reducer, {
     innerConfig: [],
@@ -194,19 +222,23 @@ const FetchLink = (props: FetchLinkProps) => {
   });
   const fetchComponentRefs = useRef(new Map<number, FetchComponentRef>());
 
+  const configSchemaKey = useMemo(() => getConfigSchemaKey(config), [config]);
+
   useEffect(() => {
     dispatch({
       type: 'init',
       config,
     });
     fetchComponentRefs.current = new Map<number, FetchComponentRef>();
-  }, [config.length]); // config的内部配置通常不会改变，所以这里只监听length
+  }, [configSchemaKey]);
 
   const handleParamsForNextFetchChange = useCallback(
-    (idx: number, nextInfo: ParamsForNextFetch) => {
+    (idx: number, nextInfo: ParamsForNextFetch, source: ChangeSource) => {
       fetchComponentRefs.current.forEach((item, key) => {
         if (key > idx) {
-          item.clearView();
+          item.clearView({
+            clearDecoratorValue: source === 'manual',
+          });
         }
       });
 
@@ -252,6 +284,33 @@ const FetchLink = (props: FetchLinkProps) => {
     });
   }, []);
 
+  const reset = useCallback(() => {
+    fetchComponentRefs.current.forEach((item, idx) => {
+      if (idx === 0) {
+        item.clearView({
+          clearData: false,
+          clearDecoratorValue: true,
+          source: 'manual',
+        });
+      } else {
+        item.clearView();
+      }
+    });
+
+    dispatch({
+      type: 'init',
+      config,
+    });
+  }, [configSchemaKey]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      reset,
+    }),
+    [reset],
+  );
+
   const renderComponent = () => {
     return state.innerConfig.map((configItem: FetchLinkConfigWithKey, idx) => {
       const {
@@ -260,6 +319,7 @@ const FetchLink = (props: FetchLinkProps) => {
         decorator: Decorator,
         decoratorProps,
         onChange,
+        ...restConfigItem
       } = configItem;
 
       const childComponent = (
@@ -269,14 +329,25 @@ const FetchLink = (props: FetchLinkProps) => {
           ref={(ref) => {
             if (ref) {
               fetchComponentRefs.current.set(idx, ref);
+            } else {
+              fetchComponentRefs.current.delete(idx);
             }
           }}
-          needFetchParam={idx !== 0 && state.innerConfig.length > 1}
-          {...configItem}
+          /**
+           * 当配置数量大于1个时，才会开启 needFetchParam 功能
+           * 默认第一个配置项不开启 needFetchParam 功能，其他配置项开启 needFetchParam 功能
+           * 也支持自定义
+           */
+          needFetchParam={
+            idx !== 0 &&
+            state.innerConfig.length > 1 &&
+            (configItem.needFetchParam ?? true)
+          }
+          {...restConfigItem}
           form={form}
           prevInfo={state.prevInfoMap[idx]}
-          onChange={(value, record, nextInfo) => {
-            handleParamsForNextFetchChange(idx, nextInfo);
+          onChange={(value, record, nextInfo, source) => {
+            handleParamsForNextFetchChange(idx, nextInfo, source);
             onChange?.(
               value,
               record,
@@ -291,13 +362,17 @@ const FetchLink = (props: FetchLinkProps) => {
       );
 
       if (Decorator) {
-        return <Decorator {...decoratorProps}>{childComponent}</Decorator>;
+        return (
+          <Decorator key={__configKey__} {...decoratorProps}>
+            {childComponent}
+          </Decorator>
+        );
       }
       return childComponent;
     });
   };
 
   return renderComponent();
-};
+});
 
 export default memo(FetchLink);
